@@ -1,0 +1,564 @@
+<title>HDR4RTT → RAOD: Internship Progress Note</title>
+<style>
+  /* ---- tokens: light is the base set, dark redefines only values ---- */
+  :root {
+    --ground:      #F6F6F4;
+    --surface:     #FFFFFF;
+    --surface-alt: #EFEFEC;
+    --ink:         #1C1F26;
+    --ink-soft:    #4A5058;
+    --ink-mute:    #767D86;
+    --rule:        #DCDCD7;
+    --rule-soft:   #E8E8E4;
+    --warm:        #A9631C;   /* measured / highlight */
+    --warm-bg:     #F6ECDF;
+    --cool:        #37607F;   /* reference / shadow */
+    --cool-bg:     #E6EDF3;
+    --flag:        #8C2F2F;   /* problem found */
+    --flag-bg:     #F5E5E4;
+    --shadow:      0 1px 2px rgba(28,31,38,.06), 0 6px 18px rgba(28,31,38,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #16181C;
+      --surface:     #1D2026;
+      --surface-alt: #23272E;
+      --ink:         #E4E6EA;
+      --ink-soft:    #B0B6BF;
+      --ink-mute:    #838A94;
+      --rule:        #333941;
+      --rule-soft:   #282D34;
+      --warm:        #D99A54;
+      --warm-bg:     #2C2419;
+      --cool:        #7EAAC9;
+      --cool-bg:     #1B242C;
+      --flag:        #D98A88;
+      --flag-bg:     #2E1F1F;
+      --shadow:      0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #16181C;
+    --surface:     #1D2026;
+    --surface-alt: #23272E;
+    --ink:         #E4E6EA;
+    --ink-soft:    #B0B6BF;
+    --ink-mute:    #838A94;
+    --rule:        #333941;
+    --rule-soft:   #282D34;
+    --warm:        #D99A54;
+    --warm-bg:     #2C2419;
+    --cool:        #7EAAC9;
+    --cool-bg:     #1B242C;
+    --flag:        #D98A88;
+    --flag-bg:     #2E1F1F;
+    --shadow:      0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    font-size: 17px;
+    line-height: 1.62;
+    margin: 0;
+    padding: 0 1.25rem 6rem;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 47rem; margin: 0 auto; }
+
+  h1, h2, h3, .ui {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  /* ---- masthead ---- */
+  header { padding: 4rem 0 2rem; border-bottom: 2px solid var(--ink); }
+  .eyebrow {
+    font-size: .72rem; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--warm); font-weight: 700; margin: 0 0 1rem;
+  }
+  h1 {
+    font-size: clamp(1.9rem, 4.6vw, 2.7rem); line-height: 1.12; font-weight: 700;
+    letter-spacing: -.022em; margin: 0 0 .9rem; text-wrap: balance;
+  }
+  .standfirst {
+    font-size: 1.12rem; color: var(--ink-soft); margin: 0 0 1.6rem; text-wrap: pretty;
+  }
+  .meta {
+    display: flex; flex-wrap: wrap; gap: .5rem 1.6rem;
+    font-size: .8rem; color: var(--ink-mute);
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", monospace;
+  }
+
+  /* ---- headline results band ---- */
+  .band {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+    margin: 2.5rem 0 1rem; box-shadow: var(--shadow);
+  }
+  .stat { background: var(--surface); padding: 1.1rem 1.2rem; }
+  .stat .k {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", sans-serif;
+    font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-mute); margin: 0 0 .5rem;
+  }
+  .stat .v {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, monospace;
+    font-size: 1.5rem; font-weight: 600; letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums; color: var(--ink); margin: 0; line-height: 1.1;
+  }
+  .stat .d { font-size: .78rem; color: var(--warm); margin: .3rem 0 0;
+             font-family: ui-sans-serif, -apple-system, sans-serif; }
+
+  /* ---- phase + steps ---- */
+  h2 {
+    font-size: 1.32rem; font-weight: 700; letter-spacing: -.015em;
+    margin: 3.6rem 0 .4rem; padding-top: 1.4rem; border-top: 1px solid var(--rule);
+    text-wrap: balance;
+  }
+  .phase-note { color: var(--ink-mute); font-size: .92rem; margin: 0 0 1.8rem; }
+
+  .step { display: grid; grid-template-columns: 2.6rem 1fr; gap: .1rem 1rem; margin: 0 0 1.9rem; }
+  .n {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, monospace;
+    font-size: .82rem; font-weight: 600; color: var(--warm);
+    font-variant-numeric: tabular-nums; padding-top: .28rem;
+    border-top: 2px solid var(--warm); align-self: start;
+  }
+  .step h3 {
+    grid-column: 2; font-size: 1.02rem; font-weight: 700; margin: 0 0 .35rem;
+    letter-spacing: -.008em; padding-top: .1rem;
+  }
+  .step .body { grid-column: 2; }
+  .step p { margin: 0 0 .6rem; }
+  .step p:last-child { margin-bottom: 0; }
+
+  /* ---- callouts ---- */
+  .found, .problem {
+    border-left: 3px solid var(--cool); background: var(--cool-bg);
+    padding: .75rem .95rem; margin: .7rem 0; font-size: .95rem;
+  }
+  .problem { border-left-color: var(--flag); background: var(--flag-bg); }
+  .found strong, .problem strong {
+    font-family: ui-sans-serif, -apple-system, sans-serif;
+    font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
+    display: block; margin-bottom: .3rem;
+  }
+  .found strong { color: var(--cool); }
+  .problem strong { color: var(--flag); }
+  .found p, .problem p { margin: 0; }
+
+  /* ---- tables ---- */
+  .scroll { overflow-x: auto; margin: 1rem 0 1.2rem; }
+  table {
+    border-collapse: collapse; width: 100%; font-size: .88rem;
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", sans-serif;
+  }
+  caption {
+    text-align: left; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-mute); padding-bottom: .5rem; font-weight: 700;
+  }
+  th, td { text-align: left; padding: .5rem .8rem .5rem 0; border-bottom: 1px solid var(--rule-soft); }
+  th { font-weight: 700; color: var(--ink-soft); font-size: .74rem;
+       letter-spacing: .05em; text-transform: uppercase; border-bottom: 1px solid var(--rule); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums;
+                   font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+  tr.hi td { background: var(--warm-bg); font-weight: 600; }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", monospace;
+    font-size: .86em; background: var(--surface-alt); padding: .1em .38em;
+    border-radius: 2px; color: var(--ink);
+  }
+  b, strong { font-weight: 700; }
+  em.q { font-style: normal; color: var(--warm); font-weight: 700;
+         font-family: ui-monospace, Consolas, monospace; font-variant-numeric: tabular-nums; }
+
+  ul { padding-left: 1.15rem; margin: .6rem 0; }
+  li { margin-bottom: .4rem; }
+
+  footer {
+    margin-top: 4rem; padding-top: 1.4rem; border-top: 2px solid var(--ink);
+    font-size: .85rem; color: var(--ink-mute);
+  }
+  a { color: var(--cool); }
+  a:focus-visible, :focus-visible { outline: 2px solid var(--warm); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Internship progress note</p>
+  <h1>Getting HDR4RTT to work with the RAOD detector</h1>
+  <p class="standfirst">A full dataset audit, two bugs found in the previous pipeline, a rebuilt conversion and evaluation chain, a fine-tuned model, and a measured answer to the train/test leakage question.</p>
+  <div class="meta">
+    <span>11–13 August 2026</span>
+    <span>4,080 EXR files audited</span>
+    <span>3 training runs</span>
+    <span>RTX 5070 Ti</span>
+  </div>
+</header>
+
+<div class="band">
+  <div class="stat"><p class="k">mAP before</p><p class="v">0.059</p></div>
+  <div class="stat"><p class="k">mAP after</p><p class="v">0.349</p><p class="d">5.9× higher</p></div>
+  <div class="stat"><p class="k">People AP50</p><p class="v">0.602</p><p class="d">was 0.018 — 33×</p></div>
+  <div class="stat"><p class="k">Cars AP50</p><p class="v">0.624</p><p class="d">was 0.237</p></div>
+</div>
+
+<h2>Phase 1 — Auditing the dataset</h2>
+<p class="phase-note">Every one of the 4,080 EXR files was decoded and measured. No sampling.</p>
+
+<div class="step">
+  <div class="n">01</div>
+  <h3>Checked that the labels are trustworthy</h3>
+  <div class="body">
+    <p>All 4,080 images decoded with zero read failures. The two label formats — plain text files and COCO JSON — agree exactly on all <em class="q">32,964</em> boxes, class by class. Image dimensions match the JSON in every case.</p>
+    <p>Only 47 boxes (0.14%) extend past the image edge, and 6 label files are empty. No zero-size boxes.</p>
+    <div class="found"><strong>Result</strong><p>Annotation quality is good. Nothing here needed fixing.</p></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">02</div>
+  <h3>Confirmed the two brightness conventions across the whole set</h3>
+  <div class="body">
+    <p>Earlier work on ~400 files found two groups: files whose maximum value is exactly 255, and files whose maximum is exactly 65504. That holds across all 4,080 — <em class="q">2,776</em> and <em class="q">1,302</em> files respectively, plus 2 stragglers.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">03</div>
+  <h3>Found that neither ceiling is over-exposure</h3>
+  <div class="body">
+    <p>Sampling 120 images from each group, the fraction of pixels actually sitting at the ceiling is around <em class="q">0.00001%</em> — roughly one pixel per image. Each image was individually scaled so its single brightest sample lands on the ceiling.</p>
+    <div class="found"><strong>Correction to a prior assumption</strong><p>Nothing is clipped, so there are no blown highlights to recover, and the stored values carry no absolute brightness meaning.</p></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">04</div>
+  <h3>Discovered the dataset is three sources glued together</h3>
+  <div class="body">
+    <p>Reading the EXR file headers directly revealed hidden metadata — <code>whiteLuminance</code>, <code>LUMINANCE</code>, and the original filename — that cleanly separates the dataset into three groups.</p>
+    <div class="scroll">
+      <table>
+        <caption>Source groups, recoverable free from the file headers</caption>
+        <thead><tr><th>Group</th><th class="num">Images</th><th>What it is</th><th class="num">Max value</th><th class="num">Negatives</th></tr></thead>
+        <tbody>
+          <tr><td>S1</td><td class="num">1,289</td><td>video / rendered, no metadata</td><td class="num">255</td><td class="num">0%</td></tr>
+          <tr><td>S2</td><td class="num">1,489</td><td>bracketed photographs, 2016</td><td class="num">255</td><td class="num">42%</td></tr>
+          <tr><td>S3</td><td class="num">1,302</td><td>one continuous HDR video</td><td class="num">65504</td><td class="num">80%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>This matters because S1 and S2 share the same maximum value while being otherwise unalike — so the "two groups" split is not the useful one. The source boundary is.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">05</div>
+  <h3>Tested whether the built-in brightness tag fixes the scale gap</h3>
+  <div class="body">
+    <p>The <code>whiteLuminance</code> field looks like exactly the right tool for putting all three groups on one physical scale. It is not: it equals 1.0 for S1 and S2 and only carries real values for S3, so multiplying by it <b>widens</b> the spread from 3.34 to 4.62 decades.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">06</div>
+  <h3>Found negative pixel values in 41% of images</h3>
+  <div class="body">
+    <p><em class="q">1,672</em> images contain negative brightness values, down to −872 — leftovers from colour processing. Any logarithm or gamma step must clamp these to zero first or it produces invalid numbers on nearly half the dataset.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">07</div>
+  <h3>Identified a separate population of very dark scenes</h3>
+  <div class="body">
+    <p><em class="q">303</em> images (7.4%) sit in a cleanly separated cluster, with a real gap in the histogram. They are roughly <b>250× darker</b> than the rest and hold <em class="q">13.1%</em> of all annotated boxes.</p>
+    <div class="found"><strong>Consequence</strong><p>Any single brightness curve tuned on the main population will crush these to black — and they are too large a share of the labels to ignore.</p></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">08</div>
+  <h3>Measured the dynamic range of every scene</h3>
+  <div class="body">
+    <p>Median <em class="q">4.11</em> decades — about 13.7 photographic stops — with a maximum of 7.83 decades (26 stops). This is genuinely wide-range data, and the per-image figures now exist for all 4,080 files, which makes it possible to sort results by scene difficulty later.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">09</div>
+  <h3>Quantified the train/test leakage</h3>
+  <div class="body">
+    <p>S3's original filenames are sequential video frames (<code>000001.exr</code>–<code>001499.exr</code>). The dataset's own train/test split was drawn randomly over individual frames, so consecutive near-identical frames land on opposite sides.</p>
+    <div class="problem"><strong>Problem found</strong><p><b>100% of S3's test frames have a training frame within ±3</b>, and 91% have one immediately adjacent. S3 is about a third of the test set.</p></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">10</div>
+  <h3>Characterised the detection task</h3>
+  <div class="body">
+    <p>Class imbalance is <em class="q">6,084:1</em> — person, bottle and car account for 86% of boxes, while cat has 3 instances and bus has 7. <b><code>cow</code> and <code>cat</code> have zero test instances</b>, so their score is undefined and any 20-class average silently depends on how the scoring tool handles that.</p>
+    <p>Objects are large: median <em class="q">7.2%</em> of the image side, with only 0.7% qualifying as tiny. That is the opposite profile to traffic datasets, where small distant objects dominate.</p>
+  </div>
+</div>
+
+<h2>Phase 2 — Diagnosing why the previous attempt failed</h2>
+<p class="phase-note">Two independent bugs, both silent, both invalidating earlier conclusions.</p>
+
+<div class="step">
+  <div class="n">11</div>
+  <h3>Read the RAOD source and found it tone-maps internally</h3>
+  <div class="body">
+    <p>RAOD's first network layer is a learned tone-mapping module: it applies <code>x^(1/gamma)</code> with gamma learned in the range 7–10.5, plus a per-pixel tone curve, then rescales. It is designed to receive <b>dark, linear, untouched</b> input and brighten it itself. RAOD's own data sits at mean 0.0118.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">12</div>
+  <h3>Found the missing scaling step in the evaluation script</h3>
+  <div class="body">
+    <p>The data loader divides pixel values by 255 inside <code>load_image</code>, so the network expects values between 0 and 1. The evaluation script skipped that step and fed values up to 255.</p>
+    <p>The trap: the same division appears <b>commented out</b> in <code>ValTransformRaw</code> — the obvious place to look — because it has already happened one level up. Anyone reimplementing the preprocessing reasonably concludes it should not be applied.</p>
+    <div class="problem"><strong>Proved it</strong><p>RAOD's <b>own</b> sample image produced <b>0 detections</b>. After restoring one line, the same image produced <b>5</b>, including a car at 0.892 confidence. Every earlier "this method does not work" result was measured through this.</p></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">13</div>
+  <h3>Found the converter was aiming at the opposite target</h3>
+  <div class="body">
+    <p>The previous converter stretched each image to fill the full 0–255 range, landing at mean 0.377 — <b>32× brighter</b> than anything the model saw in training. Every variant tried (p99, adaptive percentile, log, histogram matching) shares that same "use the full range" goal, so all of them miss in the same direction.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">14</div>
+  <h3>Settled the class mapping from source</h3>
+  <div class="body">
+    <p>All three checkpoints have 5-class output heads. The 6-class line in RAOD's annotation script is commented out — Tricycle was dropped. Only <code>person → Pedestrian</code> and <code>car → Car</code> map honestly, covering <em class="q">64.9%</em> of boxes across 3,818 images.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">15</div>
+  <h3>Caught a coordinate trap before it cost anything</h3>
+  <div class="body">
+    <p>RAOD squashes images to 1280×1280 <b>without preserving aspect ratio</b>, and squashes the boxes to match by scaling each axis independently. Reproducing one without the other misaligns every box, with no error message.</p>
+  </div>
+</div>
+
+<h2>Phase 3 — Rebuilding the pipeline</h2>
+<p class="phase-note">New converter, annotations, splits, evaluation and visualisation tools.</p>
+
+<div class="step">
+  <div class="n">16</div>
+  <h3>Built a leakage-free split</h3>
+  <div class="body">
+    <p>S3's video frames were grouped into 24 contiguous blocks, assigned whole, with a guard band of dropped frames at every boundary. Verified: <b>0</b> test frames within ±3 of a training frame, against 252 of 276 in the original split. Both splits were kept so the two can be compared.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">17</div>
+  <h3>Wrote a converter that does no tone mapping</h3>
+  <div class="body">
+    <p>Reads the EXR, clamps negatives, converts colour order, resizes with the same aspect-squashing RAOD uses, applies grey-world white balance, and writes the values through with <b>no stretching</b>. All 3,818 usable images converted in 351 seconds, zero failures, about 60 GB.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">18</div>
+  <h3>Measured the right brightness level instead of guessing</h3>
+  <div class="body">
+    <p>Swept seven scaling factors and scored each properly.</p>
+    <div class="scroll">
+      <table>
+        <caption>Input scale sweep, 144-image subset</caption>
+        <thead><tr><th class="num">Scale</th><th class="num">mAP</th><th class="num">AP50</th></tr></thead>
+        <tbody>
+          <tr><td class="num">1.0</td><td class="num">0.0216</td><td class="num">0.0601</td></tr>
+          <tr><td class="num">0.25</td><td class="num">0.0521</td><td class="num">0.1120</td></tr>
+          <tr class="hi"><td class="num">0.02</td><td class="num">0.0560</td><td class="num">0.1173</td></tr>
+          <tr><td class="num">0.01</td><td class="num">0.0529</td><td class="num">0.1141</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><b>2.6× better</b> at the measured setting than at the old converter's target, and flat between 0.01 and 0.25 — so it does not need careful tuning, only to be in roughly the right place.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">19</div>
+  <h3>Verified box alignment visually</h3>
+  <div class="body">
+    <p>Drew ground truth and predictions onto converted images. Boxes land exactly on the people, confirming the aspect-squashing was reproduced correctly. The same pictures show the model labelling stage lights and a man's cap as "Car" while missing four people at a table — the domain gap made visible.</p>
+  </div>
+</div>
+
+<h2>Phase 4 — Baseline before training</h2>
+
+<div class="step">
+  <div class="n">20</div>
+  <h3>Measured the untrained model on the clean split</h3>
+  <div class="body">
+    <p>mAP <em class="q">0.0590</em>, AP50 0.1277, on 779 test images. Pedestrian AP50 was <em class="q">0.018</em> — effectively blind, despite person being 85% of the boxes — while Car reached 0.237.</p>
+  </div>
+</div>
+
+<h2>Phase 5 — Fine-tuning</h2>
+<p class="phase-note">Three attempts. The first two were abandoned for the same hidden reason.</p>
+
+<div class="step">
+  <div class="n">21</div>
+  <h3>Hit a memory limit that Windows never reports</h3>
+  <div class="body">
+    <p>The first run projected an <b>8-day</b> completion time with no error of any kind. Measuring memory rather than timing found the cause: batch size 8 needs 17.51 GB on a 17.1 GB card. Windows does not raise an out-of-memory error — it pages GPU memory to system memory, so the run merely becomes slow and erratic.</p>
+    <p>The second run, at batch 4, still projected 16 hours. Same cause: the scale augmentation was sampling input sizes up to 1600×1600, which needs 22.67 GB.</p>
+    <div class="scroll">
+      <table>
+        <caption>Measured memory and step time, batch 4</caption>
+        <thead><tr><th class="num">Input size</th><th class="num">Step</th><th class="num">VRAM</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="num">960</td><td class="num">0.234 s</td><td class="num">7.65 GB</td><td>fits</td></tr>
+          <tr class="hi"><td class="num">1280</td><td class="num">0.483 s</td><td class="num">13.33 GB</td><td>fits</td></tr>
+          <tr><td class="num">1408</td><td class="num">0.917 s</td><td class="num">17.56 GB</td><td>over → paging</td></tr>
+          <tr><td class="num">1600</td><td class="num">2.415 s</td><td class="num">22.67 GB</td><td>over → paging</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Fixed by capping the augmentation range at 1280 instead of centring on it, which keeps the augmentation, stays inside memory, and is faster. Final run: <b>4.6 hours</b>.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">22</div>
+  <h3>Trained the model and measured the result</h3>
+  <div class="body">
+    <div class="scroll">
+      <table>
+        <caption>50 epochs from ROD weights, leakage-free split, 779 test images</caption>
+        <thead><tr><th>Metric</th><th class="num">Before</th><th class="num">After</th><th class="num">Change</th></tr></thead>
+        <tbody>
+          <tr class="hi"><td>mAP (strict)</td><td class="num">0.0590</td><td class="num">0.3490</td><td class="num">5.9×</td></tr>
+          <tr><td>AP50 (lenient)</td><td class="num">0.1277</td><td class="num">0.6132</td><td class="num">4.8×</td></tr>
+          <tr class="hi"><td>AP50 — Pedestrian</td><td class="num">0.0182</td><td class="num">0.6021</td><td class="num">33×</td></tr>
+          <tr><td>AP50 — Car</td><td class="num">0.2371</td><td class="num">0.6244</td><td class="num">2.6×</td></tr>
+          <tr><td>AP — large objects</td><td class="num">0.1003</td><td class="num">0.5257</td><td class="num">5.2×</td></tr>
+          <tr><td>AP — small objects</td><td class="num">0.0034</td><td class="num">0.0264</td><td class="num">7.8×</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="found"><strong>Main finding</strong><p>The class that was effectively blind now works. <b>Nothing about HDR4RTT is structurally incompatible with RAOD</b> — the earlier failures were the two bugs, not the data.</p></div>
+    <p>Validation stopped improving at epoch 35, so a 30-epoch schedule would reach the same place in under 3 hours.</p>
+  </div>
+</div>
+
+<h2>Phase 6 — Checking whether the result is trustworthy</h2>
+
+<div class="step">
+  <div class="n">23</div>
+  <h3>Confirmed no test image was used in training</h3>
+  <div class="body">
+    <p>Verified directly: <b>0</b> images appear in both the training and test sets.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">24</div>
+  <h3>Measured how much genuinely distinct material the training set holds</h3>
+  <div class="body">
+    <p>2,994 images, but S3's 949 of those are frames from one video in only <b>6 contiguous runs</b>. Counting near-identical frames once gives roughly <em class="q">2,051</em> distinct scenes — about <b>1.7%</b> of a standard detection training set.</p>
+    <div class="found"><strong>Interpretation</strong><p>The good result is not explained by an extensive dataset. It is better explained by an easier task — two classes, large objects — plus a strong pretrained starting point.</p></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">25</div>
+  <h3>Trained a second model to measure the leakage cost properly</h3>
+  <div class="body">
+    <p>An earlier attempt to measure this compared one model against two test sets, which was invalid — 26% of the original test set was inside that model's training data. The correct design is two models with identical settings, each tested on its own split, compared video-source to video-source so content stays constant.</p>
+    <div class="scroll">
+      <table>
+        <caption>Leakage effect, S3 against S3</caption>
+        <thead><tr><th>Trained on</th><th class="num">mAP</th><th class="num">AP50</th></tr></thead>
+        <tbody>
+          <tr><td>Clean split</td><td class="num">0.3197</td><td class="num">0.6047</td></tr>
+          <tr class="hi"><td>Original split</td><td class="num">0.3393</td><td class="num">0.6181</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><b>The original split overstates the video-source score by about 2 mAP points</b>, roughly 6% in relative terms. Real and measurable, but modest. The photo sources, which were never reshuffled, agree closely between the two models — confirming the gap is the duplicate frames and not training noise.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">26</div>
+  <h3>Broke the result down by source — and found something larger</h3>
+  <div class="body">
+    <div class="scroll">
+      <table>
+        <caption>Same model, scored separately on each source</caption>
+        <thead><tr><th>Source</th><th>What it is</th><th class="num">mAP</th><th class="num">AP50</th></tr></thead>
+        <tbody>
+          <tr class="hi"><td>S1</td><td>video / rendered</td><td class="num">0.755</td><td class="num">0.982</td></tr>
+          <tr><td>S3</td><td>HDR video</td><td class="num">0.320</td><td class="num">0.605</td></tr>
+          <tr><td>S2</td><td>bracketed photographs</td><td class="num">0.142</td><td class="num">0.395</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="problem"><strong>Problem found</strong><p>A <b>5× spread</b> hidden inside the single headline number. S1 at 0.982 AP50 is not a plausible generalisation result — it is almost certainly the leakage that could not be checked, because S1 carries no metadata and therefore no frame numbers to build a guard band from.</p></div>
+    <p>S2 is the one source where the score is unambiguously trustworthy: bracketed photographs taken across 218 separate days, with no frames and no way to cheat. It scores <em class="q">0.142</em> — far below the headline.</p>
+  </div>
+</div>
+
+<h2>Phase 7 — Positioning against the literature</h2>
+
+<div class="step">
+  <div class="n">27</div>
+  <h3>Established that the headline number is not comparable to TMO-Det</h3>
+  <div class="body">
+    <p>TMO-Det uses the same underlying dataset, but filters out near-identical video frames down to 1,491 training and 380 test images, evaluates <b>all 20 classes</b> with RetinaNet at 1024×576.</p>
+    <div class="scroll">
+      <table>
+        <caption>TMO-Det published results, 20 classes, RetinaNet</caption>
+        <thead><tr><th>Input</th><th class="num">mAP</th></tr></thead>
+        <tbody>
+          <tr><td>Raw HDR</td><td class="num">26.3</td></tr>
+          <tr><td>LDR</td><td class="num">28.2</td></tr>
+          <tr><td>Best classical tone map (Mantiuk)</td><td class="num">31.3</td></tr>
+          <tr class="hi"><td>TMO-Det</td><td class="num">32.1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Placing 34.9 next to 32.1 would be invalid: this work detects <b>2</b> classes, theirs detects <b>20</b>, including categories with a handful of instances that drag any average down. The tasks are not the same difficulty.</p>
+    <div class="found"><strong>Open scientific question</strong><p>Their table shows raw HDR performing <b>worst</b>, below plain LDR. RAOD claims the opposite for HDR with a learned adjustment. Both can hold — HDR may hurt when handed over raw and help when the network learns the compression. Nobody has compared the two approaches on the same benchmark.</p></div>
+  </div>
+</div>
+
+<h2>What remains open</h2>
+
+<div class="step">
+  <div class="n">28</div>
+  <h3>Three items, in priority order</h3>
+  <div class="body">
+    <ul>
+      <li><b>Check S1 for duplicate frames.</b> No longer a theoretical concern — the 0.982 score is direct evidence. Needs image-similarity comparison rather than metadata, since S1 has none.</li>
+      <li><b>Test without the augmentation fill quirk.</b> RAOD's training code fills empty borders with a value inherited from 8-bit image code, which sits far above the real pixel range here. It affects RAOD's own training equally and does not touch evaluation, but removing it may be free accuracy.</li>
+      <li><b>Run RAOD under TMO-Det's exact protocol</b> — their filtering, their splits, all 20 classes — to produce a genuinely comparable row for their table.</li>
+    </ul>
+  </div>
+</div>
+
+<footer>
+  <p>All code, converted data manifests and result files are under <code>hdr4rtt_rod/</code>, with the dataset audit under <code>hdr4rtt_analysis/</code>. Every number in this note comes from a saved result file and can be regenerated with the scripts in those folders.</p>
+</footer>
+
+</div>

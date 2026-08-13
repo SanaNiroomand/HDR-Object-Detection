@@ -1,0 +1,26 @@
+{
+ "ann": "D:\\Data\\HDR\\hdr4rtt_rod\\annotations\\hdr4rtt_rod_seqsafe_test_S1.json",
+ "img_dir": "D:\\Data\\HDR\\hdr4rtt_rod\\images",
+ "ckpt": "D:\\Codes\\HDR\\Sana\\hdr4rtt_rod\\cfg_hdr4rtt_rod\\best_ckpt.pth",
+ "conf": 0.001,
+ "n_images": 246,
+ "n_gt": 839,
+ "summary": {
+  "1.0": {
+   "mAP": 0.7554111461832713,
+   "AP50": 0.9817043404264293,
+   "AP_small": -1.0,
+   "AP_med": 0.38191816681623847,
+   "AP_large": 0.7757329201315477,
+   "AR100": 0.7870574028550481,
+   "n_dets": 3723,
+   "per_class_AP50": {
+    "Pedestrian": 0.964813966419583,
+    "Car": 0.9985947144332754,
+    "Cyclist": NaN,
+    "Tram": NaN,
+    "Truck": NaN
+   }
+  }
+ }
+}

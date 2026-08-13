@@ -1,0 +1,40 @@
+# Allow-list, not a deny-list. This working directory also holds copyrighted
+# paper PDFs, third-party repositories with their own history (RAOD,
+# AODRaw-mmdetection), model checkpoints of several hundred MB, and tens of GB
+# of converted imagery. None of that belongs in this repository, so everything
+# is ignored by default and only our own work is re-included below.
+
+/*
+
+!/.gitignore
+!/README.md
+!/LICENSE
+
+!/hdr4rtt_rod/
+!/hdr4rtt_analysis/
+
+# --- within those, still exclude generated and heavy artifacts ---
+
+# training output directories (checkpoints, ~170 MB each, plus tensorboard logs)
+hdr4rtt_rod/cfg_hdr4rtt_rod/
+hdr4rtt_rod/cfg_hdr4rtt_rod_original/
+hdr4rtt_rod/tv_runs/
+
+# model weights and image/array data never belong in git
+*.pth
+*.pt
+*.ckpt
+*.npy
+*.npy.gz
+*.exr
+*.gz
+
+# python bytecode
+__pycache__/
+*.py[cod]
+
+# editor and OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

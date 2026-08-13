@@ -1,0 +1,18 @@
+{
+ "arch": "fasterrcnn",
+ "weights": "coco",
+ "ann": "D:\\Data\\HDR\\hdr4rtt_rod\\annotations\\hdr4rtt_rod_seqsafe_test.json",
+ "n_images": 779,
+ "n_gt": 4082,
+ "mAP": 0.30987026519152766,
+ "AP50": 0.6055956763526037,
+ "AP_small": 0.03757511735312812,
+ "AP_med": 0.12162357422981569,
+ "AP_large": 0.47847395663043063,
+ "AR100": 0.42775688905218495,
+ "per_class_AP50": {
+  "Pedestrian": 0.5611138575253053,
+  "Car": 0.650077495179902
+ },
+ "n_dets": 12560
+}

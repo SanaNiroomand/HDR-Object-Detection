@@ -1,0 +1,39 @@
+{
+ "splits": {
+  "original_train": {
+   "images": 3060,
+   "boxes": 15749,
+   "json": "hdr4rtt_rod_original_train.json"
+  },
+  "original_test": {
+   "images": 758,
+   "boxes": 4433,
+   "json": "hdr4rtt_rod_original_test.json"
+  },
+  "seqsafe_train": {
+   "images": 2994,
+   "boxes": 15844,
+   "json": "hdr4rtt_rod_seqsafe_train.json"
+  },
+  "seqsafe_test": {
+   "images": 779,
+   "boxes": 4082,
+   "json": "hdr4rtt_rod_seqsafe_test.json"
+  }
+ },
+ "min_box": 16.0,
+ "guard": 3,
+ "n_blocks": 24,
+ "class_map": {
+  "person": "Pedestrian",
+  "car": "Car"
+ },
+ "rod_classes": {
+  "Pedestrian": 1,
+  "Car": 2,
+  "Cyclist": 3,
+  "Tram": 4,
+  "Truck": 5
+ },
+ "n_images": 3818
+}
