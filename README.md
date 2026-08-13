@@ -18,17 +18,31 @@ running [RAOD](https://openaccess.thecvf.com/content/CVPR2023/papers/Xu_Toward_R
 All on the same 779-image leakage-free test set, 4,082 ground-truth boxes,
 person and car only.
 
-| arm | HDR4RTT training | mAP | AP50 | Pedestrian | Car |
-|---|---|---|---|---|---|
-| RAOD (1M params), zero-shot | none | 0.059 | 0.128 | 0.018 | 0.237 |
-| **RAOD (1M params), fine-tuned** | 4.6 h | **0.349** | 0.613 | 0.602 | 0.624 |
-| RetinaNet (38M), zero-shot | none | 0.296 | 0.574 | 0.502 | 0.646 |
-| Faster R-CNN (44M), zero-shot | none | 0.310 | 0.606 | 0.561 | 0.650 |
+| arm | input | params | HDR4RTT training | mAP | AP50 | Pedestrian | Car |
+|---|---|---|---|---|---|---|---|
+| RAOD, zero-shot | HDR | 1M | none | 0.059 | 0.128 | 0.018 | 0.237 |
+| RAOD, fine-tuned | HDR | 1M | 4.6 h | 0.349 | 0.613 | 0.602 | 0.624 |
+| RetinaNet, zero-shot | tone-mapped | 38M | none | 0.296 | 0.574 | 0.502 | 0.646 |
+| Faster R-CNN, zero-shot | tone-mapped | 44M | none | 0.310 | 0.606 | 0.561 | 0.650 |
+| **Faster R-CNN, fine-tuned** | tone-mapped | 44M | **0.5 h** | **0.517** | **0.794** | 0.774 | 0.814 |
 
 Fine-tuning lifts RAOD 5.9× overall, and 33× on the class it was effectively
-blind to. But an off-the-shelf COCO detector on tone-mapped images reaches
-comparable AP50 with **no training on this dataset at all**, which is the
-result worth thinking about.
+blind to. But the comparison arm is the interesting part: a conventional
+tone-map-then-detect pipeline reaches **48% higher mAP in a tenth of the
+training time**, and an untrained off-the-shelf detector already matches
+fine-tuned RAOD's AP50.
+
+**This does not show that RAOD's approach is wrong.** The comparison is not
+capacity-matched — 44M parameters against 1M — and the large detector is
+COCO-pretrained on millions of everyday photographs containing exactly "person"
+and "car", while RAOD was pretrained on ROD: five traffic classes from a
+car-mounted sensor. Both advantages favour the LDR arm for reasons that have
+nothing to do with HDR.
+
+What it does show is that the open question is sharper than "how do we improve
+RAOD on HDR4RTT". The missing experiment is RAOD's tone-mapping module in front
+of the *large* detector: that row minus the row above isolates what the module
+contributes when the detector is not tiny.
 
 ---
 
@@ -164,12 +178,25 @@ batch-8 run reported an 8-day ETA. Details in
 Checkpoints, converted imagery and the dataset itself are deliberately excluded —
 see [.gitignore](.gitignore).
 
+## A note on choosing the tone-mapping operator
+
+The LDR arm could easily have been rigged. Scoring eight operators with a
+COCO-pretrained detector showed a **10% relative spread** in the resulting mAP,
+so a careless choice would have decided the comparison before any training
+happened. Gamma at the 99th percentile won and was used throughout. TMO-Det
+handles this the same way, comparing six operators and reporting the best.
+
+`pick_tmo.py` reproduces the sweep.
+
 ## Open questions
 
 1. **Check S1 for duplicate frames** using image similarity, since it has no
-   metadata. The 0.982 score makes this the highest priority.
-2. **Fine-tune the large detectors** to complete the comparison, then put RAOD's
-   tone-mapping module in front of one to isolate what the module contributes
-   when the detector is not tiny.
-3. **Run RAOD under TMO-Det's protocol** — their filtering, their splits, all 20
+   metadata. The 0.982 score makes this the highest priority — it affects
+   whether the headline numbers mean anything.
+2. **Put RAOD's tone-mapping module in front of the large detector.** This is
+   the missing row, and the only one that isolates the module's contribution
+   from the detector's capacity and pretraining.
+3. **Match capacity honestly** — either shrink the LDR arm or grow the HDR arm —
+   so the HDR-versus-tone-mapped question is not confounded by model size.
+4. **Run RAOD under TMO-Det's protocol** — their filtering, their splits, all 20
    classes — for a genuinely comparable number.
