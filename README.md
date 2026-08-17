@@ -178,6 +178,79 @@ batch-8 run reported an 8-day ETA. Details in
 Checkpoints, converted imagery and the dataset itself are deliberately excluded —
 see [.gitignore](.gitignore).
 
+## Reference: previously reported results on this dataset
+
+From İ. H. Kocdemir's MS thesis (and the corresponding Pattern Recognition
+Letters 172 (2023) 230–236 paper), on the dataset the thesis calls **OOD** —
+20 Pascal VOC classes, near-identical video frames removed, 1,491 train /
+380 test, images at 1024×576.
+
+**Detector: RetinaNet** (thesis Table 4.2)
+
+| front end | joint | on real | mAP | TMQI-Q |
+|---|---|---|---|---|
+| HDR (raw, no normalisation) | | | **26.3** | – |
+| LDR | | | 28.2 | 76.1 |
+| Reinhard | | | 29.6 | 89.6 |
+| HDR with gamma | | | 29.8 | – |
+| Fattal | | | 29.8 | 88.8 |
+| Best TMO per picture | | | 30.0 | 94.9 |
+| TMO-GAN | ✗ | | 30.0 | 94.6 |
+| Ashikhmin | | | 30.1 | 88.4 |
+| TMO-GAN + RetinaNet (COCO) | ✓ | ✓ | 30.2 | 94.2 |
+| Durand | | | 30.6 | 89.0 |
+| Std. LDR | | | 31.0 | 88.9 |
+| Mantiuk | | | 31.3 | 86.5 |
+| **TMO-GAN + RetinaNet (OOD)** | ✓ | ✓ | **31.6** | 94.5 |
+
+**Detector: Faster R-CNN** (thesis Table 4.3)
+
+| front end | joint | on real | mAP | TMQI-Q |
+|---|---|---|---|---|
+| HDR (raw, no normalisation) | | | **23.5** | – |
+| LDR | | | 24.7 | 76.1 |
+| TMO-GAN + Faster R-CNN (COCO) | ✓ | ✗ | 26.3 | 94.2 |
+| TMO-GAN + Faster R-CNN (COCO) | ✓ | ✓ | 27.3 | 94.0 |
+| HDR with gamma | | | 27.7 | – |
+| **TMO-GAN + Faster R-CNN (OOD)** | ✓ | ✓ | 27.7 | 94.3 |
+| Reinhard | | | 28.1 | 89.6 |
+| Std. LDR | | | 28.3 | 88.9 |
+| TMO-GAN | ✗ | | 28.6 | 94.6 |
+| Durand | | | 28.8 | 89.0 |
+| Ashikhmin | | | 28.9 | 88.4 |
+| Mantiuk | | | 29.1 | 86.5 |
+| **Fattal** | | | **29.5** | 88.8 |
+
+For context, thesis Table 3.1 reports the same comparison on **CityScapes**,
+where HDR with gamma (33.3 mAP) barely separates from Std. LDR (33.1) — the
+thesis states plainly that no advantage for HDR was observed there.
+
+### Two things these tables show
+
+**Raw HDR is the worst input in both.** 26.3 and 23.5, below even plain LDR.
+Normalisation, not bit depth, is what the detector needs — which is exactly what
+this work found independently: RAOD scored 0.059 when the input scale was wrong
+and 0.349 when it was right, on identical data and weights.
+
+**The detector changes the conclusion.** With RetinaNet the learned joint method
+wins (31.6, above Mantiuk's 31.3). With Faster R-CNN it does not — 27.7, below
+four classical operators, with Fattal best at 29.5. The same method, the same
+data, opposite verdicts depending on the detector behind it.
+
+### These numbers are NOT comparable with the table at the top
+
+| | thesis | this work |
+|---|---|---|
+| classes | 20 | 2 (person, car) |
+| test images | 380 | 779 |
+| duplicate frames | removed entirely | separated by split |
+| resolution | 1024×576 | 1280×1280 |
+| detectors | RetinaNet, Faster R-CNN | RAOD YOLOX, Faster R-CNN v2 |
+
+Averaging over 20 classes — several with only a handful of instances — pulls any
+score far below a 2-class average. Placing 0.517 next to 31.6 would be
+meaningless. They are recorded here as reference, not as a head-to-head.
+
 ## A note on choosing the tone-mapping operator
 
 The LDR arm could easily have been rigged. Scoring eight operators with a
