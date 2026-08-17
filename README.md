@@ -278,7 +278,8 @@ handles this the same way, comparing six operators and reporting the best.
 
 ## Licence, attribution and disclaimer
 
-Code in this repository is © 2026 Sana Niroomand, released under the
+Code in this repository is © 2026 Sana Niroomand and the **OGAM Research
+Laboratory, Middle East Technical University (METU)**, released under the
 [MIT licence](LICENSE). It is research code: provided as is, without warranty,
 and not intended for production or safety-related use.
 

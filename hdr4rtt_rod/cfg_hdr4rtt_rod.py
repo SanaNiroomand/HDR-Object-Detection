@@ -2,7 +2,8 @@
 #
 # Copyright (c) Megvii, Inc. and its affiliates.          (YOLOX)
 # Copyright 2023 Huawei Technologies Co., Ltd.            (RAOD)
-# Copyright (c) 2026 Sana Niroomand                       (modifications)
+# Copyright (c) 2026 Sana Niroomand and OGAM Research Laboratory,
+#                    Middle East Technical University (METU)  (modifications)
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
