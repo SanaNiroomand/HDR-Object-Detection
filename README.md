@@ -13,6 +13,21 @@ running [RAOD](https://openaccess.thecvf.com/content/CVPR2023/papers/Xu_Toward_R
 
 ---
 
+> ### ⚠️ Status: work in progress, not peer reviewed
+>
+> This is an **ongoing internship project**. Results here are preliminary,
+> have not been reviewed or published, and **may change or be withdrawn**.
+> Several are explicitly flagged below as unreliable — in particular the
+> headline figure, for reasons given in [Caveats](#caveats-worth-reading-before-quoting-any-number).
+>
+> Please do not cite these numbers as established findings. If you want to use
+> or build on anything here, get in touch first so you know what has since
+> changed.
+>
+> Provided without warranty of any kind (see [LICENSE](LICENSE)).
+
+---
+
 ## Headline results
 
 All on the same 779-image leakage-free test set, 4,082 ground-truth boxes,
@@ -260,6 +275,37 @@ happened. Gamma at the 99th percentile won and was used throughout. TMO-Det
 handles this the same way, comparing six operators and reporting the best.
 
 `pick_tmo.py` reproduces the sweep.
+
+## Licence, attribution and disclaimer
+
+Code in this repository is © 2026 Sana Niroomand, released under the
+[MIT licence](LICENSE). It is research code: provided as is, without warranty,
+and not intended for production or safety-related use.
+
+**What is not covered by that licence, and is not redistributed here:**
+
+| | |
+|---|---|
+| HDR4RTT / OOD dataset | obtain from its creators under their terms |
+| RAOD (Xu et al., CVPR 2023) and its weights | © Huawei Technologies, Apache 2.0 |
+| AODRaw, mmdetection | see their own repositories |
+| Thesis and paper result tables | © the authors and publisher |
+
+**Please cite the original work, not this repository, for the methods it builds on:**
+
+> R. Xu, C. Chen, J. Peng, C. Li, Y. Huang, F. Song, Y. Yan, Z. Xiong.
+> *Toward RAW Object Detection: A New Benchmark and a New Model.* CVPR 2023.
+
+> İ. H. Kocdemir, A. Koz, A. O. Akyuz, et al.
+> *TMO-Det: Deep tone-mapping optimized with and for object detection.*
+> Pattern Recognition Letters 172 (2023) 230–236.
+
+Tables from the thesis and paper are reproduced here for academic comparison
+with attribution. They are **quoted, not reproduced experimentally** — the
+original software was lost, so those numbers could not be re-run, and this is
+stated wherever they appear.
+
+Any errors in this repository are mine and not those of the original authors.
 
 ## Open questions
 
