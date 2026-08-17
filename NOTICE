@@ -1,0 +1,108 @@
+HDR object detection on HDR4RTT
+Copyright (c) 2026 Sana Niroomand
+
+This product includes software derived from, and software that interoperates
+with, third-party projects. Their notices are reproduced below as required by
+their licences. Nothing in this repository's MIT licence grants rights over
+those projects.
+
+================================================================================
+1. RAOD  -- code DERIVED FROM, and code that CALLS it
+================================================================================
+
+    Toward RAW Object Detection: A New Benchmark and a New Model
+    R. Xu, C. Chen, J. Peng, C. Li, Y. Huang, F. Song, Y. Yan, Z. Xiong
+    CVPR 2023
+    https://github.com/huaweicloud/RAOD  (as vendored under RAOD/ locally)
+
+    Copyright (c) 2022. Huawei Technologies Co., Ltd. All rights reserved.
+    Copyright (c) Megvii, Inc. and its affiliates.   (YOLOX, which RAOD builds on)
+
+    Licensed under the Apache License, Version 2.0. A copy is provided in
+    LICENSE-Apache-2.0.txt.
+
+    DERIVATIVE FILES. The following files in this repository are modified
+    derivatives of RAOD source files and remain subject to Apache 2.0. Each
+    carries a header stating what was changed, per Apache 2.0 section 4(b):
+
+      hdr4rtt_rod/cfg_hdr4rtt_rod.py           derived from RAOD cfg_small.py
+      hdr4rtt_rod/cfg_hdr4rtt_rod_original.py  derived from the same, via the above
+
+    NON-DERIVATIVE FILES that import or call RAOD at runtime. These are original
+    work under this repository's MIT licence; they do not copy RAOD source, and
+    RAOD itself is not redistributed here:
+
+      hdr4rtt_rod/run_single.py          calls yolox preproc_raw, postprocess
+      hdr4rtt_rod/eval_rod.py            same
+      hdr4rtt_rod/smoke_test_train.py    same
+      hdr4rtt_rod/visualize.py           same
+      hdr4rtt_rod/train_frontend.py      instantiates models.adaptive_module
+
+    hdr4rtt_rod/convert_hdr4rtt_to_rod.py performs the same sequence of
+    operations as RAOD's scripts/preprocess_raw.py (debayer-equivalent step
+    omitted, resize, gray-world white balance, clip, gzip float32 output) but is
+    an independent implementation written against that script's behaviour, not
+    a copy of its text.
+
+    RAOD's released model weights (pre-trained/*.pth) are NOT redistributed
+    here. They remain subject to their original terms.
+
+================================================================================
+2. TMO-Det -- results QUOTED, no code used
+================================================================================
+
+    TMO-Det: Deep tone-mapping optimized with and for object detection
+    I. H. Kocdemir, A. Koz, A. O. Akyuz, et al.
+    Pattern Recognition Letters 172 (2023) 230-236
+    and the corresponding MS thesis.
+
+    No source code from this work is used, adapted, or redistributed here. The
+    original software was reported lost and could not be re-run. Numerical
+    results are quoted from the published tables for academic comparison, with
+    attribution, and are labelled as quoted rather than reproduced wherever they
+    appear. Rights remain with the authors and publisher.
+
+================================================================================
+3. Tone-mapping operators -- ALGORITHMS from papers, INDEPENDENT implementations
+================================================================================
+
+    hdr4rtt_rod/make_frontends.py implements the following published algorithms
+    from their descriptions. No source code from these authors was used; the
+    implementations are original work under this repository's MIT licence.
+    Algorithms themselves are not subject to copyright, but the papers are cited
+    because credit for the method belongs to their authors:
+
+      Reinhard, Stark, Shirley, Ferwerda.
+        Photographic Tone Reproduction for Digital Images. SIGGRAPH 2002.
+
+      Durand, Dorsey.
+        Fast Bilateral Filtering for the Display of High-Dynamic-Range Images.
+        SIGGRAPH 2002.
+
+    These implementations are simplified and were tuned against this dataset.
+    They should NOT be treated as reference implementations of the published
+    methods, and any shortcoming in them is this repository's, not the original
+    authors'. In particular the Durand implementation computes its bilateral
+    filter at reduced resolution and uses a percentile-based exposure step.
+
+================================================================================
+4. Libraries used at runtime (not redistributed)
+================================================================================
+
+    PyTorch, torchvision            BSD 3-Clause      (Meta and contributors)
+    OpenCV                          Apache 2.0
+    NumPy, pandas, matplotlib       BSD 3-Clause
+    pycocotools                     BSD 2-Clause      (COCO Consortium)
+    mmdetection, AODRaw             Apache 2.0        (referenced, not used --
+                                                       could not be built on this
+                                                       machine; see README)
+
+================================================================================
+5. Data
+================================================================================
+
+    The HDR4RTT / OOD dataset is NOT redistributed here, in whole or in part,
+    in original or converted form. Rights remain with its creators and it must
+    be obtained from them under their own terms. The .gitignore in this
+    repository is an allow-list specifically to prevent imagery, converted
+    arrays and model weights from being committed.

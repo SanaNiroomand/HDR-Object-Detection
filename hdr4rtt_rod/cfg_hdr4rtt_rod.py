@@ -1,4 +1,30 @@
 #!/usr/bin/env python3
+#
+# Copyright (c) Megvii, Inc. and its affiliates.          (YOLOX)
+# Copyright 2023 Huawei Technologies Co., Ltd.            (RAOD)
+# Copyright (c) 2026 Sana Niroomand                       (modifications)
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at http://www.apache.org/licenses/LICENSE-2.0, and a copy is
+# included in this repository as LICENSE-Apache-2.0.txt.
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#
+# ---------------------------------------------------------------------------
+# NOTICE OF MODIFICATION (Apache 2.0 section 4(b))
+#
+# This file is a MODIFIED DERIVATIVE of RAOD's cfg_small.py. Changes made:
+#   * dataset paths, annotation filenames and split selection point at HDR4RTT
+#   * fine-tuning schedule replaces training-from-scratch: 50 epochs not 200,
+#     2 warmup epochs not 5, base learning rate 0.002/64 not 0.01/64
+#   * data_num_workers reduced from 16 to 4 for Windows spawn semantics
+#   * pin_memory disabled in both dataloaders (Windows shared-memory failures)
+#   * random_resize overridden to CAP the multiscale range at input_size rather
+#     than centre on it, because sizes above 1280 exceed a 16 GB card
+# ---------------------------------------------------------------------------
 """
 cfg_hdr4rtt_rod.py -- RAOD training/eval config for converted HDR4RTT.
 

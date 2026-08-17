@@ -1,4 +1,16 @@
 #!/usr/bin/env python3
+#
+# Copyright (c) Megvii, Inc. and its affiliates.          (YOLOX)
+# Copyright 2023 Huawei Technologies Co., Ltd.            (RAOD)
+# Copyright (c) 2026 Sana Niroomand                       (modifications)
+#
+# Licensed under the Apache License, Version 2.0; see LICENSE-Apache-2.0.txt.
+# Distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND.
+#
+# NOTICE OF MODIFICATION (Apache 2.0 section 4(b)): this file subclasses
+# cfg_hdr4rtt_rod.py, itself a modified derivative of RAOD's cfg_small.py, and
+# changes only the train/test annotation filenames and the experiment name.
+#
 """
 cfg_hdr4rtt_rod_original.py -- identical to cfg_hdr4rtt_rod.py but trained on
 HDR4RTT's ORIGINAL (leaky) split.

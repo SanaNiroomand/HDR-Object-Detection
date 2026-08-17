@@ -282,14 +282,26 @@ Code in this repository is © 2026 Sana Niroomand, released under the
 [MIT licence](LICENSE). It is research code: provided as is, without warranty,
 and not intended for production or safety-related use.
 
-**What is not covered by that licence, and is not redistributed here:**
+Full third-party attribution is in [NOTICE](NOTICE). In summary:
 
-| | |
-|---|---|
-| HDR4RTT / OOD dataset | obtain from its creators under their terms |
-| RAOD (Xu et al., CVPR 2023) and its weights | © Huawei Technologies, Apache 2.0 |
-| AODRaw, mmdetection | see their own repositories |
-| Thesis and paper result tables | © the authors and publisher |
+| what | relationship | terms |
+|---|---|---|
+| **RAOD** (Xu et al., CVPR 2023) | two config files are **modified derivatives**; other files call it at runtime | © Huawei + Megvii, **Apache 2.0** — see [LICENSE-Apache-2.0.txt](LICENSE-Apache-2.0.txt) |
+| RAOD model weights | not redistributed | original terms |
+| **TMO-Det** (Kocdemir et al.) | **no code used** — results quoted only | © authors and publisher |
+| Reinhard, Durand operators | algorithms re-implemented from the papers | methods credited to their authors |
+| torchvision, OpenCV, pycocotools | called as libraries | BSD / Apache 2.0 |
+| HDR4RTT / OOD dataset | **not redistributed**, in any form | obtain from its creators |
+
+The two derivative files — `cfg_hdr4rtt_rod.py` and `cfg_hdr4rtt_rod_original.py` —
+remain under Apache 2.0 and carry headers stating exactly what was changed, as
+that licence requires. Everything else in this repository is original work under
+MIT.
+
+**The tone-mapping operators here are simplified re-implementations**, tuned
+against this dataset. They should not be taken as reference implementations of
+the published methods, and any weakness in them is mine rather than the original
+authors'.
 
 **Please cite the original work, not this repository, for the methods it builds on:**
 
