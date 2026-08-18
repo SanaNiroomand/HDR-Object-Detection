@@ -21,6 +21,7 @@
 hdr4rtt_rod/cfg_hdr4rtt_rod/
 hdr4rtt_rod/cfg_hdr4rtt_rod_original/
 hdr4rtt_rod/tv_runs/
+hdr4rtt_rod/frontend_runs/
 
 # model weights and image/array data never belong in git
 *.pth

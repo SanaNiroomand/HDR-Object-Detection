@@ -193,6 +193,74 @@ batch-8 run reported an 8-day ETA. Details in
 Checkpoints, converted imagery and the dataset itself are deliberately excluded —
 see [.gitignore](.gitignore).
 
+---
+
+## Which tone map? One detector, nine front ends
+
+The comparison above changes two things at once (detector and input), so it
+cannot separate them. This experiment holds the detector fixed --
+RetinaNet R50-FPN v2, all 20 classes, 845 test images -- and changes **only**
+what happens to the pixels beforehand. Same data, split, schedule, batch size
+and augmentation throughout.
+
+![Five tone maps applied to the same two HDR photographs](hdr4rtt_rod/viz/tone_mapping_comparison.jpg)
+
+*The same two photographs through five front ends. Left column is the raw
+conversion with no tone curve: in the workshop scene the welding arc consumes
+the entire output range and everything else goes black. The four to its right
+are identical data under different curves.*
+
+| front end | mAP | AP50 | AP small | thesis mAP |
+|---|---|---|---|---|
+| **Reinhard** | **38.3** | **56.7** | 7.0 | 29.6 |
+| HDR with gamma | 36.5 | 54.8 | 5.7 | 29.8 |
+| Durand | 36.4 | 53.1 | 5.4 | 30.6 |
+| *learned module, full LR* | *36.1* | *52.1* | *5.2* | -- |
+| Log compression | 35.9 | 54.4 | 8.2 | -- |
+| *learned module, random init* | *35.7* | *52.9* | *6.3* | -- |
+| *learned module, as published* | *35.4* | *52.3* | *6.8* | -- |
+| *learned module, input rescaled* | *34.4* | *50.9* | *6.3* | -- |
+| **HDR, no tone curve** | **30.4** | 47.6 | **1.1** | 26.3 |
+
+### What it shows
+
+**Applying no tone curve is by far the worst option**, and catastrophic for small
+objects (1.1 against 5-8). This independently replicates the thesis result --
+raw HDR was worst there too, under both of its detectors -- and matches what the
+RAOD arm showed, where the same weights on the same data scored 0.059 with the
+input scale wrong and 0.349 with it right. Three separate experiments agree.
+
+**Which curve you choose barely matters.** The four sensible operators span 35.9
+to 38.3, a 2.4-point range, while the gap between "no curve" and "any curve" is
+about 6 points. Doing something reasonable captures most of the benefit.
+
+**RAOD's learned module did not beat a formula from 2002.** Reinhard, a
+one-line operator, leads it by 2.2 mAP. Suspecting the configuration rather than
+the method, three variants were retrained, isolating one setting each: full
+learning rate (36.1), random initialisation instead of RAOD's released weights
+(35.7), and input rescaled to the level those weights were fitted at (34.4).
+All four land below every sensible fixed operator, so the result is not an
+artefact of the settings chosen.
+
+Notably, the rescaling variant made things **worse**, not better -- the assumed
+input-scale mismatch was not the limiting factor, and correcting it cost 1.0 mAP.
+
+**This does not show RAOD's method is wrong.** RAOD pairs the module with a
+1M-parameter detector, where a strong front end plausibly matters far more; a
+38M-parameter detector may already absorb internally whatever the module was
+supplying. The thesis tables show the same pattern from the other side -- its
+learned method beats every classical operator under RetinaNet and loses to four
+of them under Faster R-CNN. **The value of a learned tone map appears to depend
+on the detector behind it**, which is the thread worth pulling next.
+
+### What this experiment cannot answer
+
+Every arm here starts from HDR, so none of them tests HDR against a genuine
+ordinary-camera exposure of the same scene. The thesis can: its real LDR row
+scores 28.2, below tone-mapped HDR at 29.6-31.3 but above raw HDR at 26.3. On
+that evidence HDR is worth roughly 2-3 mAP, **but only once tone mapped** --
+untouched, it is worse than an ordinary photograph.
+
 ## Reference: previously reported results on this dataset
 
 From İ. H. Kocdemir's MS thesis (and the corresponding Pattern Recognition
