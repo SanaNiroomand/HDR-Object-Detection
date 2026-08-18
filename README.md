@@ -195,6 +195,35 @@ see [.gitignore](.gitignore).
 
 ---
 
+## Status of the two review questions
+
+**1. Include the MS thesis results on this page.** Done. Thesis Tables 4.2
+(RetinaNet), 4.3 (Faster R-CNN) and 3.1 (CityScapes) are transcribed
+[below](#reference-previously-reported-results-on-this-dataset), with attribution
+and an explicit statement of why they are not directly comparable.
+
+Reading them surfaced something relevant to question 2: **the thesis already
+contains a detector-swap experiment, and its two detectors disagree.** Its
+learned method beats every classical operator under RetinaNet (31.6 vs 31.3) and
+loses to four of them under Faster R-CNN (27.7 vs 29.5). Same method, same data,
+opposite conclusion.
+
+**2. Compare the 2023 paper and the thesis method fairly, given they used
+different detectors.** Partly answered.
+
+| | status |
+|---|---|
+| Detector held fixed, front end varied | **done** -- [nine arms, one detector](#which-tone-map-one-detector-nine-front-ends) |
+| RAOD's module measured under that control | **done** -- 36.1 mAP |
+| Thesis TMO-GAN measured under that control | **not possible** -- software lost |
+| Indirect comparison via a shared reference | **done** -- see below |
+
+The two learned methods have still never been run side by side. What this
+repository adds is a controlled measurement of one of them, plus an indirect
+comparison of both against the best classical operator in their respective
+experiments (+0.3 for the thesis method, -2.2 for RAOD's). Closing the gap
+properly requires re-implementing TMO-GAN from the paper.
+
 ## Which tone map? One detector, nine front ends
 
 The comparison above changes two things at once (detector and input), so it
@@ -319,6 +348,53 @@ and 0.349 when it was right, on identical data and weights.
 wins (31.6, above Mantiuk's 31.3). With Faster R-CNN it does not — 27.7, below
 four classical operators, with Fattal best at 29.5. The same method, the same
 data, opposite verdicts depending on the detector behind it.
+
+### Comparing the two learned methods across experiments
+
+The thesis method (TMO-GAN) could not be re-run: its software was lost. So the
+two learned front ends -- the thesis one and RAOD's -- have never been measured
+side by side, and the obvious fix does not work.
+
+**The failed approach: shared operators as calibration anchors.** Four operators
+appear in both experiments, so in principle they could map one scale onto the
+other. They do not. The rankings invert:
+
+| operator | thesis rank (RetinaNet) | rank here |
+|---|---|---|
+| Reinhard | **worst** tone map, 29.6 | **best**, 38.3 |
+| Durand | best of the three, 30.6 | middle, 36.4 |
+| HDR with gamma | 29.8 | 36.5 |
+
+That is an inversion rather than an offset, so no scale factor reconciles the
+two tables and the thesis's 31.6 cannot be placed on this axis. It is recorded
+here as a negative result: **do not** compare the absolute numbers.
+
+**What does work: each method against the best classical operator in its own
+experiment.** That reference is meaningful in both, and the ratio cancels the
+differences in split, resolution and detector version:
+
+| learned method | own score | best classical, same table | **gap** |
+|---|---|---|---|
+| TMO-GAN + RetinaNet (thesis) | 31.6 | 31.3 (Mantiuk) | **+0.3** |
+| RAOD Adaptive_Module (here) | 36.1 | 38.3 (Reinhard) | **-2.2** |
+
+Read this way, the thesis method **slightly beat** the strongest classical
+operator available to it, while RAOD's module **fell behind** the strongest
+one available here, by 2.2 mAP. The difference between the two learned
+approaches is therefore about 2.5 mAP in the thesis method's favour, measured
+relative to a shared reference rather than on a shared scale.
+
+**Caveats on that number.** The best classical operator differs between the two
+(Mantiuk there, Reinhard here) and Mantiuk is not implemented in this
+repository; were it stronger than Reinhard on this data, the gap here would
+widen rather than narrow. Both experiments also use different splits and
+different RetinaNet implementations. This is a defensible indirect comparison,
+not a head-to-head.
+
+**What would close it properly:** re-implement TMO-GAN from the paper -- a
+generator and discriminator trained jointly with the detector -- and run it as a
+seventh front end here. Then both learned methods sit in one table under one
+detector, and the comparison is direct rather than inferred.
 
 ### These numbers are NOT comparable with the table at the top
 
