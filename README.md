@@ -246,22 +246,42 @@ and augmentation throughout.
 
 ![Five tone maps applied to the same two HDR photographs](hdr4rtt_rod/viz/tone_mapping_comparison.jpg)
 
-*The same two photographs through five front ends. Left column is the raw
-conversion with no tone curve: in the workshop scene the welding arc consumes
-the entire output range and everything else goes black. The four to its right
-are identical data under different curves.*
+*The same two photographs through the five **fixed** front ends (rows 1, 2, 3,
+5 and 9 of the table). Left column is row 9, the raw conversion with no curve:
+in the workshop scene the welding arc consumes the entire output range and
+everything else goes black. The four to its right are identical data under
+different curves. The CVPR 2023 learned method is not shown, because it produces
+a different curve for every photograph rather than a fixed image set.*
 
-| front end | mAP | AP50 | AP small | thesis mAP |
-|---|---|---|---|---|
-| **Reinhard** | **38.3** | **56.7** | 7.0 | 29.6 |
-| HDR with gamma | 36.5 | 54.8 | 5.7 | 29.8 |
-| Durand | 36.4 | 53.1 | 5.4 | 30.6 |
-| *learned module, full LR* | *36.1* | *52.1* | *5.2* | -- |
-| Log compression | 35.9 | 54.4 | 8.2 | -- |
-| *learned module, random init* | *35.7* | *52.9* | *6.3* | -- |
-| *learned module, as published* | *35.4* | *52.3* | *6.8* | -- |
-| *learned module, input rescaled* | *34.4* | *50.9* | *6.3* | -- |
-| **HDR, no tone curve** | **30.4** | 47.6 | **1.1** | 26.3 |
+**Whose method is each row?**
+
+| # | front end | whose method | mAP | AP50 | AP small | Kocdemir's mAP for the same operator |
+|---|---|---|---|---|---|---|
+| 1 | **Reinhard** | classical, 2002 | **38.3** | **56.7** | 7.0 | 29.6 |
+| 2 | HDR with gamma | standard display curve | 36.5 | 54.8 | 5.7 | 29.8 |
+| 3 | Durand | classical, 2002 | 36.4 | 53.1 | 5.4 | 30.6 |
+| 4 | **RAOD module** — full learning rate | **learned, CVPR 2023** | **36.1** | 52.1 | 5.2 | not in his tables |
+| 5 | Log compression | simple formula | 35.9 | 54.4 | 8.2 | not in his tables |
+| 6 | **RAOD module** — random start | **learned, CVPR 2023** | 35.7 | 52.9 | 6.3 | not in his tables |
+| 7 | **RAOD module** — as published | **learned, CVPR 2023** | 35.4 | 52.3 | 6.8 | not in his tables |
+| 8 | **RAOD module** — input rescaled | **learned, CVPR 2023** | 34.4 | 50.9 | 6.3 | not in his tables |
+| 9 | **HDR, no tone curve** | no method at all | **30.4** | 47.6 | **1.1** | 26.3 |
+
+Reading the table:
+
+* **Rows 4, 6, 7, 8 are the CVPR 2023 method** (RAOD's learned Adaptive_Module),
+  run four times with one setting changed each time. They are the same method,
+  not four different ones.
+* **Rows 1, 2, 3, 5 are fixed formulas** that anyone can apply — no learning
+  involved. Rows 1 and 3 are the classical operators that also appear in the
+  thesis.
+* **Row 9 is the control**: the raw values with nothing applied.
+* **Kocdemir's TMO-GAN is NOT in this table.** Its software was lost and could
+  not be run. His published number (31.6) is on a different scale and cannot be
+  placed here — see [the section below](#comparing-the-two-learned-methods-across-experiments).
+* The last column is **his** published figure for that same operator, measured
+  in **his** experiment. It is there to show the two experiments rank the
+  operators differently, not to be compared row-against-row with ours.
 
 ### What it shows
 
