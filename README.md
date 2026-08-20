@@ -255,7 +255,12 @@ a different curve for every photograph rather than a fixed image set.*
 
 **Whose method is each row?**
 
-| # | front end | whose method | mAP | AP50 | AP small | Kocdemir's mAP for the same operator |
+All numbers in the **first four score columns were measured here**, by running
+every row on the same machine, same data, same detector. The **final column is
+not ours** -- it is Kocdemir's published figure for that same operator, from his
+own separate experiment, shown only for reference.
+
+| # | front end | whose method | MEASURED HERE mAP | MEASURED HERE AP50 | MEASURED HERE AP small | HIS PAPER mAP |
 |---|---|---|---|---|---|---|
 | 1 | **Reinhard** | classical, 2002 | **38.3** | **56.7** | 7.0 | 29.6 |
 | 2 | HDR with gamma | standard display curve | 36.5 | 54.8 | 5.7 | 29.8 |
@@ -279,9 +284,12 @@ Reading the table:
 * **Kocdemir's TMO-GAN is NOT in this table.** Its software was lost and could
   not be run. His published number (31.6) is on a different scale and cannot be
   placed here — see [the section below](#comparing-the-two-learned-methods-across-experiments).
-* The last column is **his** published figure for that same operator, measured
-  in **his** experiment. It is there to show the two experiments rank the
-  operators differently, not to be compared row-against-row with ours.
+* **Which experiment is this?** Rows 1-9 and the three "MEASURED HERE" columns
+  are all **this work** -- every one of those nine numbers comes from a training
+  run performed for this repository. Only the single "HIS PAPER" column comes
+  from Kocdemir's thesis; nothing in it was re-run here. It is included to show
+  that the two experiments rank the operators differently, not to be compared
+  row-against-row.
 
 ### What it shows
 
