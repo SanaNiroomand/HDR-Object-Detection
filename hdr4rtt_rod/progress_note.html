@@ -207,7 +207,10 @@
   <div class="stat"><p class="k">mAP after</p><p class="v">0.349</p><p class="d">5.9× higher</p></div>
   <div class="stat"><p class="k">People AP50</p><p class="v">0.602</p><p class="d">was 0.018 — 33×</p></div>
   <div class="stat"><p class="k">Cars AP50</p><p class="v">0.624</p><p class="d">was 0.237</p></div>
+  <div class="stat"><p class="k">Best overall</p><p class="v">51.7</p><p class="d">ordinary detector, tone-mapped</p></div>
 </div>
+
+<p class="phase-note" style="margin-top:1rem">Scores above are written 0&ndash;1 (0.349); from Phase&nbsp;8 onward they are written &times;100 (34.9), the convention the papers use &mdash; identical numbers. Phases&nbsp;1&ndash;7 also score <b>2 classes</b> while Phase&nbsp;8 scores <b>20</b>, so the two are not comparable with each other.</p>
 
 <h2>Phase 1 — Auditing the dataset</h2>
 <p class="phase-note">Every one of the 4,080 EXR files was decoded and measured. No sampling.</p>
@@ -543,6 +546,149 @@
   </div>
 </div>
 
+<h2>Phase 8 &mdash; Holding the detector fixed, changing only the tone map</h2>
+<p class="phase-note">Prompted by review comments: the earlier comparison varied
+the detector <em>and</em> the input at once, so it could not separate them.
+Scores in this phase are &times;100 and cover all 20 classes.</p>
+
+<div class="step">
+  <div class="n">29</div>
+  <h3>Ruled out mmdetection, and pivoted</h3>
+  <div class="body">
+    <p>The intended detector needed <code>mmcv</code>, which requires compiled CUDA
+    extensions. Neither a CUDA toolkit nor a C++ compiler is installed here, and its
+    prebuilt packages stop at PyTorch versions predating this GPU's architecture, so
+    no combination works without a multi-gigabyte toolchain.</p>
+    <div class="found"><strong>Result</strong><p>Switched to torchvision: no
+    compilation, and it supplies both a one-stage detector (RetinaNet, the family the
+    thesis used) and a two-stage one. Better suited to the question anyway.</p></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">30</div>
+  <h3>Chose the tone-mapping operator by measurement, to avoid rigging the comparison</h3>
+  <div class="body">
+    <p>A weak operator would have made the comparison arm lose by construction.
+    Eight candidates were scored with a COCO-pretrained detector, needing no
+    training. The spread was <em class="q">10%</em> relative, so the choice genuinely
+    mattered; gamma at the 99th percentile won and was used throughout.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">31</div>
+  <h3>Found an off-the-shelf detector already matches the fine-tuned model</h3>
+  <div class="body">
+    <p>A COCO-pretrained detector with <b>no training on this dataset at all</b>
+    reached AP50 <em class="q">60.6</em>, against fine-tuned RAOD's 61.3. After
+    fine-tuning it reached mAP <em class="q">51.7</em> in half an hour, against
+    RAOD's 34.9 in 4.6 hours.</p>
+    <div class="found"><strong>Interpretation</strong><p>Not evidence that RAOD is
+    wrong: 44M parameters against 1M, and pretraining that covers person and car
+    directly. Both advantages are unrelated to HDR. It does move the burden of proof
+    onto the HDR pipeline.</p></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">32</div>
+  <h3>Rebuilt the labels for all 20 classes</h3>
+  <div class="body">
+    <p>Earlier work kept only person and car, because RAOD's head has 5 fixed traffic
+    classes. With a freshly initialised head there was no reason to discard 35% of the
+    boxes, and the thesis tables this sits beside report over 20 classes. Result:
+    <em class="q">3,229</em> training and <em class="q">845</em> test images, 25,758
+    and 7,034 boxes. Two classes (cat, cow) have no test instances and drop out of the
+    average.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">33</div>
+  <h3>Built five tone-mapping front ends from the same source</h3>
+  <div class="body">
+    <p>Raw HDR with no curve, gamma, log, Reinhard and Durand &mdash; identical
+    geometry and white balance, differing only in the curve. Four also appear in the
+    thesis tables, which is what makes any cross-checking possible.</p>
+    <div class="problem"><strong>Implementation fault found and fixed</strong>
+    <p>The first Durand implementation was washed out and colour-cast: a gamma was
+    applied on top of an already display-referred result, and the operator was
+    normalised twice. Fixing it exposed a real property of the method &mdash; a small
+    very bright source is high-frequency, so it lands in Durand's detail layer and
+    escapes the base compression, leaving the rest of the frame dark. That is the
+    operator behaving as designed, and part of what the comparison measures.</p></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">34</div>
+  <h3>Wired RAOD's learned module to the same detector</h3>
+  <div class="body">
+    <p>RAOD publishes its tone-mapping module bolted to a 1M-parameter detector.
+    Putting it in front of the same 38M detector the fixed operators feed separates
+    the module's contribution from the detector's capacity. Weights were initialised
+    from RAOD's released checkpoint. Memory was measured before committing:
+    <em class="q">13.1 GB</em> of a 17.1 GB card at batch 4.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">35</div>
+  <h3>Ran all six arms and compared</h3>
+  <div class="body">
+    <div class="scroll">
+      <table>
+        <caption>Measured here &mdash; one detector, 20 classes, 845 test images</caption>
+        <thead><tr><th>front end</th><th>whose method</th><th class="num">mAP</th><th class="num">AP small</th></tr></thead>
+        <tbody>
+          <tr class="hi"><td>Reinhard</td><td>classical, 2002</td><td class="num">38.3</td><td class="num">7.0</td></tr>
+          <tr><td>HDR with gamma</td><td>standard curve</td><td class="num">36.5</td><td class="num">5.7</td></tr>
+          <tr><td>Durand</td><td>classical, 2002</td><td class="num">36.4</td><td class="num">5.4</td></tr>
+          <tr><td>RAOD module</td><td>learned, CVPR 2023</td><td class="num">36.1</td><td class="num">5.2</td></tr>
+          <tr><td>Log compression</td><td>simple formula</td><td class="num">35.9</td><td class="num">8.2</td></tr>
+          <tr class="hi"><td>no tone curve</td><td>control</td><td class="num">30.4</td><td class="num">1.1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="found"><strong>Three findings</strong><p><b>Applying no curve is by far
+    the worst</b>, and near-blind on small objects (1.1 against 5&ndash;8), independently
+    replicating the thesis result under a third detector. <b>Which curve barely
+    matters</b>: the sensible ones span 2.4 points while the gap to no-curve is 6.
+    <b>The learned module lost to a one-line formula from 2002</b>, by 2.2 points.</p></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">36</div>
+  <h3>Retested the learned module three more ways</h3>
+  <div class="body">
+    <p>Two settings used could have suppressed it rather than the method being weak,
+    so each was isolated: full learning rate (<em class="q">36.1</em>), random
+    initialisation instead of RAOD's weights (<em class="q">35.7</em>), and input
+    rescaled to the level those weights were fitted at (<em class="q">34.4</em>).</p>
+    <div class="found"><strong>Result</strong><p>All four variants land below every
+    sensible fixed operator, so the finding is not an artefact of the settings. The
+    rescaling variant was <b>worse</b>, not better &mdash; the assumed input-scale
+    mismatch was not the limiting factor.</p></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">37</div>
+  <h3>Recorded a failed bridge between the two experiments</h3>
+  <div class="body">
+    <p>The plan was to use the operators common to both experiments to map the
+    thesis's scale onto this one, so its lost method could be placed. It does not
+    work: the rankings <b>invert</b> &mdash; Reinhard is the worst tone map in the
+    thesis table and the best here. No scale factor reconciles them.</p>
+    <p>What does hold is comparing each learned method against the best classical
+    operator <em>in its own experiment</em>: the thesis method <em class="q">+0.3</em>
+    ahead of its best classical, RAOD's module <em class="q">-2.2</em> behind its own.
+    An indirect comparison, not a head-to-head.</p>
+  </div>
+</div>
+
 <h2>What remains open</h2>
 
 <div class="step">
@@ -552,7 +698,8 @@
     <ul>
       <li><b>Check S1 for duplicate frames.</b> No longer a theoretical concern — the 0.982 score is direct evidence. Needs image-similarity comparison rather than metadata, since S1 has none.</li>
       <li><b>Test without the augmentation fill quirk.</b> RAOD's training code fills empty borders with a value inherited from 8-bit image code, which sits far above the real pixel range here. It affects RAOD's own training equally and does not touch evaluation, but removing it may be free accuracy.</li>
-      <li><b>Run RAOD under TMO-Det's exact protocol</b> — their filtering, their splits, all 20 classes — to produce a genuinely comparable row for their table.</li>
+      <li><b>Re-implement the thesis's TMO-GAN from the paper</b> and run it as a seventh front end. Its software was lost, so the two learned methods have still never been measured side by side; this is the only way to close that.</li>
+      <li><b>Match model capacity honestly</b> &mdash; either shrink the large detector or grow the small one &mdash; so the HDR-versus-tone-mapped question is not confounded by a 44&times; difference in parameters.</li>
     </ul>
   </div>
 </div>
