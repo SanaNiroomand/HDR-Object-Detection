@@ -42,8 +42,10 @@ running [RAOD](https://openaccess.thecvf.com/content/CVPR2023/papers/Xu_Toward_R
 > because it excludes the rare classes that drag an average down.
 
 
-All on the same 779-image leakage-free test set, 4,082 ground-truth boxes,
-person and car only.
+**Source of these numbers: measured here.** Every row is a training or
+evaluation run performed for this repository, on the same 779-image
+leakage-free test set, 4,082 ground-truth boxes, person and car only. Nothing
+in this table is quoted from a paper.
 
 | arm | input | params | HDR4RTT training | mAP | AP50 | Pedestrian | Car |
 |---|---|---|---|---|---|---|---|
@@ -124,7 +126,8 @@ which makes it possible to stratify detection results by scene difficulty.
 
 ## Caveats worth reading before quoting any number
 
-**Scores vary 5× between sources.** Same model, scored per source:
+**Scores vary 5× between sources.** *Measured here*, same fine-tuned model,
+scored separately on each source:
 
 | source | what it is | mAP | AP50 |
 |---|---|---|---|
@@ -337,7 +340,8 @@ Letters 172 (2023) 230–236 paper), on the dataset the thesis calls **OOD** —
 20 Pascal VOC classes, near-identical video frames removed, 1,491 train /
 380 test, images at 1024×576.
 
-**Detector: RetinaNet** (thesis Table 4.2)
+**Detector: RetinaNet** (thesis Table 4.2). *Every number below is **quoted
+from his thesis**. None of it was re-run here.*
 
 | front end | joint | on real | mAP | TMQI-Q |
 |---|---|---|---|---|
@@ -355,7 +359,8 @@ Letters 172 (2023) 230–236 paper), on the dataset the thesis calls **OOD** —
 | Mantiuk | | | 31.3 | 86.5 |
 | **TMO-GAN + RetinaNet (OOD)** | ✓ | ✓ | **31.6** | 94.5 |
 
-**Detector: Faster R-CNN** (thesis Table 4.3)
+**Detector: Faster R-CNN** (thesis Table 4.3). *Every number below is **quoted
+from his thesis**. None of it was re-run here.*
 
 | front end | joint | on real | mAP | TMQI-Q |
 |---|---|---|---|---|
@@ -399,7 +404,7 @@ side by side, and the obvious fix does not work.
 appear in both experiments, so in principle they could map one scale onto the
 other. They do not. The rankings invert:
 
-| operator | thesis rank (RetinaNet) | rank here |
+| operator | HIS PAPER rank (RetinaNet) | MEASURED HERE rank |
 |---|---|---|
 | Reinhard | **worst** tone map, 29.6 | **best**, 38.3 |
 | Durand | best of the three, 30.6 | middle, 36.4 |
@@ -413,10 +418,10 @@ here as a negative result: **do not** compare the absolute numbers.
 experiment.** That reference is meaningful in both, and the ratio cancels the
 differences in split, resolution and detector version:
 
-| learned method | own score | best classical, same table | **gap** |
-|---|---|---|---|
-| TMO-GAN + RetinaNet (thesis) | 31.6 | 31.3 (Mantiuk) | **+0.3** |
-| RAOD Adaptive_Module (here) | 36.1 | 38.3 (Reinhard) | **-2.2** |
+| learned method | source | own score | best classical, same table | **gap** |
+|---|---|---|---|---|
+| TMO-GAN + RetinaNet | **his paper, quoted** | 31.6 | 31.3 (Mantiuk) | **+0.3** |
+| RAOD Adaptive_Module | **measured here** | 36.1 | 38.3 (Reinhard) | **-2.2** |
 
 Read this way, the thesis method **slightly beat** the strongest classical
 operator available to it, while RAOD's module **fell behind** the strongest

@@ -42,6 +42,13 @@ signal RAOD exists to exploit.
 
 ## Measured results
 
+*Source: all numbers in this document were measured here. Where a figure is
+quoted from someone else's paper it is labelled as such at that point.*
+
+*Scale: this document reports mAP in the **0-1** form `pycocotools` prints
+(`0.349`). The top-level [README](../README.md) reports the same values **x100**
+(`34.9`), the convention the papers use. Identical numbers, different notation.*
+
 Zero-shot, `best-day_night.pth`, no fine-tuning.
 
 ### Input gain sweep (144-image subset, leakage-free split)
@@ -99,22 +106,28 @@ dataset: median object is 7.2% of the image side and only 0.7% are tiny.
 
 ### Leakage cost, measured
 
-Same fine-tuned checkpoint, both test splits:
+> **An earlier version of this section was wrong and has been replaced.** It
+> compared ONE model against two test sets and reported +0.005 mAP. That
+> comparison was invalid: 195 of the 758 images in the original test set (26%)
+> were inside that model's training data, because the `seqsafe` split reassigns
+> S3 frames. It was measuring memorisation, not duplicate frames.
 
-| test split | mAP | AP50 | Pedestrian | Car |
-|---|---|---|---|---|
-| `seqsafe` (leakage-free) | 0.3490 | 0.6132 | 0.6021 | 0.6244 |
-| `original` (leaky) | 0.3536 | 0.6201 | 0.5842 | 0.6560 |
+The correct design is two models with identical settings, each evaluated on its
+OWN split, compared **S3 against S3** so scene content is held constant (S3 is
+the only source with frame adjacency; comparing whole splits would confound the
+leakage with the difference between traffic video and bracketed stills).
 
-The leaky split reads **+0.005 mAP / +0.007 AP50** higher — real but small, and
-much smaller than the 100%-adjacent-frame statistic suggests. Two reasons: only
-S3 is video-derived (a third of the data), and HDR4RTT's own split happened to be
-close to proportional. Car is the class that inflates (+0.032), which fits — S3
-is the traffic-heavy source.
+| model trained on | S3 test mAP | S3 test AP50 |
+|---|---|---|
+| `seqsafe` (leakage-free) | 0.3197 | 0.6047 |
+| `original` (leaky) | **0.3393** | **0.6181** |
 
-So the earlier caution stands but is quantified: report `seqsafe`, and treat
-published numbers on the original split as roughly half a point optimistic rather
-than badly wrong.
+**The original split overstates the video source by +0.020 mAP**, about 6%
+relative. Control: the photo sources, never reassigned, agree closely between the
+two models (S1 0.7554 vs 0.7591; S2 0.1416 vs 0.1392), confirming the S3 gap is
+the duplicate frames rather than training noise.
+
+Report `seqsafe`.
 
 ### What the numbers mean
 
