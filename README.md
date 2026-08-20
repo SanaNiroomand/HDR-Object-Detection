@@ -30,16 +30,28 @@ running [RAOD](https://openaccess.thecvf.com/content/CVPR2023/papers/Xu_Toward_R
 
 ## Headline results
 
+> **A note on scale.** Every detection number on this page is **mAP x100**
+> (percentage points), the convention used in the papers. `pycocotools`, which
+> both this work and RAOD run, prints the same values in 0-1 -- so `34.9` here
+> appears as `0.349` in the saved JSON under `results/`. They are identical
+> numbers.
+>
+> Being on one scale does **not** make the tables comparable with each other.
+> The headline table covers **2 classes**; the tone-mapping table and the thesis
+> tables cover **20**. A 2-class average is far higher for the same detector,
+> because it excludes the rare classes that drag an average down.
+
+
 All on the same 779-image leakage-free test set, 4,082 ground-truth boxes,
 person and car only.
 
 | arm | input | params | HDR4RTT training | mAP | AP50 | Pedestrian | Car |
 |---|---|---|---|---|---|---|---|
-| RAOD, zero-shot | HDR | 1M | none | 0.059 | 0.128 | 0.018 | 0.237 |
-| RAOD, fine-tuned | HDR | 1M | 4.6 h | 0.349 | 0.613 | 0.602 | 0.624 |
-| RetinaNet, zero-shot | tone-mapped | 38M | none | 0.296 | 0.574 | 0.502 | 0.646 |
-| Faster R-CNN, zero-shot | tone-mapped | 44M | none | 0.310 | 0.606 | 0.561 | 0.650 |
-| **Faster R-CNN, fine-tuned** | tone-mapped | 44M | **0.5 h** | **0.517** | **0.794** | 0.774 | 0.814 |
+| RAOD, zero-shot | HDR | 1M | none | 5.9 | 12.8 | 1.8 | 23.7 |
+| RAOD, fine-tuned | HDR | 1M | 4.6 h | 34.9 | 61.3 | 60.2 | 62.4 |
+| RetinaNet, zero-shot | tone-mapped | 38M | none | 29.6 | 57.4 | 50.2 | 64.6 |
+| Faster R-CNN, zero-shot | tone-mapped | 44M | none | 31.0 | 60.6 | 56.1 | 65.0 |
+| **Faster R-CNN, fine-tuned** | tone-mapped | 44M | **0.5 h** | **51.7** | **79.4** | 77.4 | 81.4 |
 
 Fine-tuning lifts RAOD 5.9× overall, and 33× on the class it was effectively
 blind to. But the comparison arm is the interesting part: a conventional
@@ -102,7 +114,7 @@ Every one of the 4,080 EXR files was decoded and measured. Full detail in
 - **Median dynamic range is 4.11 decades** (≈13.7 stops), maximum 7.83 (26 stops).
 - **The shipped train/test split leaks**: 100% of the video source's test frames
   have a training frame within ±3. Measured cost, with a controlled two-model
-  experiment: **+0.020 mAP**, about 6% relative.
+  experiment: **+2.0 mAP**, about 6% relative.
 
 Per-image dynamic-range statistics for all 4,080 files are in
 [`hdr4rtt_analysis/hdr_stats_sources.csv`](hdr4rtt_analysis/hdr_stats_sources.csv),
@@ -116,11 +128,11 @@ which makes it possible to stratify detection results by scene difficulty.
 
 | source | what it is | mAP | AP50 |
 |---|---|---|---|
-| S1 | video / rendered | 0.755 | **0.982** |
-| S3 | HDR video | 0.320 | 0.605 |
-| S2 | bracketed photographs | **0.142** | 0.395 |
+| S1 | video / rendered | 75.5 | **98.2** |
+| S3 | HDR video | 32.0 | 60.5 |
+| S2 | bracketed photographs | **14.2** | 39.5 |
 
-S1's 0.982 is not a plausible generalisation result. S1 carries no metadata, so
+S1's 98.2 is not a plausible generalisation result. S1 carries no metadata, so
 frame sequences cannot be detected and no guard band could be built — it is very
 likely contaminated by near-duplicate frames. Visual inspection supports this:
 an arbitrary run of 200 consecutive S1 files turned out to be one continuous
@@ -256,8 +268,8 @@ are identical data under different curves.*
 **Applying no tone curve is by far the worst option**, and catastrophic for small
 objects (1.1 against 5-8). This independently replicates the thesis result --
 raw HDR was worst there too, under both of its detectors -- and matches what the
-RAOD arm showed, where the same weights on the same data scored 0.059 with the
-input scale wrong and 0.349 with it right. Three separate experiments agree.
+RAOD arm showed, where the same weights on the same data scored 5.9 with the
+input scale wrong and 34.9 with it right. Three separate experiments agree.
 
 **Which curve you choose barely matters.** The four sensible operators span 35.9
 to 38.3, a 2.4-point range, while the gap between "no curve" and "any curve" is
@@ -341,8 +353,8 @@ thesis states plainly that no advantage for HDR was observed there.
 
 **Raw HDR is the worst input in both.** 26.3 and 23.5, below even plain LDR.
 Normalisation, not bit depth, is what the detector needs — which is exactly what
-this work found independently: RAOD scored 0.059 when the input scale was wrong
-and 0.349 when it was right, on identical data and weights.
+this work found independently: RAOD scored 5.9 when the input scale was wrong
+and 34.9 when it was right, on identical data and weights.
 
 **The detector changes the conclusion.** With RetinaNet the learned joint method
 wins (31.6, above Mantiuk's 31.3). With Faster R-CNN it does not — 27.7, below
@@ -407,7 +419,7 @@ detector, and the comparison is direct rather than inferred.
 | detectors | RetinaNet, Faster R-CNN | RAOD YOLOX, Faster R-CNN v2 |
 
 Averaging over 20 classes — several with only a handful of instances — pulls any
-score far below a 2-class average. Placing 0.517 next to 31.6 would be
+score far below a 2-class average. Placing 51.7 next to 31.6 would be
 meaningless. They are recorded here as reference, not as a head-to-head.
 
 ## A note on choosing the tone-mapping operator
@@ -467,7 +479,7 @@ Any errors in this repository are mine and not those of the original authors.
 ## Open questions
 
 1. **Check S1 for duplicate frames** using image similarity, since it has no
-   metadata. The 0.982 score makes this the highest priority — it affects
+   metadata. The 98.2 score makes this the highest priority — it affects
    whether the headline numbers mean anything.
 2. **Put RAOD's tone-mapping module in front of the large detector.** This is
    the missing row, and the only one that isolates the module's contribution
