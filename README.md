@@ -258,22 +258,28 @@ a different curve for every photograph rather than a fixed image set.*
 
 **Whose method is each row?**
 
-All numbers in the **first four score columns were measured here**, by running
+**Every row here is fine-tuned, not zero-shot.** Each arm was trained for the
+same 10 epochs at batch 4 on the same 3,229 training images, starting from the
+same COCO-pretrained RetinaNet with a freshly initialised 20-class head. The
+only thing that differs between rows is the tone mapping applied to the pixels.
+
+All numbers in the **first three score columns were measured here**, by running
 every row on the same machine, same data, same detector. The **final column is
 not ours** -- it is Kocdemir's published figure for that same operator, from his
-own separate experiment, shown only for reference.
+own separate experiment, shown only for reference. His rows are also trained,
+not zero-shot, so the two columns are consistent in that respect.
 
-| # | front end | whose method | MEASURED HERE mAP | MEASURED HERE AP50 | MEASURED HERE AP small | HIS PAPER mAP |
-|---|---|---|---|---|---|---|
-| 1 | **Reinhard** | classical, 2002 | **38.3** | **56.7** | 7.0 | 29.6 |
-| 2 | HDR with gamma | standard display curve | 36.5 | 54.8 | 5.7 | 29.8 |
-| 3 | Durand | classical, 2002 | 36.4 | 53.1 | 5.4 | 30.6 |
-| 4 | **RAOD module** — full learning rate | **learned, CVPR 2023** | **36.1** | 52.1 | 5.2 | not in his tables |
-| 5 | Log compression | simple formula | 35.9 | 54.4 | 8.2 | not in his tables |
-| 6 | **RAOD module** — random start | **learned, CVPR 2023** | 35.7 | 52.9 | 6.3 | not in his tables |
-| 7 | **RAOD module** — as published | **learned, CVPR 2023** | 35.4 | 52.3 | 6.8 | not in his tables |
-| 8 | **RAOD module** — input rescaled | **learned, CVPR 2023** | 34.4 | 50.9 | 6.3 | not in his tables |
-| 9 | **HDR, no tone curve** | no method at all | **30.4** | 47.6 | **1.1** | 26.3 |
+| # | front end | whose method | training | MEASURED HERE mAP | MEASURED HERE AP50 | MEASURED HERE AP small | HIS PAPER mAP |
+|---|---|---|---|---|---|---|---|
+| 1 | **Reinhard** | classical, 2002 | fine-tuned 10 ep | **38.3** | **56.7** | 7.0 | 29.6 |
+| 2 | HDR with gamma | standard display curve | fine-tuned 10 ep | 36.5 | 54.8 | 5.7 | 29.8 |
+| 3 | Durand | classical, 2002 | fine-tuned 10 ep | 36.4 | 53.1 | 5.4 | 30.6 |
+| 4 | **RAOD module** — full learning rate | **learned, CVPR 2023** | fine-tuned 10 ep, jointly | **36.1** | 52.1 | 5.2 | not in his tables |
+| 5 | Log compression | simple formula | fine-tuned 10 ep | 35.9 | 54.4 | 8.2 | not in his tables |
+| 6 | **RAOD module** — random start | **learned, CVPR 2023** | fine-tuned 10 ep, jointly | 35.7 | 52.9 | 6.3 | not in his tables |
+| 7 | **RAOD module** — as published | **learned, CVPR 2023** | fine-tuned 10 ep, jointly | 35.4 | 52.3 | 6.8 | not in his tables |
+| 8 | **RAOD module** — input rescaled | **learned, CVPR 2023** | fine-tuned 10 ep, jointly | 34.4 | 50.9 | 6.3 | not in his tables |
+| 9 | **HDR, no tone curve** | no method at all | fine-tuned 10 ep | **30.4** | 47.6 | **1.1** | 26.3 |
 
 Reading the table:
 
@@ -287,6 +293,11 @@ Reading the table:
 * **Kocdemir's TMO-GAN is NOT in this table.** Its software was lost and could
   not be run. His published number (31.6) is on a different scale and cannot be
   placed here — see [the section below](#comparing-the-two-learned-methods-across-experiments).
+* **Fine-tuned, not zero-shot.** All nine rows were trained on this dataset
+  for 10 epochs. "jointly" on the RAOD rows means the learned module was
+  trained at the same time as the detector, which is how RAOD intends it to
+  be used. A zero-shot comparison appears in the
+  [headline table](#headline-results) instead.
 * **Which experiment is this?** Rows 1-9 and the three "MEASURED HERE" columns
   are all **this work** -- every one of those nine numbers comes from a training
   run performed for this repository. Only the single "HIS PAPER" column comes
