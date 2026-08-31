@@ -41,6 +41,26 @@ running [RAOD](https://openaccess.thecvf.com/content/CVPR2023/papers/Xu_Toward_R
 > tables cover **20**. A 2-class average is far higher for the same detector,
 > because it excludes the rare classes that drag an average down.
 
+> **A note on class counts.** mAP averages over classes that have ground truth,
+> not over classes declared. Verified directly: the reported AP50 equals the mean
+> of the per-class AP50 values the scorer emits, to two decimals.
+>
+> * The **20-class tables average over 18**. `cat` and `cow` have no test
+>   instances at all, so they contribute nothing.
+> * The **headline table averages over 2**. Its 2-class scope is **not a choice**:
+>   RAOD's released head has exactly five fixed outputs (Pedestrian, Car, Cyclist,
+>   Tram, Truck), only `person` and `car` map onto it honestly, and the zero-shot
+>   rows cannot change that head at all. Every row in that table uses the same two
+>   classes, so it is internally consistent.
+> * **Kocdemir's effective count is unknown.** His test set is smaller than ours
+>   (380 images against 633), so it plausibly has more empty classes, and each
+>   empty class silently changes the denominator. This is a real limit on
+>   comparing his absolute numbers with ours, on top of the split difference.
+>
+> Rare classes make this worse: this test set contains 2 `bus`, 2 `motorbike`,
+> 5 `train` and 6 `horse` instances. A class with two examples scores almost
+> arbitrarily, yet weighs as much in the average as `person` with 3,719.
+
 
 **Source of these numbers: measured here.** Every row is a training or
 evaluation run performed for this repository, on the same 779-image test set,
@@ -157,9 +177,12 @@ scenes, about 1.7% the size of a standard detection training set. The good
 result is better explained by an easier task (two classes, large objects) and a
 strong pretrained starting point than by dataset size.
 
-**Not comparable to TMO-Det.** TMO-Det uses the same underlying dataset but
-evaluates all 20 classes on a de-duplicated 1,871-image subset with RetinaNet.
-This work uses 2 classes. Placing the numbers side by side would be invalid.
+**The headline table is not comparable to TMO-Det.** It scores 2 classes; his
+tables score 20 on a differently deduplicated 1,871-image subset. The 2-class
+scope is forced by RAOD's fixed five-output head, not chosen -- but it still
+makes the numbers incomparable with his. The
+[tone-mapping table](#which-tone-map-one-detector-six-front-ends) is the one to
+put beside his, since it uses 20 classes.
 
 ---
 
@@ -267,14 +290,21 @@ the entire output range and everything else goes black. The four to its right ar
 identical data under different curves. The learned method is not shown because it
 produces a different curve for every photograph.*
 
-| # | front end | whose method | training | mAP | AP50 | S2 only |
-|---|---|---|---|---|---|---|
-| 1 | **Reinhard** | classical, 2002 | fine-tuned 10 ep | **31.3** | 49.7 | 24.2 |
-| 2 | HDR with gamma | standard display curve | fine-tuned 10 ep | 30.4 | 48.5 | 22.9 |
-| 3 | Log compression | simple formula | fine-tuned 10 ep | 29.9 | 48.8 | 22.5 |
-| 4 | Durand | classical, 2002 | fine-tuned 10 ep | 29.7 | **50.6** | 22.7 |
-| 5 | **RAOD module** | **learned, CVPR 2023** | fine-tuned 10 ep, jointly | 28.7 | 46.5 | 22.0 |
-| 6 | **no tone curve** | control | fine-tuned 10 ep | **24.4** | 41.8 | **18.8** |
+| # | front end | whose method | training | mAP | AP50 | AP50 head-8 | S2 only |
+|---|---|---|---|---|---|---|---|
+| 1 | **Reinhard** | classical, 2002 | fine-tuned 10 ep | **31.3** | 49.7 | **59.9** | 24.2 |
+| 2 | HDR with gamma | standard display curve | fine-tuned 10 ep | 30.4 | 48.5 | 56.7 | 22.9 |
+| 3 | Log compression | simple formula | fine-tuned 10 ep | 29.9 | 48.8 | 58.4 | 22.5 |
+| 4 | Durand | classical, 2002 | fine-tuned 10 ep | 29.7 | **50.6** | 58.1 | 22.7 |
+| 5 | **RAOD module** | **learned, CVPR 2023** | fine-tuned 10 ep, jointly | 28.7 | 46.5 | 54.1 | 22.0 |
+| 6 | **no tone curve** | control | fine-tuned 10 ep | **24.4** | 41.8 | **49.3** | **18.8** |
+
+**AP50 head-8** averages only the eight classes with enough test instances to be
+stable (person, bottle, car, chair, pottedplant, diningtable, bird, bicycle). It
+is insensitive to how many rare or empty classes a split happens to contain, so
+it is the column to use when comparing against an experiment whose class
+coverage is not known. The ordering is unchanged from mAP, with Durand and log
+swapping by 0.3 -- so the conclusions do not rest on the rare classes.
 
 All measured here. "S2 only" scores the bracketed-photograph source alone --
 independent shots across 218 separate days, the source where no duplicates are

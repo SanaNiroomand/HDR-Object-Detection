@@ -135,3 +135,41 @@ epoch 3 done, checkpoint saved (346s elapsed)
   ep4/12 it4000/13764 loss=0.218 lr=0.00447 405s eta 989s
   ep4/12 it4100/13764 loss=0.288 lr=0.00443 415s eta 977s
   ep4/12 it4200/13764 loss=0.263 lr=0.00439 424s eta 966s
+  ep4/12 it4300/13764 loss=0.236 lr=0.00434 434s eta 955s
+  ep4/12 it4400/13764 loss=0.250 lr=0.00430 444s eta 944s
+  ep4/12 it4500/13764 loss=0.261 lr=0.00426 453s eta 933s
+epoch 4 done, checkpoint saved (462s elapsed)
+  ep5/12 it4600/13764 loss=0.031 lr=0.00421 468s eta 933s
+  ep5/12 it4700/13764 loss=0.212 lr=0.00416 478s eta 922s
+  ep5/12 it4800/13764 loss=0.239 lr=0.00411 488s eta 910s
+  ep5/12 it4900/13764 loss=0.218 lr=0.00407 497s eta 899s
+  ep5/12 it5000/13764 loss=0.260 lr=0.00402 507s eta 888s
+  ep5/12 it5100/13764 loss=0.297 lr=0.00397 516s eta 877s
+  ep5/12 it5200/13764 loss=0.239 lr=0.00391 526s eta 866s
+  ep5/12 it5300/13764 loss=0.237 lr=0.00386 535s eta 855s
+  ep5/12 it5400/13764 loss=0.187 lr=0.00381 545s eta 844s
+  ep5/12 it5500/13764 loss=0.228 lr=0.00375 554s eta 833s
+  ep5/12 it5600/13764 loss=0.281 lr=0.00370 564s eta 822s
+  ep5/12 it5700/13764 loss=0.206 lr=0.00364 573s eta 811s
+epoch 5 done, checkpoint saved (577s elapsed)
+  ep6/12 it5800/13764 loss=0.140 lr=0.00358 589s eta 809s
+  ep6/12 it5900/13764 loss=0.267 lr=0.00353 599s eta 798s
+  ep6/12 it6000/13764 loss=0.280 lr=0.00347 608s eta 787s
+  ep6/12 it6100/13764 loss=0.205 lr=0.00341 618s eta 776s
+  ep6/12 it6200/13764 loss=0.238 lr=0.00335 627s eta 765s
+  ep6/12 it6300/13764 loss=0.200 lr=0.00329 637s eta 755s
+  ep6/12 it6400/13764 loss=0.235 lr=0.00323 646s eta 744s
+  ep6/12 it6500/13764 loss=0.201 lr=0.00317 656s eta 733s
+  ep6/12 it6600/13764 loss=0.206 lr=0.00311 666s eta 723s
+  ep6/12 it6700/13764 loss=0.230 lr=0.00305 675s eta 712s
+  ep6/12 it6800/13764 loss=0.211 lr=0.00298 685s eta 701s
+epoch 6 done, checkpoint saved (693s elapsed)
+  ep7/12 it6900/13764 loss=0.047 lr=0.00292 700s eta 696s
+  ep7/12 it7000/13764 loss=0.204 lr=0.00286 710s eta 686s
+  ep7/12 it7100/13764 loss=0.200 lr=0.00280 719s eta 675s
+  ep7/12 it7200/13764 loss=0.205 lr=0.00273 729s eta 665s
+  ep7/12 it7300/13764 loss=0.206 lr=0.00267 739s eta 654s
+  ep7/12 it7400/13764 loss=0.235 lr=0.00261 748s eta 644s
+  ep7/12 it7500/13764 loss=0.202 lr=0.00254 758s eta 633s
+  ep7/12 it7600/13764 loss=0.197 lr=0.00248 768s eta 623s
+  ep7/12 it7700/13764 loss=0.207 lr=0.00242 778s eta 612s
