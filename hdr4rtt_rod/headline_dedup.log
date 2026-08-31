@@ -173,3 +173,27 @@ epoch 6 done, checkpoint saved (693s elapsed)
   ep7/12 it7500/13764 loss=0.202 lr=0.00254 758s eta 633s
   ep7/12 it7600/13764 loss=0.197 lr=0.00248 768s eta 623s
   ep7/12 it7700/13764 loss=0.207 lr=0.00242 778s eta 612s
+  ep7/12 it7800/13764 loss=0.232 lr=0.00235 787s eta 602s
+  ep7/12 it7900/13764 loss=0.252 lr=0.00229 797s eta 592s
+  ep7/12 it8000/13764 loss=0.229 lr=0.00223 807s eta 581s
+epoch 7 done, checkpoint saved (810s elapsed)
+  ep8/12 it8100/13764 loss=0.147 lr=0.00216 822s eta 575s
+  ep8/12 it8200/13764 loss=0.191 lr=0.00210 832s eta 565s
+  ep8/12 it8300/13764 loss=0.218 lr=0.00204 842s eta 554s
+  ep8/12 it8400/13764 loss=0.229 lr=0.00198 852s eta 544s
+  ep8/12 it8500/13764 loss=0.217 lr=0.00192 861s eta 533s
+  ep8/12 it8600/13764 loss=0.168 lr=0.00185 871s eta 523s
+  ep8/12 it8700/13764 loss=0.196 lr=0.00179 881s eta 513s
+  ep8/12 it8800/13764 loss=0.216 lr=0.00173 891s eta 503s
+  ep8/12 it8900/13764 loss=0.190 lr=0.00167 901s eta 492s
+  ep8/12 it9000/13764 loss=0.182 lr=0.00161 910s eta 482s
+  ep8/12 it9100/13764 loss=0.166 lr=0.00155 920s eta 472s
+epoch 8 done, checkpoint saved (928s elapsed)
+  ep9/12 it9200/13764 loss=0.039 lr=0.00150 935s eta 464s
+  ep9/12 it9300/13764 loss=0.175 lr=0.00144 945s eta 454s
+  ep9/12 it9400/13764 loss=0.182 lr=0.00138 954s eta 443s
+  ep9/12 it9500/13764 loss=0.175 lr=0.00132 964s eta 433s
+  ep9/12 it9600/13764 loss=0.185 lr=0.00127 974s eta 422s
+  ep9/12 it9700/13764 loss=0.192 lr=0.00121 983s eta 412s
+  ep9/12 it9800/13764 loss=0.186 lr=0.00116 993s eta 402s
+  ep9/12 it9900/13764 loss=0.172 lr=0.00111 1002s eta 391s

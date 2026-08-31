@@ -53,7 +53,9 @@ Zero-shot, `best-day_night.pth`, no fine-tuning.
 
 ### Input gain sweep (144-image subset, leakage-free split)
 
-*All **zero-shot** — pretrained ROD weights, no training on HDR4RTT.*
+*Detector: **RAOD** as released (YOLOX depth 0.33 / width 0.25, depthwise,
+plus its Adaptive_Module; 1.0M parameters). All **zero-shot** — pretrained ROD
+weights, no training on HDR4RTT.*
 
 | gain | mAP | AP50 |
 |---|---|---|
@@ -70,7 +72,7 @@ converted at **gain 0.02**.
 
 ### Full test set
 
-*All **zero-shot**.*
+*Detector: **RAOD** as released. All **zero-shot**.*
 
 | split | images | GT boxes | mAP | AP50 | Pedestrian AP50 | Car AP50 |
 |---|---|---|---|---|---|---|
@@ -82,7 +84,7 @@ leakage cannot help it. They differ by ~0.01 mAP purely from different image
 sampling. Report `seqsafe`; the gap between them **after fine-tuning** is the
 leakage effect, and that is the number to watch.
 
-### Fine-tuned (50 epochs from `best-day_night.pth`, batch 4, ~4.6 h)
+### Fine-tuned (**RAOD**, 50 epochs from `best-day_night.pth`, batch 4, ~4.6 h)
 
 Evaluated with `best_ckpt.pth` on the leakage-free `seqsafe` test set:
 
@@ -120,6 +122,8 @@ The correct design is two models with identical settings, each evaluated on its
 OWN split, compared **S3 against S3** so scene content is held constant (S3 is
 the only source with frame adjacency; comparing whole splits would confound the
 leakage with the difference between traffic video and bracketed stills).
+
+*Both models are **RAOD** in its released configuration.*
 
 | model trained on | training | S3 test mAP | S3 test AP50 |
 |---|---|---|---|
@@ -190,6 +194,8 @@ that source. Detecting it needs image-similarity hashing.
 ## Batch size 4, not 8 — a 16 GB card cannot run batch 8
 
 Measured step time and peak VRAM at 1280×1280, fp16, on an RTX 5070 Ti (17.1 GB):
+
+*Measured with **RAOD** (YOLOX-nano + Adaptive_Module) at 1280×1280, fp16.*
 
 | batch | step | peak VRAM |
 |---|---|---|

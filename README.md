@@ -74,13 +74,18 @@ evaluation run performed for this repository, on the same 779-image test set,
 > should be read as roughly 6-7 mAP high, by analogy with the tone-mapping
 > table. The deduplicated table is the one to quote.
 
-| arm | input | params | **training** | mAP | AP50 | Pedestrian | Car |
+| detector | input | params | **training** | mAP | AP50 | Pedestrian | Car |
 |---|---|---|---|---|---|---|---|
-| RAOD | HDR | 1M | **zero-shot** | 5.9 | 12.8 | 1.8 | 23.7 |
-| RAOD | HDR | 1M | **fine-tuned**, 4.6 h | 34.9 | 61.3 | 60.2 | 62.4 |
-| RetinaNet | tone-mapped | 38M | **zero-shot** | 29.6 | 57.4 | 50.2 | 64.6 |
-| Faster R-CNN | tone-mapped | 44M | **zero-shot** | 31.0 | 60.6 | 56.1 | 65.0 |
-| **Faster R-CNN** | tone-mapped | 44M | **fine-tuned**, 0.5 h | **51.7** | **79.4** | 77.4 | 81.4 |
+| RAOD (YOLOX-nano + its module) | HDR | 1M | **zero-shot** | 5.9 | 12.8 | 1.8 | 23.7 |
+| RAOD (YOLOX-nano + its module) | HDR | 1M | **fine-tuned**, 4.6 h | 34.9 | 61.3 | 60.2 | 62.4 |
+| RetinaNet R50-FPN v2 | tone-mapped | 38M | **zero-shot** | 29.6 | 57.4 | 50.2 | 64.6 |
+| Faster R-CNN R50-FPN v2 | tone-mapped | 44M | **zero-shot** | 31.0 | 60.6 | 56.1 | 65.0 |
+| **Faster R-CNN R50-FPN v2** | tone-mapped | 44M | **fine-tuned**, 0.5 h | **51.7** | **79.4** | 77.4 | 81.4 |
+
+*RAOD is its released configuration: a YOLOX at depth 0.33 / width 0.25 with
+depthwise convolutions, plus its Adaptive_Module tone mapper, 1.0M parameters
+total. The other two are torchvision's `retinanet_resnet50_fpn_v2` and
+`fasterrcnn_resnet50_fpn_v2`, COCO-pretrained.*
 
 Fine-tuning lifts RAOD 5.9× overall, and 33× on the class it was effectively
 blind to. But the comparison arm is the interesting part: a conventional
@@ -153,8 +158,9 @@ which makes it possible to stratify detection results by scene difficulty.
 
 ## Caveats worth reading before quoting any number
 
-**Scores vary 5× between sources.** *Measured here*, same fine-tuned model,
-scored separately on each source:
+**Scores vary 5× between sources.** *Measured here*, the **fine-tuned RAOD**
+model (YOLOX-nano + Adaptive_Module, 2 classes), scored separately on each
+source:
 
 | source | what it is | training | mAP | AP50 |
 |---|---|---|---|---|
@@ -290,6 +296,9 @@ the entire output range and everything else goes black. The four to its right ar
 identical data under different curves. The learned method is not shown because it
 produces a different curve for every photograph.*
 
+*Detector for every row: **RetinaNet R50-FPN v2** (torchvision
+`retinanet_resnet50_fpn_v2`), COCO-pretrained, fresh 20-class head.*
+
 | # | front end | whose method | training | mAP | AP50 | AP50 head-8 | S2 only |
 |---|---|---|---|---|---|---|---|
 | 1 | **Reinhard** | classical, 2002 | fine-tuned 10 ep | **31.3** | 49.7 | **59.9** | 24.2 |
@@ -342,7 +351,8 @@ An earlier version of this table reported 30.4 to 38.3. Those numbers were
 inflated by near-duplicate frames, and have been removed rather than kept
 alongside.
 
-The problem was found by scoring the best arm on each source separately:
+The problem was found by scoring the best arm (Reinhard + **RetinaNet R50-FPN
+v2**) on each source separately:
 
 | source | what it is | training | mAP, before dedup |
 |---|---|---|---|
@@ -378,11 +388,15 @@ other change.
 
 ### The effect on comparability
 
-| | mAP |
-|---|---|
-| Kocdemir, best classical operator (Mantiuk) | 31.3 |
-| Kocdemir, his own method (TMO-GAN) | 31.6 |
-| **This work, best operator, deduplicated** | **31.3** |
+| | detector | mAP |
+|---|---|---|
+| Kocdemir, best classical operator (Mantiuk) | RetinaNet (his implementation) | 31.3 |
+| Kocdemir, his own method (TMO-GAN) | RetinaNet (his implementation) | 31.6 |
+| **This work, best operator, deduplicated** | **RetinaNet R50-FPN v2** | **31.3** |
+
+*Both are RetinaNet, but not the same implementation: torchvision's v2 recipe
+is newer than what the thesis would have used, which is one of several reasons
+the absolute values need not line up.*
 
 Before deduplication this work scored roughly 7 points above his across the
 board, with no principled explanation. After it, the numbers land in the same
@@ -481,8 +495,8 @@ differences in split, resolution and detector version:
 
 | learned method | source | training | own score | best classical, same table | **gap** |
 |---|---|---|---|---|---|
-| TMO-GAN + RetinaNet | **his paper, quoted** | fine-tuned, joint | 31.6 | 31.3 (Mantiuk) | **+0.3** |
-| RAOD Adaptive_Module | **measured here** | fine-tuned, joint | 28.7 | 31.3 (Reinhard) | **-2.6** |
+| TMO-GAN + RetinaNet *(his impl.)* | **his paper, quoted** | fine-tuned, joint | 31.6 | 31.3 (Mantiuk) | **+0.3** |
+| RAOD Adaptive_Module + RetinaNet *(R50-FPN v2)* | **measured here** | fine-tuned, joint | 28.7 | 31.3 (Reinhard) | **-2.6** |
 
 Read this way, the thesis method **slightly beat** the strongest classical
 operator available to it, while RAOD's module **fell behind** the strongest
