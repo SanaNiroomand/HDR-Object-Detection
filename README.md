@@ -1,136 +1,238 @@
 # HDR object detection on HDR4RTT
 
-Work on running object detectors directly on high-dynamic-range imagery, using the
-HDR4RTT dataset (4,080 OpenEXR images, 32,964 boxes, 20 Pascal VOC classes).
+Running object detectors on high-dynamic-range imagery, using the HDR4RTT dataset
+(4,080 OpenEXR images, 32,964 boxes, 20 Pascal VOC classes).
 
-Two things are in here: a full audit of the dataset, and a rebuilt pipeline for
+Three things are in here: a full audit of the dataset, a rebuilt pipeline for
 running [RAOD](https://openaccess.thecvf.com/content/CVPR2023/papers/Xu_Toward_RAW_Object_Detection_A_New_Benchmark_and_a_New_CVPR_2023_paper.pdf)
-(CVPR 2023) on it, plus a comparison against conventional tone-map-then-detect.
+(CVPR 2023) on it, and a controlled comparison of six tone-mapping front ends
+behind a single fixed detector.
 
 **[→ Step-by-step progress note](hdr4rtt_rod/progress_note.html)** ·
 **[→ Dataset audit](hdr4rtt_analysis/REPORT.md)** ·
 **[→ Pipeline details](hdr4rtt_rod/README.md)**
 
+> **⚠️ Work in progress, not peer reviewed.** An ongoing internship project.
+> Results are preliminary and may change or be withdrawn; one table is explicitly
+> marked as superseded. Please do not cite these as established findings — get in
+> touch first. No warranty (see [LICENSE](LICENSE)).
+
+**Contents**
+
+1. [Main result: which tone map?](#1-main-result-which-tone-map)
+2. [Detector comparison](#2-detector-comparison)
+3. [How to read these numbers](#3-how-to-read-these-numbers)
+4. [Why the earlier numbers were higher](#4-why-the-earlier-numbers-were-higher)
+5. [What the dataset audit found](#5-what-the-dataset-audit-found)
+6. [Two bugs that invalidated earlier work](#6-two-bugs-that-invalidated-earlier-work)
+7. [Comparison with the MS thesis](#7-comparison-with-the-ms-thesis)
+8. [Method notes](#8-method-notes)
+9. [Reproducing](#9-reproducing)
+10. [Layout and open questions](#10-layout-and-open-questions)
+11. [Licence and attribution](#11-licence-and-attribution)
+
 ---
 
-> ### ⚠️ Status: work in progress, not peer reviewed
->
-> This is an **ongoing internship project**. Results here are preliminary,
-> have not been reviewed or published, and **may change or be withdrawn**.
-> Several are explicitly flagged below as unreliable — in particular the
-> headline figure, for reasons given in [Caveats](#caveats-worth-reading-before-quoting-any-number).
->
-> Please do not cite these numbers as established findings. If you want to use
-> or build on anything here, get in touch first so you know what has since
-> changed.
->
-> Provided without warranty of any kind (see [LICENSE](LICENSE)).
+## 1. Main result: which tone map?
+
+The detector is held fixed and **only the tone mapping changes**. Same data,
+split, schedule, batch size and augmentation throughout.
+
+* **Detector, every row:** RetinaNet R50-FPN v2 (torchvision
+  `retinanet_resnet50_fpn_v2`), COCO-pretrained, fresh 20-class head
+* **Training, every row:** fine-tuned 10 epochs at batch 4 — **none is zero-shot**
+* **Split:** deduplicated, 2,506 train / 633 test, all 20 classes
+* **Source:** every number measured here
+
+![Five tone maps applied to the same two HDR photographs](hdr4rtt_rod/viz/tone_mapping_comparison.jpg)
+
+*The same two photographs through the five fixed front ends. Left column is the
+raw conversion with no tone curve: in the workshop scene the welding arc consumes
+the entire output range and everything else goes black. The four to its right are
+identical data under different curves. The learned method is not shown because it
+produces a different curve for every photograph.*
+
+| # | front end | whose method | mAP | AP50 | AP50 head-8 | S2 only |
+|---|---|---|---|---|---|---|
+| 1 | **Reinhard** *(global)* | classical, 2002 | **31.3** | 49.7 | **59.9** | 24.2 |
+| 2 | HDR with gamma | standard display curve | 30.4 | 48.5 | 56.7 | 22.9 |
+| 3 | Log compression | simple formula | 29.9 | 48.8 | 58.4 | 22.5 |
+| 4 | Durand *(local)* | classical, 2002 | 29.7 | **50.6** | 58.1 | 22.7 |
+| 5 | **RAOD module** | **learned, CVPR 2023** | 28.7 | 46.5 | 54.1 | 22.0 |
+| 6 | **no tone curve** | control | **24.4** | 41.8 | **49.3** | **18.8** |
+
+*Row 5 trains the learned module **jointly** with the detector, as RAOD intends.
+**AP50 head-8** averages only the eight classes with enough test instances to be
+stable; **S2 only** scores the bracketed-photograph source alone, where no
+duplicates are possible — the most conservative figure available.*
+
+### What it shows
+
+**Applying no tone curve is by far the worst** — 6.9 mAP below the best operator,
+and worst on every source. This independently replicates the thesis finding,
+where raw HDR was also worst under both of its detectors (26.3 and 23.5).
+
+**Which curve you choose barely matters.** The four sensible operators span 29.7
+to 31.3, a 1.6-point range, against a 6.9-point gap to applying none at all.
+
+**RAOD's learned module did not beat a formula from 2002.** Reinhard leads it by
+2.6 mAP; it places fifth of six. Three variants isolating one suspect setting
+each — full learning rate, random initialisation instead of RAOD's released
+weights, and input rescaled to the level those weights were fitted at — were also
+tried, and all landed below every sensible fixed operator. *(Those three ran on
+the earlier, un-deduplicated split, so their absolute values are inflated the
+same way; what carries over is that none overtakes a fixed operator.)*
+
+**This does not show RAOD's method is wrong.** RAOD pairs the module with a
+1M-parameter detector, where a strong front end plausibly matters far more; a
+38M-parameter detector may already absorb internally whatever the module was
+supplying. The thesis shows the same pattern from the other side — its learned
+method beats every classical operator under RetinaNet and loses to four of them
+under Faster R-CNN. **The value of a learned tone map appears to depend on the
+detector behind it.**
 
 ---
 
-## Headline results
+## 2. Detector comparison
 
-> **A note on scale.** Every detection number on this page is **mAP x100**
-> (percentage points), the convention used in the papers. `pycocotools`, which
-> both this work and RAOD run, prints the same values in 0-1 -- so `34.9` here
-> appears as `0.349` in the saved JSON under `results/`. They are identical
-> numbers.
->
-> Being on one scale does **not** make the tables comparable with each other.
-> The headline table covers **2 classes**; the tone-mapping table and the thesis
-> tables cover **20**. A 2-class average is far higher for the same detector,
-> because it excludes the rare classes that drag an average down.
+A different question: how do the detectors themselves compare? Here the input
+representation and the detector both change, so this table cannot separate them —
+that is what section 1 is for.
 
-> **A note on class counts.** mAP averages over classes that have ground truth,
-> not over classes declared. Verified directly: the reported AP50 equals the mean
-> of the per-class AP50 values the scorer emits, to two decimals.
->
-> * The **20-class tables average over 18**. `cat` and `cow` have no test
->   instances at all, so they contribute nothing.
-> * The **headline table averages over 2**. Its 2-class scope is **not a choice**:
->   RAOD's released head has exactly five fixed outputs (Pedestrian, Car, Cyclist,
->   Tram, Truck), only `person` and `car` map onto it honestly, and the zero-shot
->   rows cannot change that head at all. Every row in that table uses the same two
->   classes, so it is internally consistent.
-> * **Kocdemir's effective count is unknown.** His test set is smaller than ours
->   (380 images against 633), so it plausibly has more empty classes, and each
->   empty class silently changes the denominator. This is a real limit on
->   comparing his absolute numbers with ours, on top of the split difference.
->
-> Rare classes make this worse: this test set contains 2 `bus`, 2 `motorbike`,
-> 5 `train` and 6 `horse` instances. A class with two examples scores almost
-> arbitrarily, yet weighs as much in the average as `person` with 3,719.
+> **⚠️ Superseded. These absolute values are inflated.** This table predates the
+> [deduplication](#4-why-the-earlier-numbers-were-higher) and its test set still
+> contains the near-duplicate S1 frames. Comparisons *between* rows remain valid,
+> since every row faced identical images, but read the absolute numbers as
+> roughly 6–7 mAP high. A re-run on the clean split is the first
+> [open question](#10-layout-and-open-questions).
 
+Measured here, 779-image test set, 4,082 boxes, **person and car only**.
 
-**Source of these numbers: measured here.** Every row is a training or
-evaluation run performed for this repository, on the same 779-image test set,
-4,082 ground-truth boxes, person and car only. Nothing is quoted from a paper.
-
-> **These absolute values are inflated and have not yet been re-run.** This
-> table predates the deduplication described
-> [below](#why-the-numbers-are-lower-than-they-were); its test set still
-> contains the near-duplicate S1 frames. Comparisons *between* rows remain
-> valid, since every row faced identical images, but the absolute numbers
-> should be read as roughly 6-7 mAP high, by analogy with the tone-mapping
-> table. The deduplicated table is the one to quote.
-
-| detector | input | params | **training** | mAP | AP50 | Pedestrian | Car |
+| detector | input | params | training | mAP | AP50 | Pedestrian | Car |
 |---|---|---|---|---|---|---|---|
-| RAOD (YOLOX-nano + its module) | HDR | 1M | **zero-shot** | 5.9 | 12.8 | 1.8 | 23.7 |
-| RAOD (YOLOX-nano + its module) | HDR | 1M | **fine-tuned**, 4.6 h | 34.9 | 61.3 | 60.2 | 62.4 |
-| RetinaNet R50-FPN v2 | tone-mapped | 38M | **zero-shot** | 29.6 | 57.4 | 50.2 | 64.6 |
-| Faster R-CNN R50-FPN v2 | tone-mapped | 44M | **zero-shot** | 31.0 | 60.6 | 56.1 | 65.0 |
-| **Faster R-CNN R50-FPN v2** | tone-mapped | 44M | **fine-tuned**, 0.5 h | **51.7** | **79.4** | 77.4 | 81.4 |
+| RAOD (YOLOX-nano + its module) | HDR | 1M | zero-shot | 5.9 | 12.8 | 1.8 | 23.7 |
+| RAOD (YOLOX-nano + its module) | HDR | 1M | fine-tuned, 4.6 h | 34.9 | 61.3 | 60.2 | 62.4 |
+| RetinaNet R50-FPN v2 | tone-mapped | 38M | zero-shot | 29.6 | 57.4 | 50.2 | 64.6 |
+| Faster R-CNN R50-FPN v2 | tone-mapped | 44M | zero-shot | 31.0 | 60.6 | 56.1 | 65.0 |
+| **Faster R-CNN R50-FPN v2** | tone-mapped | 44M | **fine-tuned, 0.5 h** | **51.7** | **79.4** | 77.4 | 81.4 |
 
-*RAOD is its released configuration: a YOLOX at depth 0.33 / width 0.25 with
+*RAOD in its released configuration: YOLOX at depth 0.33 / width 0.25 with
 depthwise convolutions, plus its Adaptive_Module tone mapper, 1.0M parameters
-total. The other two are torchvision's `retinanet_resnet50_fpn_v2` and
-`fasterrcnn_resnet50_fpn_v2`, COCO-pretrained.*
+total.*
 
-Fine-tuning lifts RAOD 5.9× overall, and 33× on the class it was effectively
-blind to. But the comparison arm is the interesting part: a conventional
-tone-map-then-detect pipeline reaches **48% higher mAP in a tenth of the
-training time**, and an untrained off-the-shelf detector already matches
-fine-tuned RAOD's AP50.
+Fine-tuning lifts RAOD 5.9× overall and 33× on the class it was effectively blind
+to. But the comparison arm is the interesting part: conventional
+tone-map-then-detect reaches **48% higher mAP in a tenth of the training time**,
+and an untrained off-the-shelf detector already matches fine-tuned RAOD's AP50.
 
-**This does not show that RAOD's approach is wrong.** The comparison is not
-capacity-matched — 44M parameters against 1M — and the large detector is
-COCO-pretrained on millions of everyday photographs containing exactly "person"
-and "car", while RAOD was pretrained on ROD: five traffic classes from a
-car-mounted sensor. Both advantages favour the LDR arm for reasons that have
-nothing to do with HDR.
-
-What it does show is that the open question is sharper than "how do we improve
-RAOD on HDR4RTT". The missing experiment is RAOD's tone-mapping module in front
-of the *large* detector: that row minus the row above isolates what the module
-contributes when the detector is not tiny.
+**This is not capacity-matched** — 44M parameters against 1M — and the large
+detector is COCO-pretrained on millions of everyday photographs containing
+exactly "person" and "car", while RAOD was pretrained on ROD: five traffic
+classes from a car-mounted sensor. Both advantages favour the tone-mapped arm for
+reasons unrelated to HDR.
 
 ---
 
-## Two bugs that invalidated earlier work
+## 3. How to read these numbers
 
-**1. Wrong input scale in evaluation.** RAOD's data loader divides pixel values
-by 255 inside `load_image`, so the network expects `[0,1]`. The evaluation
-script skipped it and fed `[0,255]`. Because RAOD's tone-mapping module applies
-`x^(1/gamma)` with gamma of 7–10.5, every pixel saturated and the frame
-collapsed to white.
+**Scale.** Every number here is **mAP × 100** (percentage points), the convention
+the papers use. `pycocotools` prints the same values in 0–1, so `31.3` here
+appears as `0.313` in the saved JSON under `results/`. Identical numbers.
 
-The trap: the same division appears **commented out** in `ValTransformRaw` —
-the obvious place to look — because it has already happened one level up.
+**The two tables above are not comparable with each other.** Section 1 scores 20
+classes; section 2 scores 2. A 2-class average is far higher for the same
+detector, because it excludes the rare classes that drag an average down.
 
-Proof: RAOD's *own* sample image gave **0 detections**; after restoring one
-line, **5**, including a car at 0.892 confidence.
+**Class counts.** mAP averages over classes that *have ground truth*, not over
+classes declared. Verified: the reported AP50 equals the mean of the per-class
+AP50 values the scorer emits, to two decimals.
 
-**2. The converter optimised for the opposite of what the model wants.** RAOD
-tone-maps internally and expects dark, linear input at mean ≈ 0.012. The
-previous converter stretched images to fill `[0,255]`, mean 0.377 — **32×
-brighter** than anything the model saw in training. Every rescaling variant
-tried (p99, adaptive percentile, log, histogram matching) shares that same
-"use the full range" goal, so all of them fail the same way.
+| table | declared | actually averaged |
+|---|---|---|
+| Section 1 | 20 | **18** — `cat` and `cow` have no test instances |
+| Section 2 | 5 | **2** — only Pedestrian and Car have data |
+
+Section 2's 2-class scope is **not a choice**: RAOD's released head has exactly
+five fixed outputs, only `person` and `car` map onto it honestly, and the
+zero-shot rows cannot change that head at all. Every row uses the same two
+classes, so the table is internally consistent.
+
+Rare classes matter here: this test set contains 2 `bus`, 2 `motorbike`, 5
+`train` and 6 `horse` instances. A class with two examples scores almost
+arbitrarily yet weighs as much as `person` with 3,719 — which is why the
+**head-8** column exists.
+
+**Which Reinhard?** The 2002 paper defines a **global** operator and a **local**
+one with dodging-and-burning. The implementation here is the **global** form: one
+curve, `L/(1+L)` after scaling to a target key, applied uniformly. The thesis
+lists both variants separately elsewhere (CityScapes: local 33.2, global 32.7)
+but its HDR4RTT table gives only "Reinhard 29.6" without saying which — **so that
+row and ours may not be the same operator.** Durand is local in both.
 
 ---
 
-## What the dataset audit found
+## 4. Why the earlier numbers were higher
+
+An earlier version of section 1 reported 30.4 to 38.3. Those numbers were
+inflated by near-duplicate frames and have been **removed rather than kept
+alongside**.
+
+The problem showed up when the best arm was scored on each source separately:
+
+| source | what it is | mAP, before dedup |
+|---|---|---|
+| S1 | video / rendered | **90.1** (AP50 **99.2**) |
+| S3 | HDR video | 63.3 |
+| S2 | bracketed photographs | 24.7 |
+
+99.2 is not a plausible generalisation result. Running Ulaş's
+`dedupe_hdr_frames.py` (SSIM against the last kept frame) confirmed why:
+
+| SSIM threshold | total kept | S1 kept | S2 kept | S3 kept |
+|---|---|---|---|---|
+| **0.92 (used)** | 3,145 | **28%** | 100% | 99% |
+| 0.60 | 2,822 | 7% | 98% | 98% |
+| 0.30 | 2,582 | 2% | 89% | 94% |
+
+**S1's 1,289 images contain only a few hundred distinct scenes** — that is the
+source of the inflation. Note S3 survives at 99%: its frames genuinely differ, so
+this project's earlier focus on S3 (the only source with readable frame numbers)
+was looking in the wrong place.
+
+Threshold 0.92 was chosen by *what it removes*, not by hitting a target count.
+The more aggressive settings approach Kocdemir's 1,871 images, but only by
+deleting S2 photographs taken on separate days, which contain nothing to
+deduplicate.
+
+**This is not Kocdemir's split.** His list was not available; this is our own
+deduplication and the surviving count differs from his.
+
+After deduplication every arm dropped 5.9 to 7.0 mAP and the ranking held. S2,
+which lost almost nothing to deduplication, barely moved (24.7 → 24.2) — a
+control confirming the drop came from removing duplicates rather than some other
+change.
+
+### The effect on comparability
+
+| | detector | mAP |
+|---|---|---|
+| Kocdemir, best classical (Mantiuk) | RetinaNet, his implementation | 31.3 |
+| Kocdemir, Reinhard *(variant unstated)* | RetinaNet, his implementation | 29.6 |
+| Kocdemir, his own method (TMO-GAN) | RetinaNet, his implementation | 31.6 |
+| **This work, best operator, deduplicated** | **RetinaNet R50-FPN v2** | **31.3** |
+
+Before deduplication this work sat roughly 7 points above his across the board
+with no principled explanation. After it, the numbers land in the same range —
+evidence the gap was duplicate frames rather than any advantage in method.
+
+Both are RetinaNet but **not the same implementation**: torchvision's v2 recipe
+postdates the thesis. That, the different splits, and the unknown class counts
+are three separate reasons the absolute values need not line up. This is
+convergence, not a head-to-head.
+
+---
+
+## 5. What the dataset audit found
 
 Every one of the 4,080 EXR files was decoded and measured. Full detail in
 [REPORT.md](hdr4rtt_analysis/REPORT.md).
@@ -141,8 +243,8 @@ Every one of the 4,080 EXR files was decoded and measured. Full detail in
 - **Neither value ceiling is over-exposure.** About one pixel per image touches
   it — each image was individually normalised, so the stored values carry no
   absolute brightness meaning.
-- **41% of images contain negative pixel values**, down to −872. Any log or
-  gamma step must clamp first.
+- **41% of images contain negative pixel values**, down to −872. Any log or gamma
+  step must clamp first.
 - **303 images (7.4%) form a separate very dark cluster**, ~250× darker than the
   rest, holding 13.1% of all boxes.
 - **Median dynamic range is 4.11 decades** (≈13.7 stops), maximum 7.83 (26 stops).
@@ -151,107 +253,43 @@ Every one of the 4,080 EXR files was decoded and measured. Full detail in
   experiment: **+2.0 mAP**, about 6% relative.
 
 Per-image dynamic-range statistics for all 4,080 files are in
-[`hdr4rtt_analysis/hdr_stats_sources.csv`](hdr4rtt_analysis/hdr_stats_sources.csv),
-which makes it possible to stratify detection results by scene difficulty.
+[`hdr_stats_sources.csv`](hdr4rtt_analysis/hdr_stats_sources.csv), which makes it
+possible to stratify detection results by scene difficulty.
+
+**The training set is small.** 2,994 images, but the video source contributes 949
+frames from only ~6 contiguous runs — roughly 2,051 genuinely distinct scenes,
+about 1.7% the size of a standard detection training set.
 
 ---
 
-## Caveats worth reading before quoting any number
+## 6. Two bugs that invalidated earlier work
 
-**Scores vary 5× between sources.** *Measured here*, the **fine-tuned RAOD**
-model (YOLOX-nano + Adaptive_Module, 2 classes), scored separately on each
-source:
+**1. Wrong input scale in evaluation.** RAOD's data loader divides pixel values
+by 255 inside `load_image`, so the network expects `[0,1]`. The evaluation script
+skipped it and fed `[0,255]`. Because RAOD's tone-mapping module applies
+`x^(1/gamma)` with gamma of 7–10.5, every pixel saturated and the frame collapsed
+to white.
 
-| source | what it is | training | mAP | AP50 |
-|---|---|---|---|---|
-| S1 | video / rendered | fine-tuned | 75.5 | **98.2** |
-| S3 | HDR video | fine-tuned | 32.0 | 60.5 |
-| S2 | bracketed photographs | fine-tuned | **14.2** | 39.5 |
+The trap: the same division appears **commented out** in `ValTransformRaw` — the
+obvious place to look — because it has already happened one level up.
 
-S1's 98.2 is not a plausible generalisation result, and the cause is now
-**confirmed rather than suspected**: deduplication reduces S1's 1,289 images to
-367, so it contains only a few hundred distinct scenes. Its test images are
-near-copies of its training images. See
-[why the numbers are lower](#why-the-numbers-are-lower-than-they-were).
+Proof: RAOD's *own* sample image gave **0 detections**; after restoring one line,
+**5**, including a car at 0.892 confidence.
 
-S2 is the only source where the number is unambiguously trustworthy, and it is
-much lower than the headline.
-
-**The training set is small.** 2,994 images, but the video source contributes
-949 frames from only ~6 contiguous runs — roughly 2,051 genuinely distinct
-scenes, about 1.7% the size of a standard detection training set. The good
-result is better explained by an easier task (two classes, large objects) and a
-strong pretrained starting point than by dataset size.
-
-**The headline table is not comparable to TMO-Det.** It scores 2 classes; his
-tables score 20 on a differently deduplicated 1,871-image subset. The 2-class
-scope is forced by RAOD's fixed five-output head, not chosen -- but it still
-makes the numbers incomparable with his. The
-[tone-mapping table](#which-tone-map-one-detector-six-front-ends) is the one to
-put beside his, since it uses 20 classes.
+**2. The converter optimised for the opposite of what the model wants.** RAOD
+tone-maps internally and expects dark, linear input at mean ≈ 0.012. The previous
+converter stretched images to fill `[0,255]`, mean 0.377 — **32× brighter** than
+anything the model saw in training. Every rescaling variant tried (p99, adaptive
+percentile, log, histogram matching) shares that same "use the full range" goal,
+so all of them fail the same way.
 
 ---
 
-## Reproducing
+## 7. Comparison with the MS thesis
 
-Requires an environment with PyTorch and OpenCV; RAOD's own repository supplies
-the model code. Data paths are set at the top of each script.
+### The two review questions
 
-```bash
-# 1. audit the dataset (all 4,080 files)
-python hdr4rtt_analysis/scripts/scan_hdr.py
-python hdr4rtt_analysis/scripts/sources.py
-
-# 2. build annotations and both splits
-python hdr4rtt_rod/build_rod_annotations.py
-
-# 3. convert EXR -> RAOD format (no tone mapping)
-python hdr4rtt_rod/convert_hdr4rtt_to_rod.py --gain 0.02
-
-# 4. verify the training path before a long run
-python hdr4rtt_rod/smoke_test_train.py --workers 0
-
-# 5. evaluate
-python hdr4rtt_rod/eval_rod.py --ann <split>.json --img_dir <images> --gains 1.0
-```
-
-For the tone-mapped comparison arm:
-
-```bash
-python hdr4rtt_rod/pick_tmo.py                      # choose the operator by measurement
-python hdr4rtt_rod/convert_hdr4rtt_to_ldr.py --tmo gamma --percentile 99
-python hdr4rtt_rod/train_torchvision.py --arch fasterrcnn
-```
-
-**Use batch size 4, not 8, on a 16 GB GPU.** Batch 8 needs 17.51 GB on a 17.1 GB
-card, and Windows does not raise an out-of-memory error — it pages GPU memory to
-system RAM, so the run silently becomes ~8× slower with no error message. A
-batch-8 run reported an 8-day ETA. Details in
-[hdr4rtt_rod/README.md](hdr4rtt_rod/README.md).
-
----
-
-## Layout
-
-| path | contents |
-|---|---|
-| `hdr4rtt_analysis/` | dataset audit: scripts, report, per-image statistics |
-| `hdr4rtt_rod/` | conversion, annotations, splits, training configs, evaluation |
-| `hdr4rtt_rod/results/` | every reported number, as saved JSON |
-| `hdr4rtt_rod/viz/` | ground truth and predictions drawn on converted images |
-| `hdr4rtt_rod/progress_note.html` | step-by-step record of the work |
-
-Checkpoints, converted imagery and the dataset itself are deliberately excluded —
-see [.gitignore](.gitignore).
-
----
-
-## Status of the two review questions
-
-**1. Include the MS thesis results on this page.** Done. Thesis Tables 4.2
-(RetinaNet), 4.3 (Faster R-CNN) and 3.1 (CityScapes) are transcribed
-[below](#reference-previously-reported-results-on-this-dataset), with attribution
-and an explicit statement of why they are not directly comparable.
+**1. Include the MS thesis results here.** Done — tables below.
 
 Reading them surfaced something relevant to question 2: **the thesis already
 contains a detector-swap experiment, and its two detectors disagree.** Its
@@ -259,179 +297,29 @@ learned method beats every classical operator under RetinaNet (31.6 vs 31.3) and
 loses to four of them under Faster R-CNN (27.7 vs 29.5). Same method, same data,
 opposite conclusion.
 
-**2. Compare the 2023 paper and the thesis method fairly, given they used
-different detectors.** Partly answered.
+**2. Compare the 2023 paper and the thesis method fairly.** Partly answered.
 
 | | status |
 |---|---|
-| Detector held fixed, front end varied | **done** -- [nine arms, one detector](#which-tone-map-one-detector-nine-front-ends) |
-| RAOD's module measured under that control | **done** -- 28.7 mAP |
-| Thesis TMO-GAN measured under that control | **not possible** -- software lost |
-| Indirect comparison via a shared reference | **done** -- see below |
+| Detector held fixed, front end varied | **done** — [section 1](#1-main-result-which-tone-map) |
+| RAOD's module measured under that control | **done** — 28.7 mAP |
+| Thesis TMO-GAN measured under that control | **not possible** — software lost |
+| Indirect comparison via a shared reference | **done** — below |
 
-The two learned methods have still never been run side by side. What this
-repository adds is a controlled measurement of one of them, plus an indirect
-comparison of both against the best classical operator in their respective
-experiments (+0.3 for the thesis method, -2.2 for RAOD's). Closing the gap
-properly requires re-implementing TMO-GAN from the paper.
+The two learned methods have still never been run side by side.
 
-## Which tone map? One detector, six front ends
-
-The detector is held fixed -- RetinaNet R50-FPN v2, all 20 classes -- and only
-the tone mapping changes. Same data, split, schedule, batch size and
-augmentation throughout. **Every arm is fine-tuned for 10 epochs at batch 4**
-from the same COCO-pretrained weights with a fresh 20-class head; none is
-zero-shot.
-
-**Measured on the deduplicated split** (2,506 train / 633 test). Near-duplicate
-frames were removed first -- see [why](#why-the-numbers-are-lower-than-they-were)
--- so these numbers are lower, and more trustworthy, than an earlier version of
-this table.
-
-![Five tone maps applied to the same two HDR photographs](hdr4rtt_rod/viz/tone_mapping_comparison.jpg)
-
-*The same two photographs through the five fixed front ends. Left column is the
-raw conversion with no tone curve: in the workshop scene the welding arc consumes
-the entire output range and everything else goes black. The four to its right are
-identical data under different curves. The learned method is not shown because it
-produces a different curve for every photograph.*
-
-*Detector for every row: **RetinaNet R50-FPN v2** (torchvision
-`retinanet_resnet50_fpn_v2`), COCO-pretrained, fresh 20-class head.*
-
-| # | front end | whose method | training | mAP | AP50 | AP50 head-8 | S2 only |
-|---|---|---|---|---|---|---|---|
-| 1 | **Reinhard (global)** | classical, 2002 | fine-tuned 10 ep | **31.3** | 49.7 | **59.9** | 24.2 |
-| 2 | HDR with gamma | standard display curve | fine-tuned 10 ep | 30.4 | 48.5 | 56.7 | 22.9 |
-| 3 | Log compression | simple formula | fine-tuned 10 ep | 29.9 | 48.8 | 58.4 | 22.5 |
-| 4 | Durand *(local)* | classical, 2002 | fine-tuned 10 ep | 29.7 | **50.6** | 58.1 | 22.7 |
-| 5 | **RAOD module** | **learned, CVPR 2023** | fine-tuned 10 ep, jointly | 28.7 | 46.5 | 54.1 | 22.0 |
-| 6 | **no tone curve** | control | fine-tuned 10 ep | **24.4** | 41.8 | **49.3** | **18.8** |
-
-> **Which Reinhard?** The 2002 paper defines a **global** operator and a
-> **local** one with dodging-and-burning. The implementation here is the
-> **global** form: one curve, `L/(1+L)` after scaling to a target key, applied
-> uniformly to every pixel. There is no local adaptation.
->
-> This matters for comparison. The thesis's CityScapes table lists both variants
-> separately (local 33.2, global 32.7, so they differ by half a point), but its
-> HDR4RTT table -- the one compared against here -- lists only "Reinhard 29.6"
-> without saying which. **So our Reinhard row and his may not be the same
-> operator.** Durand is inherently local in both.
->
-> This also weakens part of the ranking-inversion argument below: some of the gap
-> on the Reinhard row could be a global-versus-local difference rather than a real
-> disagreement. Running the local variant as a seventh arm would settle it;
-> it has not been done.
-
-**AP50 head-8** averages only the eight classes with enough test instances to be
-stable (person, bottle, car, chair, pottedplant, diningtable, bird, bicycle). It
-is insensitive to how many rare or empty classes a split happens to contain, so
-it is the column to use when comparing against an experiment whose class
-coverage is not known. The ordering is unchanged from mAP, with Durand and log
-swapping by 0.3 -- so the conclusions do not rest on the rare classes.
-
-All measured here. "S2 only" scores the bracketed-photograph source alone --
-independent shots across 218 separate days, the source where no duplicates are
-possible and therefore the most conservative figure available.
-
-### What it shows
-
-**Applying no tone curve is by far the worst**, 6.9 mAP below the best operator
-and worst on every source. This independently replicates the thesis finding,
-where raw HDR was also worst under both of its detectors (26.3 and 23.5).
-
-**Which curve you choose barely matters.** The four sensible operators span 29.7
-to 31.3, a 1.6-point range, against a 6.9-point gap to applying none at all.
-
-**RAOD's learned module did not beat a formula from 2002.** Reinhard leads it by
-2.6 mAP, and it places fifth of six. Three variants isolating one suspect setting
-each -- full learning rate, random initialisation instead of RAOD's released
-weights, and input rescaled to the level those weights were fitted at -- were
-also tried; all landed below every sensible fixed operator. (Those three ran on
-the earlier, un-deduplicated split, so their absolute numbers are inflated in the
-same way; the conclusion that none of them overtakes a fixed operator is what
-carries over.)
-
-**This does not show RAOD's method is wrong.** RAOD pairs the module with a
-1M-parameter detector, where a strong front end plausibly matters far more; a
-38M-parameter detector may already absorb internally whatever the module was
-supplying. The thesis tables show the same pattern from the other side -- its
-learned method beats every classical operator under RetinaNet and loses to four
-of them under Faster R-CNN. **The value of a learned tone map appears to depend
-on the detector behind it.**
-
-## Why the numbers are lower than they were
-
-An earlier version of this table reported 30.4 to 38.3. Those numbers were
-inflated by near-duplicate frames, and have been removed rather than kept
-alongside.
-
-The problem was found by scoring the best arm (Reinhard + **RetinaNet R50-FPN
-v2**) on each source separately:
-
-| source | what it is | training | mAP, before dedup |
-|---|---|---|---|
-| S1 | video / rendered | fine-tuned | **90.1** (AP50 **99.2**) |
-| S3 | HDR video | fine-tuned | 63.3 |
-| S2 | bracketed photographs | fine-tuned | 24.7 |
-
-99.2 is not a plausible generalisation result. Running Ulas's
-`dedupe_hdr_frames.py` (SSIM against the last kept frame) confirmed why:
-
-| threshold | total kept | S1 kept | S2 kept | S3 kept |
-|---|---|---|---|---|
-| **0.92 (used)** | 3,145 | **28%** | 100% | 99% |
-| 0.60 | 2,822 | 7% | 98% | 98% |
-| 0.30 | 2,582 | 2% | 89% | 94% |
-
-**S1's 1,289 images contain only a few hundred distinct scenes.** That is the
-source of the inflation. Note that S3 survives at 99% -- its frames genuinely
-differ, so the earlier focus on S3 (the only source with readable frame numbers)
-was looking in the wrong place.
-
-Threshold 0.92 was chosen by what it removes, not by hitting a target count. The
-more aggressive settings approach Kocdemir's 1,871 images, but only by deleting
-S2 photographs taken on separate days, which contain nothing to deduplicate.
-
-**This is not Kocdemir's split.** His list was not available; this is our own
-deduplication and the surviving count differs from his.
-
-After deduplication every arm dropped 5.9 to 7.0 mAP, and the ranking held. S2,
-which lost almost nothing to deduplication, barely moved (24.7 to 24.2) -- a
-control confirming the drop came from removing duplicates rather than from some
-other change.
-
-### The effect on comparability
-
-| | detector | mAP |
-|---|---|---|
-| Kocdemir, best classical operator (Mantiuk) | RetinaNet (his implementation) | 31.3 |
-| Kocdemir, Reinhard *(variant unstated)* | RetinaNet (his implementation) | 29.6 |
-| Kocdemir, his own method (TMO-GAN) | RetinaNet (his implementation) | 31.6 |
-| **This work, best operator (Reinhard, global), deduplicated** | **RetinaNet R50-FPN v2** | **31.3** |
-
-*Both are RetinaNet, but not the same implementation: torchvision's v2 recipe
-is newer than what the thesis would have used, which is one of several reasons
-the absolute values need not line up.*
-
-Before deduplication this work scored roughly 7 points above his across the
-board, with no principled explanation. After it, the numbers land in the same
-range. That is evidence the gap was duplicate frames rather than any advantage
-in method -- though the splits still differ, so this is convergence, not a
-head-to-head.
-
-## Reference: previously reported results on this dataset
+### The thesis tables
 
 From İ. H. Kocdemir's MS thesis (and the corresponding Pattern Recognition
-Letters 172 (2023) 230–236 paper), on the dataset the thesis calls **OOD** —
-20 Pascal VOC classes, near-identical video frames removed, 1,491 train /
-380 test, images at 1024×576.
+Letters 172 (2023) 230–236 paper), on the dataset the thesis calls **OOD** — 20
+Pascal VOC classes, near-identical video frames removed, 1,491 train / 380 test,
+images at 1024×576.
 
-**Detector: RetinaNet** (thesis Table 4.2). *Every number below is **quoted
-from his thesis**, none re-run here. All of his rows are **fine-tuned**, not
-zero-shot: the detector is trained on each tone-mapped image set, and the
-✓ in "joint" marks the rows where his generator trains alongside it.*
+*Every number below is **quoted from his thesis**, none re-run here. All his rows
+are **fine-tuned**, not zero-shot: the detector is trained on each tone-mapped
+image set, and ✓ in "joint" marks where his generator trains alongside it.*
+
+**Detector: RetinaNet** (thesis Table 4.2)
 
 | front end | joint | on real | mAP | TMQI-Q |
 |---|---|---|---|---|
@@ -449,8 +337,7 @@ zero-shot: the detector is trained on each tone-mapped image set, and the
 | Mantiuk | | | 31.3 | 86.5 |
 | **TMO-GAN + RetinaNet (OOD)** | ✓ | ✓ | **31.6** | 94.5 |
 
-**Detector: Faster R-CNN** (thesis Table 4.3). *Every number below is **quoted
-from his thesis**, none re-run here. All rows **fine-tuned**, as above.*
+**Detector: Faster R-CNN** (thesis Table 4.3)
 
 | front end | joint | on real | mAP | TMQI-Q |
 |---|---|---|---|---|
@@ -469,104 +356,171 @@ from his thesis**, none re-run here. All rows **fine-tuned**, as above.*
 | **Fattal** | | | **29.5** | 88.8 |
 
 For context, thesis Table 3.1 reports the same comparison on **CityScapes**,
-where HDR with gamma (33.3 mAP) barely separates from Std. LDR (33.1) — the
-thesis states plainly that no advantage for HDR was observed there.
+where HDR with gamma (33.3) barely separates from Std. LDR (33.1) — the thesis
+states plainly that no advantage for HDR was observed there.
 
-### Two things these tables show
+**Two things these tables show.** *Raw HDR is worst in both* (26.3 and 23.5,
+below plain LDR) — normalisation, not bit depth, is what the detector needs,
+which is exactly what this work found independently. And *the detector changes
+the conclusion*, as above.
 
-**Raw HDR is the worst input in both.** 26.3 and 23.5, below even plain LDR.
-Normalisation, not bit depth, is what the detector needs — which is exactly what
-this work found independently: RAOD scored 5.9 when the input scale was wrong
-and 34.9 when it was right, on identical data and weights.
+### Comparing the two learned methods
 
-**The detector changes the conclusion.** With RetinaNet the learned joint method
-wins (31.6, above Mantiuk's 31.3). With Faster R-CNN it does not — 27.7, below
-four classical operators, with Fattal best at 29.5. The same method, the same
-data, opposite verdicts depending on the detector behind it.
-
-### Comparing the two learned methods across experiments
-
-The thesis method (TMO-GAN) could not be re-run: its software was lost. So the
-two learned front ends -- the thesis one and RAOD's -- have never been measured
-side by side, and the obvious fix does not work.
+TMO-GAN could not be re-run: its software was lost. The obvious workaround does
+not work either.
 
 **The failed approach: shared operators as calibration anchors.** Four operators
 appear in both experiments, so in principle they could map one scale onto the
-other. They do not. The rankings invert:
+other. They do not — the rankings invert:
 
-| operator | HIS PAPER rank (RetinaNet) | MEASURED HERE rank |
+| operator | his rank (RetinaNet) | rank here |
 |---|---|---|
 | Reinhard | **worst** tone map, 29.6 *(variant unstated)* | **best**, 31.3 *(global)* |
 | Durand *(local in both)* | best of the three, 30.6 | **worst of the three**, 29.7 |
 | HDR with gamma | 29.8 | 30.4 |
 
-That is an inversion rather than an offset: Reinhard is his weakest tone map
-and our strongest, Durand his strongest of the three and our weakest. No scale
-factor reconciles that, so the thesis's 31.6 still cannot be placed on this
-axis by rescaling. Recorded as a negative result -- and it survives
-deduplication, which changed the absolute values but not the ordering.
+An inversion, not an offset, so no scale factor reconciles them and the thesis's
+31.6 cannot be placed on this axis. Recorded as a negative result — and it
+survives deduplication, which changed the values but not the ordering. *(Part of
+the Reinhard gap could be global-versus-local rather than real disagreement; see
+[section 3](#3-how-to-read-these-numbers).)*
 
 **What does work: each method against the best classical operator in its own
-experiment.** That reference is meaningful in both, and the ratio cancels the
-differences in split, resolution and detector version:
+experiment.** That reference is meaningful in both, and cancels the differences
+in split, resolution and detector version.
 
-| learned method | source | training | own score | best classical, same table | **gap** |
-|---|---|---|---|---|---|
-| TMO-GAN + RetinaNet *(his impl.)* | **his paper, quoted** | fine-tuned, joint | 31.6 | 31.3 (Mantiuk) | **+0.3** |
-| RAOD Adaptive_Module + RetinaNet *(R50-FPN v2)* | **measured here** | fine-tuned, joint | 28.7 | 31.3 (Reinhard) | **-2.6** |
+| learned method | source | own score | best classical, same table | **gap** |
+|---|---|---|---|---|
+| TMO-GAN + RetinaNet *(his impl.)* | his paper, quoted | 31.6 | 31.3 (Mantiuk) | **+0.3** |
+| RAOD module + RetinaNet *(R50-FPN v2)* | measured here | 28.7 | 31.3 (Reinhard) | **−2.6** |
 
-Read this way, the thesis method **slightly beat** the strongest classical
-operator available to it, while RAOD's module **fell behind** the strongest
-one available here, by 2.6 mAP. The difference between the two learned
-approaches is therefore about 2.9 mAP in the thesis method's favour, measured
-relative to a shared reference rather than on a shared scale.
+The thesis method **slightly beat** the strongest classical operator available to
+it; RAOD's module **fell behind** the strongest one available here, by 2.6 mAP.
+About 2.9 mAP apart in the thesis method's favour, measured against a shared
+reference rather than on a shared scale. Since deduplication brought the absolute
+scales into the same range, this is on firmer ground than it was.
 
-Since deduplication brought the absolute scales into the same range (31.3
-against his 31.3), this indirect comparison is now on firmer ground than it
-was, though the splits still differ and it remains indirect.
+**Caveats.** The best classical operator differs between the two (Mantiuk there,
+Reinhard here) and Mantiuk is not implemented here; were it stronger than
+Reinhard on this data, the gap would widen rather than narrow. Different splits,
+different RetinaNet implementations. A defensible indirect comparison, not a
+head-to-head.
 
-**Caveats on that number.** The best classical operator differs between the two
-(Mantiuk there, Reinhard here) and Mantiuk is not implemented in this
-repository; were it stronger than Reinhard on this data, the gap here would
-widen rather than narrow. Both experiments also use different splits and
-different RetinaNet implementations. This is a defensible indirect comparison,
-not a head-to-head.
+**What would close it:** re-implement TMO-GAN from the paper — a generator and
+discriminator trained jointly with the detector — and run it as a seventh front
+end. Then both learned methods sit in one table under one detector.
 
-**What would close it properly:** re-implement TMO-GAN from the paper -- a
-generator and discriminator trained jointly with the detector -- and run it as a
-seventh front end here. Then both learned methods sit in one table under one
-detector, and the comparison is direct rather than inferred.
+### Section 2 is not comparable with any of this
 
-### These numbers are NOT comparable with the table at the top
-
-| | thesis | this work |
+| | thesis | section 2 |
 |---|---|---|
 | classes | 20 | 2 (person, car) |
 | test images | 380 | 779 |
-| duplicate frames | removed entirely | separated by split |
+| duplicate frames | removed entirely | still present |
 | resolution | 1024×576 | 1280×1280 |
 | detectors | RetinaNet, Faster R-CNN | RAOD YOLOX, Faster R-CNN v2 |
 
-Averaging over 20 classes — several with only a handful of instances — pulls any
-score far below a 2-class average. Placing 51.7 next to 31.6 would be
-meaningless. They are recorded here as reference, not as a head-to-head.
+Placing 51.7 next to 31.6 would be meaningless.
+[Section 1](#1-main-result-which-tone-map) is the table to put beside his, since
+it uses 20 classes.
 
-## A note on choosing the tone-mapping operator
+---
 
-The LDR arm could easily have been rigged. Scoring eight operators with a
-COCO-pretrained detector showed a **10% relative spread** in the resulting mAP,
-so a careless choice would have decided the comparison before any training
-happened. Gamma at the 99th percentile won and was used throughout. TMO-Det
-handles this the same way, comparing six operators and reporting the best.
+## 8. Method notes
 
-`pick_tmo.py` reproduces the sweep.
+**Choosing the tone-mapping operator.** The comparison could easily have been
+rigged by picking a weak operator. Scoring eight candidates with a
+COCO-pretrained detector showed a **10% relative spread**, so a careless choice
+would have decided the outcome before any training happened. Gamma at the 99th
+percentile won and was used throughout. TMO-Det handles this the same way,
+comparing six operators and reporting the best. `pick_tmo.py` reproduces it.
 
-## Licence, attribution and disclaimer
+**Use batch size 4, not 8, on a 16 GB GPU.** Batch 8 needs 17.51 GB on a 17.1 GB
+card, and Windows does not raise an out-of-memory error — it pages GPU memory to
+system RAM, so the run silently becomes ~8× slower with no error message. A
+batch-8 run reported an 8-day ETA. Details in
+[hdr4rtt_rod/README.md](hdr4rtt_rod/README.md).
 
-Code in this repository is © 2026 Sana Niroomand and the **OGAM Research
-Laboratory, Middle East Technical University (METU)**, released under the
-[MIT licence](LICENSE). It is research code: provided as is, without warranty,
-and not intended for production or safety-related use.
+---
+
+## 9. Reproducing
+
+Requires PyTorch and OpenCV; RAOD's own repository supplies the model code. Data
+paths are set at the top of each script.
+
+Audit the dataset (all 4,080 files):
+
+```bash
+python hdr4rtt_analysis/scripts/scan_hdr.py
+```
+
+Deduplicate, then build 20-class annotations on what survives:
+
+```bash
+python hdr4rtt_rod/build_deduped_split.py
+```
+
+Build one image set per tone-mapping front end:
+
+```bash
+python hdr4rtt_rod/make_frontends.py
+```
+
+Train one arm, then score it (repeat per front end):
+
+```bash
+python hdr4rtt_rod/train_frontend.py --arm reinhard --arch retinanet --epochs 10 --batch 4
+```
+
+```bash
+python hdr4rtt_rod/eval_frontend.py --arm reinhard --arch retinanet --batch 4
+```
+
+For the RAOD pipeline of section 2:
+
+```bash
+python hdr4rtt_rod/convert_hdr4rtt_to_rod.py --gain 0.02
+```
+
+```bash
+python hdr4rtt_rod/smoke_test_train.py --workers 0
+```
+
+---
+
+## 10. Layout and open questions
+
+| path | contents |
+|---|---|
+| `hdr4rtt_analysis/` | dataset audit: scripts, report, per-image statistics |
+| `hdr4rtt_rod/` | conversion, annotations, splits, training configs, evaluation |
+| `hdr4rtt_rod/results/` | every reported number, as saved JSON |
+| `hdr4rtt_rod/viz/` | ground truth and predictions drawn on converted images |
+| `hdr4rtt_rod/progress_note.html` | step-by-step record of the work |
+
+Checkpoints, converted imagery and the dataset itself are deliberately excluded —
+see [.gitignore](.gitignore).
+
+**Open questions, in priority order:**
+
+1. **Re-run section 2 on the deduplicated split**, so both tables sit on the same
+   footing. ~6 hours of training.
+2. **Match model capacity honestly** — either shrink the tone-mapped arm or grow
+   the HDR arm — so the HDR-versus-tone-mapped question is not confounded by a
+   44× difference in parameters.
+3. **Re-implement TMO-GAN** and run it as a seventh front end, so the two learned
+   methods can be compared directly rather than through a shared reference.
+4. **Run the local Reinhard variant**, to settle whether the ranking inversion
+   against the thesis is real or an artefact of comparing two different operators.
+
+---
+
+## 11. Licence and attribution
+
+Code © 2026 Sana Niroomand and the **OGAM Research Laboratory, Middle East
+Technical University (METU)**, released under the [MIT licence](LICENSE).
+Research code: provided as is, without warranty, not intended for production or
+safety-related use.
 
 Full third-party attribution is in [NOTICE](NOTICE). In summary:
 
@@ -579,17 +533,17 @@ Full third-party attribution is in [NOTICE](NOTICE). In summary:
 | torchvision, OpenCV, pycocotools | called as libraries | BSD / Apache 2.0 |
 | HDR4RTT / OOD dataset | **not redistributed**, in any form | obtain from its creators |
 
-The two derivative files — `cfg_hdr4rtt_rod.py` and `cfg_hdr4rtt_rod_original.py` —
-remain under Apache 2.0 and carry headers stating exactly what was changed, as
-that licence requires. Everything else in this repository is original work under
-MIT.
+The two derivative files — `cfg_hdr4rtt_rod.py` and `cfg_hdr4rtt_rod_original.py`
+— remain under Apache 2.0 and carry headers stating exactly what was changed, as
+that licence requires. Everything else is original work under MIT.
 
 **The tone-mapping operators here are simplified re-implementations**, tuned
 against this dataset. They should not be taken as reference implementations of
 the published methods, and any weakness in them is mine rather than the original
 authors'.
 
-**Please cite the original work, not this repository, for the methods it builds on:**
+**Please cite the original work, not this repository, for the methods it builds
+on:**
 
 > R. Xu, C. Chen, J. Peng, C. Li, Y. Huang, F. Song, Y. Yan, Z. Xiong.
 > *Toward RAW Object Detection: A New Benchmark and a New Model.* CVPR 2023.
@@ -598,24 +552,9 @@ authors'.
 > *TMO-Det: Deep tone-mapping optimized with and for object detection.*
 > Pattern Recognition Letters 172 (2023) 230–236.
 
-Tables from the thesis and paper are reproduced here for academic comparison
-with attribution. They are **quoted, not reproduced experimentally** — the
-original software was lost, so those numbers could not be re-run, and this is
-stated wherever they appear.
+Tables from the thesis and paper are reproduced for academic comparison with
+attribution. They are **quoted, not reproduced experimentally** — the original
+software was lost, so those numbers could not be re-run, and this is stated
+wherever they appear.
 
-Any errors in this repository are mine and not those of the original authors.
-
-## Open questions
-
-1. **Re-run the headline (2-class) table on the deduplicated split**, so its
-   absolute numbers match the tone-mapping table. ~6 hours of training.
-   *(The S1 duplicate question that used to head this list is now answered:
-   S1 is 72% near-duplicates, and the tone-mapping results have been re-measured
-   without them.)*
-2. **Put RAOD's tone-mapping module in front of the large detector.** This is
-   the missing row, and the only one that isolates the module's contribution
-   from the detector's capacity and pretraining.
-3. **Match capacity honestly** — either shrink the LDR arm or grow the HDR arm —
-   so the HDR-versus-tone-mapped question is not confounded by model size.
-4. **Run RAOD under TMO-Det's protocol** — their filtering, their splits, all 20
-   classes — for a genuinely comparable number.
+Any errors here are mine and not those of the original authors.
