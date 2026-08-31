@@ -54,13 +54,13 @@ evaluation run performed for this repository, on the same 779-image test set,
 > should be read as roughly 6-7 mAP high, by analogy with the tone-mapping
 > table. The deduplicated table is the one to quote.
 
-| arm | input | params | HDR4RTT training | mAP | AP50 | Pedestrian | Car |
+| arm | input | params | **training** | mAP | AP50 | Pedestrian | Car |
 |---|---|---|---|---|---|---|---|
-| RAOD, zero-shot | HDR | 1M | none | 5.9 | 12.8 | 1.8 | 23.7 |
-| RAOD, fine-tuned | HDR | 1M | 4.6 h | 34.9 | 61.3 | 60.2 | 62.4 |
-| RetinaNet, zero-shot | tone-mapped | 38M | none | 29.6 | 57.4 | 50.2 | 64.6 |
-| Faster R-CNN, zero-shot | tone-mapped | 44M | none | 31.0 | 60.6 | 56.1 | 65.0 |
-| **Faster R-CNN, fine-tuned** | tone-mapped | 44M | **0.5 h** | **51.7** | **79.4** | 77.4 | 81.4 |
+| RAOD | HDR | 1M | **zero-shot** | 5.9 | 12.8 | 1.8 | 23.7 |
+| RAOD | HDR | 1M | **fine-tuned**, 4.6 h | 34.9 | 61.3 | 60.2 | 62.4 |
+| RetinaNet | tone-mapped | 38M | **zero-shot** | 29.6 | 57.4 | 50.2 | 64.6 |
+| Faster R-CNN | tone-mapped | 44M | **zero-shot** | 31.0 | 60.6 | 56.1 | 65.0 |
+| **Faster R-CNN** | tone-mapped | 44M | **fine-tuned**, 0.5 h | **51.7** | **79.4** | 77.4 | 81.4 |
 
 Fine-tuning lifts RAOD 5.9× overall, and 33× on the class it was effectively
 blind to. But the comparison arm is the interesting part: a conventional
@@ -136,11 +136,11 @@ which makes it possible to stratify detection results by scene difficulty.
 **Scores vary 5× between sources.** *Measured here*, same fine-tuned model,
 scored separately on each source:
 
-| source | what it is | mAP | AP50 |
-|---|---|---|---|
-| S1 | video / rendered | 75.5 | **98.2** |
-| S3 | HDR video | 32.0 | 60.5 |
-| S2 | bracketed photographs | **14.2** | 39.5 |
+| source | what it is | training | mAP | AP50 |
+|---|---|---|---|---|
+| S1 | video / rendered | fine-tuned | 75.5 | **98.2** |
+| S3 | HDR video | fine-tuned | 32.0 | 60.5 |
+| S2 | bracketed photographs | fine-tuned | **14.2** | 39.5 |
 
 S1's 98.2 is not a plausible generalisation result, and the cause is now
 **confirmed rather than suspected**: deduplication reduces S1's 1,289 images to
@@ -267,14 +267,14 @@ the entire output range and everything else goes black. The four to its right ar
 identical data under different curves. The learned method is not shown because it
 produces a different curve for every photograph.*
 
-| # | front end | whose method | mAP | AP50 | S2 only |
-|---|---|---|---|---|---|
-| 1 | **Reinhard** | classical, 2002 | **31.3** | 49.7 | 24.2 |
-| 2 | HDR with gamma | standard display curve | 30.4 | 48.5 | 22.9 |
-| 3 | Log compression | simple formula | 29.9 | 48.8 | 22.5 |
-| 4 | Durand | classical, 2002 | 29.7 | **50.6** | 22.7 |
-| 5 | **RAOD module** | **learned, CVPR 2023** | 28.7 | 46.5 | 22.0 |
-| 6 | **no tone curve** | control | **24.4** | 41.8 | **18.8** |
+| # | front end | whose method | training | mAP | AP50 | S2 only |
+|---|---|---|---|---|---|---|
+| 1 | **Reinhard** | classical, 2002 | fine-tuned 10 ep | **31.3** | 49.7 | 24.2 |
+| 2 | HDR with gamma | standard display curve | fine-tuned 10 ep | 30.4 | 48.5 | 22.9 |
+| 3 | Log compression | simple formula | fine-tuned 10 ep | 29.9 | 48.8 | 22.5 |
+| 4 | Durand | classical, 2002 | fine-tuned 10 ep | 29.7 | **50.6** | 22.7 |
+| 5 | **RAOD module** | **learned, CVPR 2023** | fine-tuned 10 ep, jointly | 28.7 | 46.5 | 22.0 |
+| 6 | **no tone curve** | control | fine-tuned 10 ep | **24.4** | 41.8 | **18.8** |
 
 All measured here. "S2 only" scores the bracketed-photograph source alone --
 independent shots across 218 separate days, the source where no duplicates are
@@ -314,11 +314,11 @@ alongside.
 
 The problem was found by scoring the best arm on each source separately:
 
-| source | what it is | mAP, before dedup |
-|---|---|---|
-| S1 | video / rendered | **90.1** (AP50 **99.2**) |
-| S3 | HDR video | 63.3 |
-| S2 | bracketed photographs | 24.7 |
+| source | what it is | training | mAP, before dedup |
+|---|---|---|---|
+| S1 | video / rendered | fine-tuned | **90.1** (AP50 **99.2**) |
+| S3 | HDR video | fine-tuned | 63.3 |
+| S2 | bracketed photographs | fine-tuned | 24.7 |
 
 99.2 is not a plausible generalisation result. Running Ulas's
 `dedupe_hdr_frames.py` (SSIM against the last kept frame) confirmed why:
@@ -368,7 +368,9 @@ Letters 172 (2023) 230–236 paper), on the dataset the thesis calls **OOD** —
 380 test, images at 1024×576.
 
 **Detector: RetinaNet** (thesis Table 4.2). *Every number below is **quoted
-from his thesis**. None of it was re-run here.*
+from his thesis**, none re-run here. All of his rows are **fine-tuned**, not
+zero-shot: the detector is trained on each tone-mapped image set, and the
+✓ in "joint" marks the rows where his generator trains alongside it.*
 
 | front end | joint | on real | mAP | TMQI-Q |
 |---|---|---|---|---|
@@ -387,7 +389,7 @@ from his thesis**. None of it was re-run here.*
 | **TMO-GAN + RetinaNet (OOD)** | ✓ | ✓ | **31.6** | 94.5 |
 
 **Detector: Faster R-CNN** (thesis Table 4.3). *Every number below is **quoted
-from his thesis**. None of it was re-run here.*
+from his thesis**, none re-run here. All rows **fine-tuned**, as above.*
 
 | front end | joint | on real | mAP | TMQI-Q |
 |---|---|---|---|---|
@@ -447,10 +449,10 @@ deduplication, which changed the absolute values but not the ordering.
 experiment.** That reference is meaningful in both, and the ratio cancels the
 differences in split, resolution and detector version:
 
-| learned method | source | own score | best classical, same table | **gap** |
-|---|---|---|---|---|
-| TMO-GAN + RetinaNet | **his paper, quoted** | 31.6 | 31.3 (Mantiuk) | **+0.3** |
-| RAOD Adaptive_Module | **measured here** | 28.7 | 31.3 (Reinhard) | **-2.6** |
+| learned method | source | training | own score | best classical, same table | **gap** |
+|---|---|---|---|---|---|
+| TMO-GAN + RetinaNet | **his paper, quoted** | fine-tuned, joint | 31.6 | 31.3 (Mantiuk) | **+0.3** |
+| RAOD Adaptive_Module | **measured here** | fine-tuned, joint | 28.7 | 31.3 (Reinhard) | **-2.6** |
 
 Read this way, the thesis method **slightly beat** the strongest classical
 operator available to it, while RAOD's module **fell behind** the strongest

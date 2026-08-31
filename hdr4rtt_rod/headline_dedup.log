@@ -1,0 +1,137 @@
+##### ROW 1: RAOD zero-shot #####
+C:\Users\OGAM\miniconda3\envs\hs-ml\Lib\site-packages\torch\functional.py:554: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\pytorch\aten\src\ATen\native\TensorShape.cpp:4324.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+gamma range: [7.0, 10.5]
+hdr4rtt_rod_dedup_test.json: 576 images present, 0 missing
+evaluating against 3785 ground-truth boxes
+   gain=1        4/576
+   gain=1        84/576
+   gain=1        164/576
+   gain=1        244/576
+   gain=1        324/576
+   gain=1        404/576
+   gain=1        484/576
+   gain=1        564/576
+
+=== gain=1 | 101356 raw detections | 82s ===
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.070
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.153
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.057
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.005
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.026
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.124
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.036
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.109
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.136
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.030
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.092
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.201
+   AP50 per class: Pedestrian=0.0182  Car=0.2879
+
+======================================================================
+      gain       mAP      AP50     AR100      dets
+======================================================================
+         1    0.0696    0.1531    0.1360    101356
+
+best gain by mAP: 1  (mAP=0.0696, AP50=0.1531)
+wrote D:\Data\HDR\hdr4rtt_rod\headline_dedup\raod_zeroshot.json
+##### ROW 3: RetinaNet zero-shot (tone-mapped) #####
+retinanet | weights=coco | 38.2M params | cuda
+hdr4rtt_rod_dedup_test.json: 576 images present, 0 missing
+ground truth: 3785 boxes
+   4/576
+   104/576
+   204/576
+   304/576
+   404/576
+   504/576
+
+32590 detections
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.242
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.507
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.209
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.027
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.108
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.386
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.111
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.296
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.385
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.180
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.282
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.509
+   AP50 per class: Pedestrian=0.3854  Car=0.6295
+wrote D:\Data\HDR\hdr4rtt_rod\headline_dedup\retinanet_zeroshot.json
+##### ROW 4: Faster R-CNN zero-shot (tone-mapped) #####
+fasterrcnn | weights=coco | 43.7M params | cuda
+hdr4rtt_rod_dedup_test.json: 576 images present, 0 missing
+ground truth: 3785 boxes
+   4/576
+   104/576
+   204/576
+   304/576
+   404/576
+   504/576
+
+12097 detections
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.264
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.547
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.225
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.038
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.132
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.422
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.112
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.321
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.386
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.185
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.260
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.530
+   AP50 per class: Pedestrian=0.4456  Car=0.6479
+wrote D:\Data\HDR\hdr4rtt_rod\headline_dedup\fasterrcnn_zeroshot.json
+##### ROW 5: Faster R-CNN fine-tuned (tone-mapped) #####
+train: 2294 images with boxes
+fasterrcnn: 43.3M params, 2 classes, batch 2
+  ep1/12 it100/13764 loss=0.845 lr=0.00026 16s eta 2121s
+  ep1/12 it200/13764 loss=0.613 lr=0.00045 25s eta 1702s
+  ep1/12 it300/13764 loss=0.560 lr=0.00074 35s eta 1557s
+  ep1/12 it400/13764 loss=0.461 lr=0.00113 44s eta 1479s
+  ep1/12 it500/13764 loss=0.407 lr=0.00160 54s eta 1429s
+  ep1/12 it600/13764 loss=0.358 lr=0.00212 64s eta 1393s
+  ep1/12 it700/13764 loss=0.358 lr=0.00267 73s eta 1365s
+  ep1/12 it800/13764 loss=0.369 lr=0.00321 83s eta 1340s
+  ep1/12 it900/13764 loss=0.351 lr=0.00372 92s eta 1320s
+  ep1/12 it1000/13764 loss=0.352 lr=0.00417 102s eta 1301s
+  ep1/12 it1100/13764 loss=0.332 lr=0.00454 112s eta 1284s
+epoch 1 done, checkpoint saved (117s elapsed)
+  ep2/12 it1200/13764 loss=0.194 lr=0.00481 126s eta 1324s
+  ep2/12 it1300/13764 loss=0.286 lr=0.00496 136s eta 1304s
+  ep2/12 it1400/13764 loss=0.310 lr=0.00500 146s eta 1285s
+  ep2/12 it1500/13764 loss=0.329 lr=0.00500 155s eta 1268s
+  ep2/12 it1600/13764 loss=0.326 lr=0.00500 165s eta 1252s
+  ep2/12 it1700/13764 loss=0.341 lr=0.00499 174s eta 1236s
+  ep2/12 it1800/13764 loss=0.300 lr=0.00499 184s eta 1222s
+  ep2/12 it1900/13764 loss=0.295 lr=0.00498 193s eta 1207s
+  ep2/12 it2000/13764 loss=0.294 lr=0.00497 203s eta 1194s
+  ep2/12 it2100/13764 loss=0.313 lr=0.00496 213s eta 1180s
+  ep2/12 it2200/13764 loss=0.300 lr=0.00495 222s eta 1167s
+epoch 2 done, checkpoint saved (232s elapsed)
+  ep3/12 it2300/13764 loss=0.019 lr=0.00493 237s eta 1181s
+  ep3/12 it2400/13764 loss=0.238 lr=0.00492 246s eta 1167s
+  ep3/12 it2500/13764 loss=0.268 lr=0.00490 256s eta 1154s
+  ep3/12 it2600/13764 loss=0.346 lr=0.00488 266s eta 1140s
+  ep3/12 it2700/13764 loss=0.273 lr=0.00486 275s eta 1128s
+  ep3/12 it2800/13764 loss=0.267 lr=0.00484 285s eta 1115s
+  ep3/12 it2900/13764 loss=0.294 lr=0.00482 294s eta 1103s
+  ep3/12 it3000/13764 loss=0.264 lr=0.00479 304s eta 1090s
+  ep3/12 it3100/13764 loss=0.284 lr=0.00476 313s eta 1078s
+  ep3/12 it3200/13764 loss=0.280 lr=0.00474 323s eta 1066s
+  ep3/12 it3300/13764 loss=0.279 lr=0.00471 333s eta 1054s
+  ep3/12 it3400/13764 loss=0.256 lr=0.00468 342s eta 1043s
+epoch 3 done, checkpoint saved (346s elapsed)
+  ep4/12 it3500/13764 loss=0.141 lr=0.00465 357s eta 1047s
+  ep4/12 it3600/13764 loss=0.263 lr=0.00461 367s eta 1035s
+  ep4/12 it3700/13764 loss=0.265 lr=0.00458 376s eta 1023s
+  ep4/12 it3800/13764 loss=0.260 lr=0.00454 386s eta 1012s
+  ep4/12 it3900/13764 loss=0.279 lr=0.00450 395s eta 1000s
+  ep4/12 it4000/13764 loss=0.218 lr=0.00447 405s eta 989s
+  ep4/12 it4100/13764 loss=0.288 lr=0.00443 415s eta 977s
+  ep4/12 it4200/13764 loss=0.263 lr=0.00439 424s eta 966s

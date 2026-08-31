@@ -53,6 +53,8 @@ Zero-shot, `best-day_night.pth`, no fine-tuning.
 
 ### Input gain sweep (144-image subset, leakage-free split)
 
+*All **zero-shot** — pretrained ROD weights, no training on HDR4RTT.*
+
 | gain | mAP | AP50 |
 |---|---|---|
 | 1.0 | 0.0216 | 0.0601 |
@@ -67,6 +69,8 @@ Zero-shot, `best-day_night.pth`, no fine-tuning.
 converted at **gain 0.02**.
 
 ### Full test set
+
+*All **zero-shot**.*
 
 | split | images | GT boxes | mAP | AP50 | Pedestrian AP50 | Car AP50 |
 |---|---|---|---|---|---|---|
@@ -117,10 +121,10 @@ OWN split, compared **S3 against S3** so scene content is held constant (S3 is
 the only source with frame adjacency; comparing whole splits would confound the
 leakage with the difference between traffic video and bracketed stills).
 
-| model trained on | S3 test mAP | S3 test AP50 |
-|---|---|---|
-| `seqsafe` (leakage-free) | 0.3197 | 0.6047 |
-| `original` (leaky) | **0.3393** | **0.6181** |
+| model trained on | training | S3 test mAP | S3 test AP50 |
+|---|---|---|---|
+| `seqsafe` (leakage-free) | fine-tuned 50 ep | 0.3197 | 0.6047 |
+| `original` (leaky) | fine-tuned 50 ep | **0.3393** | **0.6181** |
 
 **The original split overstates the video source by +0.020 mAP**, about 6%
 relative. Control: the photo sources, never reassigned, agree closely between the

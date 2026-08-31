@@ -384,7 +384,7 @@
     <p>Swept seven scaling factors and scored each properly.</p>
     <div class="scroll">
       <table>
-        <caption>Input scale sweep, 144-image subset</caption>
+        <caption>Input scale sweep, 144-image subset &mdash; ZERO-SHOT (no training)</caption>
         <thead><tr><th class="num">Scale</th><th class="num">mAP</th><th class="num">AP50</th></tr></thead>
         <tbody>
           <tr><td class="num">1.0</td><td class="num">0.0216</td><td class="num">0.0601</td></tr>
@@ -447,7 +447,7 @@
   <div class="body">
     <div class="scroll">
       <table>
-        <caption>50 epochs from ROD weights, leakage-free split, 779 test images</caption>
+        <caption>FINE-TUNED, 50 epochs from ROD weights, leakage-free split, 779 test images</caption>
         <thead><tr><th>Metric</th><th class="num">Before</th><th class="num">After</th><th class="num">Change</th></tr></thead>
         <tbody>
           <tr class="hi"><td>mAP (strict)</td><td class="num">0.0590</td><td class="num">0.3490</td><td class="num">5.9×</td></tr>
@@ -490,7 +490,7 @@
     <p>An earlier attempt to measure this compared one model against two test sets, which was invalid — 26% of the original test set was inside that model's training data. The correct design is two models with identical settings, each tested on its own split, compared video-source to video-source so content stays constant.</p>
     <div class="scroll">
       <table>
-        <caption>Leakage effect, S3 against S3</caption>
+        <caption>Leakage effect, S3 against S3 &mdash; both models FINE-TUNED 50 epochs</caption>
         <thead><tr><th>Trained on</th><th class="num">mAP</th><th class="num">AP50</th></tr></thead>
         <tbody>
           <tr><td>Clean split</td><td class="num">0.3197</td><td class="num">0.6047</td></tr>
@@ -508,7 +508,7 @@
   <div class="body">
     <div class="scroll">
       <table>
-        <caption>Same model, scored separately on each source</caption>
+        <caption>Same FINE-TUNED model, scored separately on each source</caption>
         <thead><tr><th>Source</th><th>What it is</th><th class="num">mAP</th><th class="num">AP50</th></tr></thead>
         <tbody>
           <tr class="hi"><td>S1</td><td>video / rendered</td><td class="num">0.755</td><td class="num">0.982</td></tr>
