@@ -16,7 +16,12 @@ Front ends produced here:
              (26.3 / 23.5). Written as float16 because forcing it through 8 bits
              would apply exactly the compression the arm is meant to omit.
   gamma      same normalisation then sRGB-style gamma. The "HDR with gamma" row.
-  reinhard   global Reinhard, L/(1+L) after scaling to a target key.
+  reinhard   GLOBAL Reinhard: L/(1+L) after scaling to a target key, one curve
+             applied uniformly. NOT the local dodging-and-burning variant the
+             same paper also defines -- the thesis lists both separately
+             (CityScapes: local 33.2, global 32.7) but does not say which its
+             HDR4RTT table used, so treat that row as possibly a different
+             operator when comparing.
   durand     bilateral base/detail separation in log luminance, base compressed,
              detail preserved. A local operator, unlike the three above.
   log        log1p compression.

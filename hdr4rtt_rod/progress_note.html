@@ -611,6 +611,10 @@ Scores in this phase are &times;100 and cover all 20 classes.</p>
     <p>Raw HDR with no curve, gamma, log, Reinhard and Durand &mdash; identical
     geometry and white balance, differing only in the curve. Four also appear in the
     thesis tables, which is what makes any cross-checking possible.</p>
+    <p><b>Reinhard here is the global variant</b> (one curve applied uniformly), not
+    the local dodge-and-burn form. The thesis lists both separately elsewhere but
+    does not say which its HDR4RTT table used, so those two rows may not be the same
+    operator. Durand is local in both.</p>
     <div class="problem"><strong>Implementation fault found and fixed</strong>
     <p>The first Durand implementation was washed out and colour-cast: a gamma was
     applied on top of an already display-referred result, and the operator was
@@ -642,9 +646,9 @@ Scores in this phase are &times;100 and cover all 20 classes.</p>
         <caption>Measured here &mdash; RetinaNet R50-FPN v2 for every row, 20 classes, 845 test images, all fine-tuned 10 epochs (none zero-shot)</caption>
         <thead><tr><th>front end</th><th>whose method</th><th class="num">mAP</th><th class="num">AP small</th></tr></thead>
         <tbody>
-          <tr class="hi"><td>Reinhard</td><td>classical, 2002</td><td class="num">38.3</td><td class="num">7.0</td></tr>
+          <tr class="hi"><td>Reinhard <b>(global)</b></td><td>classical, 2002</td><td class="num">38.3</td><td class="num">7.0</td></tr>
           <tr><td>HDR with gamma</td><td>standard curve</td><td class="num">36.5</td><td class="num">5.7</td></tr>
-          <tr><td>Durand</td><td>classical, 2002</td><td class="num">36.4</td><td class="num">5.4</td></tr>
+          <tr><td>Durand <b>(local)</b></td><td>classical, 2002</td><td class="num">36.4</td><td class="num">5.4</td></tr>
           <tr><td>RAOD module</td><td>learned, CVPR 2023</td><td class="num">36.1</td><td class="num">5.2</td></tr>
           <tr><td>Log compression</td><td>simple formula</td><td class="num">35.9</td><td class="num">8.2</td></tr>
           <tr class="hi"><td>no tone curve</td><td>control</td><td class="num">30.4</td><td class="num">1.1</td></tr>

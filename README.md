@@ -301,12 +301,28 @@ produces a different curve for every photograph.*
 
 | # | front end | whose method | training | mAP | AP50 | AP50 head-8 | S2 only |
 |---|---|---|---|---|---|---|---|
-| 1 | **Reinhard** | classical, 2002 | fine-tuned 10 ep | **31.3** | 49.7 | **59.9** | 24.2 |
+| 1 | **Reinhard (global)** | classical, 2002 | fine-tuned 10 ep | **31.3** | 49.7 | **59.9** | 24.2 |
 | 2 | HDR with gamma | standard display curve | fine-tuned 10 ep | 30.4 | 48.5 | 56.7 | 22.9 |
 | 3 | Log compression | simple formula | fine-tuned 10 ep | 29.9 | 48.8 | 58.4 | 22.5 |
-| 4 | Durand | classical, 2002 | fine-tuned 10 ep | 29.7 | **50.6** | 58.1 | 22.7 |
+| 4 | Durand *(local)* | classical, 2002 | fine-tuned 10 ep | 29.7 | **50.6** | 58.1 | 22.7 |
 | 5 | **RAOD module** | **learned, CVPR 2023** | fine-tuned 10 ep, jointly | 28.7 | 46.5 | 54.1 | 22.0 |
 | 6 | **no tone curve** | control | fine-tuned 10 ep | **24.4** | 41.8 | **49.3** | **18.8** |
+
+> **Which Reinhard?** The 2002 paper defines a **global** operator and a
+> **local** one with dodging-and-burning. The implementation here is the
+> **global** form: one curve, `L/(1+L)` after scaling to a target key, applied
+> uniformly to every pixel. There is no local adaptation.
+>
+> This matters for comparison. The thesis's CityScapes table lists both variants
+> separately (local 33.2, global 32.7, so they differ by half a point), but its
+> HDR4RTT table -- the one compared against here -- lists only "Reinhard 29.6"
+> without saying which. **So our Reinhard row and his may not be the same
+> operator.** Durand is inherently local in both.
+>
+> This also weakens part of the ranking-inversion argument below: some of the gap
+> on the Reinhard row could be a global-versus-local difference rather than a real
+> disagreement. Running the local variant as a seventh arm would settle it;
+> it has not been done.
 
 **AP50 head-8** averages only the eight classes with enough test instances to be
 stable (person, bottle, car, chair, pottedplant, diningtable, bird, bicycle). It
@@ -391,8 +407,9 @@ other change.
 | | detector | mAP |
 |---|---|---|
 | Kocdemir, best classical operator (Mantiuk) | RetinaNet (his implementation) | 31.3 |
+| Kocdemir, Reinhard *(variant unstated)* | RetinaNet (his implementation) | 29.6 |
 | Kocdemir, his own method (TMO-GAN) | RetinaNet (his implementation) | 31.6 |
-| **This work, best operator, deduplicated** | **RetinaNet R50-FPN v2** | **31.3** |
+| **This work, best operator (Reinhard, global), deduplicated** | **RetinaNet R50-FPN v2** | **31.3** |
 
 *Both are RetinaNet, but not the same implementation: torchvision's v2 recipe
 is newer than what the thesis would have used, which is one of several reasons
@@ -479,8 +496,8 @@ other. They do not. The rankings invert:
 
 | operator | HIS PAPER rank (RetinaNet) | MEASURED HERE rank |
 |---|---|---|
-| Reinhard | **worst** tone map, 29.6 | **best**, 31.3 |
-| Durand | best of the three, 30.6 | **worst of the three**, 29.7 |
+| Reinhard | **worst** tone map, 29.6 *(variant unstated)* | **best**, 31.3 *(global)* |
+| Durand *(local in both)* | best of the three, 30.6 | **worst of the three**, 29.7 |
 | HDR with gamma | 29.8 | 30.4 |
 
 That is an inversion rather than an offset: Reinhard is his weakest tone map
