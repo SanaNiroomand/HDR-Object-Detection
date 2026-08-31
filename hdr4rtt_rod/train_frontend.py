@@ -167,6 +167,10 @@ def main():
     p.add_argument("--arch", default="retinanet", choices=["retinanet", "fasterrcnn"])
     p.add_argument("--frontend_root", default=FRONTEND_ROOT)
     p.add_argument("--ann_dir", default=ANN_DIR)
+    p.add_argument("--train_ann", default=None,
+                   help="explicit training annotation file; overrides --ann_dir")
+    p.add_argument("--val_ann", default=None,
+                   help="explicit test annotation file; overrides --ann_dir")
     p.add_argument("--out_root", default=r"D:\Codes\HDR\Sana\hdr4rtt_rod\frontend_runs")
     p.add_argument("--epochs", type=int, default=10)
     p.add_argument("--batch", type=int, default=2)
@@ -193,11 +197,15 @@ def main():
                            f"{args.arch}_{args.arm}" + (f"_{args.tag}" if args.tag else ""))
     os.makedirs(out_dir, exist_ok=True)
 
-    with open(os.path.join(args.ann_dir, "manifest.json"), encoding="utf-8") as f:
-        n_classes = len(json.load(f)["classes"]) + 1        # + background
-    tr = FrontendDataset(os.path.join(args.ann_dir, "hdr4rtt_voc20_train.json"),
-                         img_dir, is_float, train=True)
+    import json as _json
+    with open(train_ann_for_classes := (args.train_ann or
+              os.path.join(args.ann_dir, "hdr4rtt_voc20_train.json")),
+              encoding="utf-8") as f:
+        n_classes = len(_json.load(f)["categories"]) + 1    # + background
+    train_ann = args.train_ann or os.path.join(args.ann_dir, "hdr4rtt_voc20_train.json")
+    tr = FrontendDataset(train_ann, img_dir, is_float, train=True)
     print(f"arm={args.arm}  arch={args.arch}  images={len(tr)}  classes={n_classes-1}")
+    print(f"  train annotations: {os.path.basename(train_ann)}")
     print(f"  reading {img_dir}")
     loader = DataLoader(tr, batch_size=args.batch, shuffle=True, num_workers=args.workers,
                         collate_fn=collate, pin_memory=False, drop_last=True)

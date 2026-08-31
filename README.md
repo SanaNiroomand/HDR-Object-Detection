@@ -43,9 +43,16 @@ running [RAOD](https://openaccess.thecvf.com/content/CVPR2023/papers/Xu_Toward_R
 
 
 **Source of these numbers: measured here.** Every row is a training or
-evaluation run performed for this repository, on the same 779-image
-leakage-free test set, 4,082 ground-truth boxes, person and car only. Nothing
-in this table is quoted from a paper.
+evaluation run performed for this repository, on the same 779-image test set,
+4,082 ground-truth boxes, person and car only. Nothing is quoted from a paper.
+
+> **These absolute values are inflated and have not yet been re-run.** This
+> table predates the deduplication described
+> [below](#why-the-numbers-are-lower-than-they-were); its test set still
+> contains the near-duplicate S1 frames. Comparisons *between* rows remain
+> valid, since every row faced identical images, but the absolute numbers
+> should be read as roughly 6-7 mAP high, by analogy with the tone-mapping
+> table. The deduplicated table is the one to quote.
 
 | arm | input | params | HDR4RTT training | mAP | AP50 | Pedestrian | Car |
 |---|---|---|---|---|---|---|---|
@@ -135,11 +142,11 @@ scored separately on each source:
 | S3 | HDR video | 32.0 | 60.5 |
 | S2 | bracketed photographs | **14.2** | 39.5 |
 
-S1's 98.2 is not a plausible generalisation result. S1 carries no metadata, so
-frame sequences cannot be detected and no guard band could be built — it is very
-likely contaminated by near-duplicate frames. Visual inspection supports this:
-an arbitrary run of 200 consecutive S1 files turned out to be one continuous
-living-room scene.
+S1's 98.2 is not a plausible generalisation result, and the cause is now
+**confirmed rather than suspected**: deduplication reduces S1's 1,289 images to
+367, so it contains only a few hundred distinct scenes. Its test images are
+near-copies of its training images. See
+[why the numbers are lower](#why-the-numbers-are-lower-than-they-were).
 
 S2 is the only source where the number is unambiguously trustworthy, and it is
 much lower than the headline.
@@ -229,7 +236,7 @@ different detectors.** Partly answered.
 | | status |
 |---|---|
 | Detector held fixed, front end varied | **done** -- [nine arms, one detector](#which-tone-map-one-detector-nine-front-ends) |
-| RAOD's module measured under that control | **done** -- 36.1 mAP |
+| RAOD's module measured under that control | **done** -- 28.7 mAP |
 | Thesis TMO-GAN measured under that control | **not possible** -- software lost |
 | Indirect comparison via a shared reference | **done** -- see below |
 
@@ -239,94 +246,57 @@ comparison of both against the best classical operator in their respective
 experiments (+0.3 for the thesis method, -2.2 for RAOD's). Closing the gap
 properly requires re-implementing TMO-GAN from the paper.
 
-## Which tone map? One detector, nine front ends
+## Which tone map? One detector, six front ends
 
-The comparison above changes two things at once (detector and input), so it
-cannot separate them. This experiment holds the detector fixed --
-RetinaNet R50-FPN v2, all 20 classes, 845 test images -- and changes **only**
-what happens to the pixels beforehand. Same data, split, schedule, batch size
-and augmentation throughout.
+The detector is held fixed -- RetinaNet R50-FPN v2, all 20 classes -- and only
+the tone mapping changes. Same data, split, schedule, batch size and
+augmentation throughout. **Every arm is fine-tuned for 10 epochs at batch 4**
+from the same COCO-pretrained weights with a fresh 20-class head; none is
+zero-shot.
+
+**Measured on the deduplicated split** (2,506 train / 633 test). Near-duplicate
+frames were removed first -- see [why](#why-the-numbers-are-lower-than-they-were)
+-- so these numbers are lower, and more trustworthy, than an earlier version of
+this table.
 
 ![Five tone maps applied to the same two HDR photographs](hdr4rtt_rod/viz/tone_mapping_comparison.jpg)
 
-*The same two photographs through the five **fixed** front ends (rows 1, 2, 3,
-5 and 9 of the table). Left column is row 9, the raw conversion with no curve:
-in the workshop scene the welding arc consumes the entire output range and
-everything else goes black. The four to its right are identical data under
-different curves. The CVPR 2023 learned method is not shown, because it produces
-a different curve for every photograph rather than a fixed image set.*
+*The same two photographs through the five fixed front ends. Left column is the
+raw conversion with no tone curve: in the workshop scene the welding arc consumes
+the entire output range and everything else goes black. The four to its right are
+identical data under different curves. The learned method is not shown because it
+produces a different curve for every photograph.*
 
-**Whose method is each row?**
+| # | front end | whose method | mAP | AP50 | S2 only |
+|---|---|---|---|---|---|
+| 1 | **Reinhard** | classical, 2002 | **31.3** | 49.7 | 24.2 |
+| 2 | HDR with gamma | standard display curve | 30.4 | 48.5 | 22.9 |
+| 3 | Log compression | simple formula | 29.9 | 48.8 | 22.5 |
+| 4 | Durand | classical, 2002 | 29.7 | **50.6** | 22.7 |
+| 5 | **RAOD module** | **learned, CVPR 2023** | 28.7 | 46.5 | 22.0 |
+| 6 | **no tone curve** | control | **24.4** | 41.8 | **18.8** |
 
-**Every row here is fine-tuned, not zero-shot.** Each arm was trained for the
-same 10 epochs at batch 4 on the same 3,229 training images, starting from the
-same COCO-pretrained RetinaNet with a freshly initialised 20-class head. The
-only thing that differs between rows is the tone mapping applied to the pixels.
-
-All numbers in the **first three score columns were measured here**, by running
-every row on the same machine, same data, same detector. The **final column is
-not ours** -- it is Kocdemir's published figure for that same operator, from his
-own separate experiment, shown only for reference. His rows are also trained,
-not zero-shot, so the two columns are consistent in that respect.
-
-| # | front end | whose method | training | MEASURED HERE mAP | MEASURED HERE AP50 | MEASURED HERE AP small | HIS PAPER mAP |
-|---|---|---|---|---|---|---|---|
-| 1 | **Reinhard** | classical, 2002 | fine-tuned 10 ep | **38.3** | **56.7** | 7.0 | 29.6 |
-| 2 | HDR with gamma | standard display curve | fine-tuned 10 ep | 36.5 | 54.8 | 5.7 | 29.8 |
-| 3 | Durand | classical, 2002 | fine-tuned 10 ep | 36.4 | 53.1 | 5.4 | 30.6 |
-| 4 | **RAOD module** — full learning rate | **learned, CVPR 2023** | fine-tuned 10 ep, jointly | **36.1** | 52.1 | 5.2 | not in his tables |
-| 5 | Log compression | simple formula | fine-tuned 10 ep | 35.9 | 54.4 | 8.2 | not in his tables |
-| 6 | **RAOD module** — random start | **learned, CVPR 2023** | fine-tuned 10 ep, jointly | 35.7 | 52.9 | 6.3 | not in his tables |
-| 7 | **RAOD module** — as published | **learned, CVPR 2023** | fine-tuned 10 ep, jointly | 35.4 | 52.3 | 6.8 | not in his tables |
-| 8 | **RAOD module** — input rescaled | **learned, CVPR 2023** | fine-tuned 10 ep, jointly | 34.4 | 50.9 | 6.3 | not in his tables |
-| 9 | **HDR, no tone curve** | no method at all | fine-tuned 10 ep | **30.4** | 47.6 | **1.1** | 26.3 |
-
-Reading the table:
-
-* **Rows 4, 6, 7, 8 are the CVPR 2023 method** (RAOD's learned Adaptive_Module),
-  run four times with one setting changed each time. They are the same method,
-  not four different ones.
-* **Rows 1, 2, 3, 5 are fixed formulas** that anyone can apply — no learning
-  involved. Rows 1 and 3 are the classical operators that also appear in the
-  thesis.
-* **Row 9 is the control**: the raw values with nothing applied.
-* **Kocdemir's TMO-GAN is NOT in this table.** Its software was lost and could
-  not be run. His published number (31.6) is on a different scale and cannot be
-  placed here — see [the section below](#comparing-the-two-learned-methods-across-experiments).
-* **Fine-tuned, not zero-shot.** All nine rows were trained on this dataset
-  for 10 epochs. "jointly" on the RAOD rows means the learned module was
-  trained at the same time as the detector, which is how RAOD intends it to
-  be used. A zero-shot comparison appears in the
-  [headline table](#headline-results) instead.
-* **Which experiment is this?** Rows 1-9 and the three "MEASURED HERE" columns
-  are all **this work** -- every one of those nine numbers comes from a training
-  run performed for this repository. Only the single "HIS PAPER" column comes
-  from Kocdemir's thesis; nothing in it was re-run here. It is included to show
-  that the two experiments rank the operators differently, not to be compared
-  row-against-row.
+All measured here. "S2 only" scores the bracketed-photograph source alone --
+independent shots across 218 separate days, the source where no duplicates are
+possible and therefore the most conservative figure available.
 
 ### What it shows
 
-**Applying no tone curve is by far the worst option**, and catastrophic for small
-objects (1.1 against 5-8). This independently replicates the thesis result --
-raw HDR was worst there too, under both of its detectors -- and matches what the
-RAOD arm showed, where the same weights on the same data scored 5.9 with the
-input scale wrong and 34.9 with it right. Three separate experiments agree.
+**Applying no tone curve is by far the worst**, 6.9 mAP below the best operator
+and worst on every source. This independently replicates the thesis finding,
+where raw HDR was also worst under both of its detectors (26.3 and 23.5).
 
-**Which curve you choose barely matters.** The four sensible operators span 35.9
-to 38.3, a 2.4-point range, while the gap between "no curve" and "any curve" is
-about 6 points. Doing something reasonable captures most of the benefit.
+**Which curve you choose barely matters.** The four sensible operators span 29.7
+to 31.3, a 1.6-point range, against a 6.9-point gap to applying none at all.
 
-**RAOD's learned module did not beat a formula from 2002.** Reinhard, a
-one-line operator, leads it by 2.2 mAP. Suspecting the configuration rather than
-the method, three variants were retrained, isolating one setting each: full
-learning rate (36.1), random initialisation instead of RAOD's released weights
-(35.7), and input rescaled to the level those weights were fitted at (34.4).
-All four land below every sensible fixed operator, so the result is not an
-artefact of the settings chosen.
-
-Notably, the rescaling variant made things **worse**, not better -- the assumed
-input-scale mismatch was not the limiting factor, and correcting it cost 1.0 mAP.
+**RAOD's learned module did not beat a formula from 2002.** Reinhard leads it by
+2.6 mAP, and it places fifth of six. Three variants isolating one suspect setting
+each -- full learning rate, random initialisation instead of RAOD's released
+weights, and input rescaled to the level those weights were fitted at -- were
+also tried; all landed below every sensible fixed operator. (Those three ran on
+the earlier, un-deduplicated split, so their absolute numbers are inflated in the
+same way; the conclusion that none of them overtakes a fixed operator is what
+carries over.)
 
 **This does not show RAOD's method is wrong.** RAOD pairs the module with a
 1M-parameter detector, where a strong front end plausibly matters far more; a
@@ -334,15 +304,61 @@ input-scale mismatch was not the limiting factor, and correcting it cost 1.0 mAP
 supplying. The thesis tables show the same pattern from the other side -- its
 learned method beats every classical operator under RetinaNet and loses to four
 of them under Faster R-CNN. **The value of a learned tone map appears to depend
-on the detector behind it**, which is the thread worth pulling next.
+on the detector behind it.**
 
-### What this experiment cannot answer
+## Why the numbers are lower than they were
 
-Every arm here starts from HDR, so none of them tests HDR against a genuine
-ordinary-camera exposure of the same scene. The thesis can: its real LDR row
-scores 28.2, below tone-mapped HDR at 29.6-31.3 but above raw HDR at 26.3. On
-that evidence HDR is worth roughly 2-3 mAP, **but only once tone mapped** --
-untouched, it is worse than an ordinary photograph.
+An earlier version of this table reported 30.4 to 38.3. Those numbers were
+inflated by near-duplicate frames, and have been removed rather than kept
+alongside.
+
+The problem was found by scoring the best arm on each source separately:
+
+| source | what it is | mAP, before dedup |
+|---|---|---|
+| S1 | video / rendered | **90.1** (AP50 **99.2**) |
+| S3 | HDR video | 63.3 |
+| S2 | bracketed photographs | 24.7 |
+
+99.2 is not a plausible generalisation result. Running Ulas's
+`dedupe_hdr_frames.py` (SSIM against the last kept frame) confirmed why:
+
+| threshold | total kept | S1 kept | S2 kept | S3 kept |
+|---|---|---|---|---|
+| **0.92 (used)** | 3,145 | **28%** | 100% | 99% |
+| 0.60 | 2,822 | 7% | 98% | 98% |
+| 0.30 | 2,582 | 2% | 89% | 94% |
+
+**S1's 1,289 images contain only a few hundred distinct scenes.** That is the
+source of the inflation. Note that S3 survives at 99% -- its frames genuinely
+differ, so the earlier focus on S3 (the only source with readable frame numbers)
+was looking in the wrong place.
+
+Threshold 0.92 was chosen by what it removes, not by hitting a target count. The
+more aggressive settings approach Kocdemir's 1,871 images, but only by deleting
+S2 photographs taken on separate days, which contain nothing to deduplicate.
+
+**This is not Kocdemir's split.** His list was not available; this is our own
+deduplication and the surviving count differs from his.
+
+After deduplication every arm dropped 5.9 to 7.0 mAP, and the ranking held. S2,
+which lost almost nothing to deduplication, barely moved (24.7 to 24.2) -- a
+control confirming the drop came from removing duplicates rather than from some
+other change.
+
+### The effect on comparability
+
+| | mAP |
+|---|---|
+| Kocdemir, best classical operator (Mantiuk) | 31.3 |
+| Kocdemir, his own method (TMO-GAN) | 31.6 |
+| **This work, best operator, deduplicated** | **31.3** |
+
+Before deduplication this work scored roughly 7 points above his across the
+board, with no principled explanation. After it, the numbers land in the same
+range. That is evidence the gap was duplicate frames rather than any advantage
+in method -- though the splits still differ, so this is convergence, not a
+head-to-head.
 
 ## Reference: previously reported results on this dataset
 
@@ -417,13 +433,15 @@ other. They do not. The rankings invert:
 
 | operator | HIS PAPER rank (RetinaNet) | MEASURED HERE rank |
 |---|---|---|
-| Reinhard | **worst** tone map, 29.6 | **best**, 38.3 |
-| Durand | best of the three, 30.6 | middle, 36.4 |
-| HDR with gamma | 29.8 | 36.5 |
+| Reinhard | **worst** tone map, 29.6 | **best**, 31.3 |
+| Durand | best of the three, 30.6 | **worst of the three**, 29.7 |
+| HDR with gamma | 29.8 | 30.4 |
 
-That is an inversion rather than an offset, so no scale factor reconciles the
-two tables and the thesis's 31.6 cannot be placed on this axis. It is recorded
-here as a negative result: **do not** compare the absolute numbers.
+That is an inversion rather than an offset: Reinhard is his weakest tone map
+and our strongest, Durand his strongest of the three and our weakest. No scale
+factor reconciles that, so the thesis's 31.6 still cannot be placed on this
+axis by rescaling. Recorded as a negative result -- and it survives
+deduplication, which changed the absolute values but not the ordering.
 
 **What does work: each method against the best classical operator in its own
 experiment.** That reference is meaningful in both, and the ratio cancels the
@@ -432,13 +450,17 @@ differences in split, resolution and detector version:
 | learned method | source | own score | best classical, same table | **gap** |
 |---|---|---|---|---|
 | TMO-GAN + RetinaNet | **his paper, quoted** | 31.6 | 31.3 (Mantiuk) | **+0.3** |
-| RAOD Adaptive_Module | **measured here** | 36.1 | 38.3 (Reinhard) | **-2.2** |
+| RAOD Adaptive_Module | **measured here** | 28.7 | 31.3 (Reinhard) | **-2.6** |
 
 Read this way, the thesis method **slightly beat** the strongest classical
 operator available to it, while RAOD's module **fell behind** the strongest
-one available here, by 2.2 mAP. The difference between the two learned
-approaches is therefore about 2.5 mAP in the thesis method's favour, measured
+one available here, by 2.6 mAP. The difference between the two learned
+approaches is therefore about 2.9 mAP in the thesis method's favour, measured
 relative to a shared reference rather than on a shared scale.
+
+Since deduplication brought the absolute scales into the same range (31.3
+against his 31.3), this indirect comparison is now on firmer ground than it
+was, though the splits still differ and it remains indirect.
 
 **Caveats on that number.** The best classical operator differs between the two
 (Mantiuk there, Reinhard here) and Mantiuk is not implemented in this
@@ -522,9 +544,11 @@ Any errors in this repository are mine and not those of the original authors.
 
 ## Open questions
 
-1. **Check S1 for duplicate frames** using image similarity, since it has no
-   metadata. The 98.2 score makes this the highest priority — it affects
-   whether the headline numbers mean anything.
+1. **Re-run the headline (2-class) table on the deduplicated split**, so its
+   absolute numbers match the tone-mapping table. ~6 hours of training.
+   *(The S1 duplicate question that used to head this list is now answered:
+   S1 is 72% near-duplicates, and the tone-mapping results have been re-measured
+   without them.)*
 2. **Put RAOD's tone-mapping module in front of the large detector.** This is
    the missing row, and the only one that isolates the module's contribution
    from the detector's capacity and pretraining.

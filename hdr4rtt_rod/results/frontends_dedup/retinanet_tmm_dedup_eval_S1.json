@@ -1,0 +1,23 @@
+{
+ "arm": "tmm",
+ "arch": "retinanet",
+ "ckpt": "D:\\Codes\\HDR\\Sana\\hdr4rtt_rod\\frontend_runs\\retinanet_tmm_dedup\\last.pth",
+ "n_images": 65,
+ "n_gt": 276,
+ "mAP": 0.6807480660313192,
+ "AP50": 0.9154948387114437,
+ "AP75": 0.7301233412337368,
+ "AP_small": 0.0,
+ "AP_med": 0.46490215877279906,
+ "AP_large": 0.6954587125736431,
+ "AR100": 0.7593181818181819,
+ "per_class_AP50": {
+  "bottle": 0.8602,
+  "car": 0.9993,
+  "chair": 1.0,
+  "diningtable": 1.0,
+  "person": 0.8816,
+  "pottedplant": 0.7518
+ },
+ "n_dets": 3351
+}

@@ -36,6 +36,9 @@ def main():
     p.add_argument("--tag", default="", help="variant suffix used at training time")
     p.add_argument("--frontend_root", default=FRONTEND_ROOT)
     p.add_argument("--ann_dir", default=ANN_DIR)
+    p.add_argument("--ann", default=None,
+                   help="explicit annotation file; overrides --ann_dir. Lets a "
+                        "per-source subset be scored rather than the whole test set.")
     p.add_argument("--run_root", default=r"D:\Codes\HDR\Sana\hdr4rtt_rod\frontend_runs")
     p.add_argument("--batch", type=int, default=4)
     p.add_argument("--score_thr", type=float, default=0.01)
@@ -52,7 +55,7 @@ def main():
     run_name = f"{args.arch}_{args.arm}" + (f"_{args.tag}" if args.tag else "")
     ckpt = args.ckpt or os.path.join(args.run_root, run_name, "last.pth")
 
-    ann = os.path.join(args.ann_dir, "hdr4rtt_voc20_test.json")
+    ann = args.ann or os.path.join(args.ann_dir, "hdr4rtt_voc20_test.json")
     with contextlib.redirect_stdout(_io.StringIO()):
         coco = COCO(ann)
 

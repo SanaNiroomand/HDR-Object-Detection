@@ -1,0 +1,23 @@
+{
+ "arm": "durand",
+ "arch": "retinanet",
+ "ckpt": "D:\\Codes\\HDR\\Sana\\hdr4rtt_rod\\frontend_runs\\retinanet_durand_dedup\\last.pth",
+ "n_images": 65,
+ "n_gt": 276,
+ "mAP": 0.7079945940894387,
+ "AP50": 0.9592183566070254,
+ "AP75": 0.783734946718006,
+ "AP_small": 0.020792079207920786,
+ "AP_med": 0.4940310348530196,
+ "AP_large": 0.7247718358903242,
+ "AR100": 0.7535183566433566,
+ "per_class_AP50": {
+  "bottle": 0.8807,
+  "car": 0.9993,
+  "chair": 1.0,
+  "diningtable": 1.0,
+  "person": 0.9194,
+  "pottedplant": 0.9558
+ },
+ "n_dets": 3282
+}

@@ -1,0 +1,23 @@
+{
+ "arm": "gamma",
+ "arch": "retinanet",
+ "ckpt": "D:\\Codes\\HDR\\Sana\\hdr4rtt_rod\\frontend_runs\\retinanet_gamma_dedup\\last.pth",
+ "n_images": 65,
+ "n_gt": 276,
+ "mAP": 0.7410602000548182,
+ "AP50": 0.9619979505917731,
+ "AP75": 0.78908727751573,
+ "AP_small": 0.0,
+ "AP_med": 0.5316626213772235,
+ "AP_large": 0.7569342372759311,
+ "AR100": 0.7840224358974359,
+ "per_class_AP50": {
+  "bottle": 0.8991,
+  "car": 0.9959,
+  "chair": 1.0,
+  "diningtable": 1.0,
+  "person": 0.9211,
+  "pottedplant": 0.9559
+ },
+ "n_dets": 3353
+}
