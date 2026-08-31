@@ -1883,3 +1883,40 @@ Average forward time: 14.20 ms, Average NMS time: 1.03 ms, Average inference tim
 2026-08-31 22:57:03.371 | INFO     | yolox.core.trainer:after_iter:199 - ep:33/50, it:440/577, total_loss:5.927, iou_loss:2.898, l1_loss:0.000, conf_loss:2.372, cls_loss:0.658, lr:1.66e-05, ETA:1:11:04
 2026-08-31 22:57:11.767 | INFO     | yolox.core.trainer:after_iter:199 - ep:33/50, it:460/577, total_loss:4.314, iou_loss:2.352, l1_loss:0.000, conf_loss:1.393, cls_loss:0.569, lr:1.65e-05, ETA:1:10:56
 2026-08-31 22:57:18.891 | INFO     | yolox.core.trainer:after_iter:199 - ep:33/50, it:480/577, total_loss:4.558, iou_loss:2.395, l1_loss:0.000, conf_loss:1.543, cls_loss:0.620, lr:1.64e-05, ETA:1:10:46
+2026-08-31 22:57:26.683 | INFO     | yolox.core.trainer:after_iter:199 - ep:33/50, it:500/577, total_loss:3.494, iou_loss:1.802, l1_loss:0.000, conf_loss:1.188, cls_loss:0.504, lr:1.63e-05, ETA:1:10:37
+2026-08-31 22:57:35.042 | INFO     | yolox.core.trainer:after_iter:199 - ep:33/50, it:520/577, total_loss:3.939, iou_loss:2.122, l1_loss:0.000, conf_loss:1.252, cls_loss:0.565, lr:1.62e-05, ETA:1:10:29
+2026-08-31 22:57:43.103 | INFO     | yolox.core.trainer:after_iter:199 - ep:33/50, it:540/577, total_loss:4.048, iou_loss:2.207, l1_loss:0.000, conf_loss:1.268, cls_loss:0.574, lr:1.61e-05, ETA:1:10:20
+2026-08-31 22:57:51.708 | INFO     | yolox.core.trainer:after_iter:199 - ep:33/50, it:560/577, total_loss:6.539, iou_loss:3.251, l1_loss:0.000, conf_loss:2.592, cls_loss:0.695, lr:1.60e-05, ETA:1:10:11
+2026-08-31 22:57:59.448 | INFO     | yolox.core.trainer:save_ckpt:259 - Save weights to D:\Codes\HDR\Sana\hdr4rtt_rod\cfg_hdr4rtt_rod_dedup
+2026-08-31 22:57:59.519 | INFO     | yolox.core.trainer:before_epoch:152 - ---> start train epoch34
+2026-08-31 22:58:07.528 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:20/577, total_loss:5.286, iou_loss:2.737, l1_loss:0.000, conf_loss:1.922, cls_loss:0.627, lr:1.58e-05, ETA:1:09:55
+2026-08-31 22:58:16.340 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:40/577, total_loss:6.623, iou_loss:2.997, l1_loss:0.000, conf_loss:2.929, cls_loss:0.698, lr:1.57e-05, ETA:1:09:47
+2026-08-31 22:58:24.103 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:60/577, total_loss:4.814, iou_loss:2.455, l1_loss:0.000, conf_loss:1.752, cls_loss:0.607, lr:1.56e-05, ETA:1:09:38
+2026-08-31 22:58:32.403 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:80/577, total_loss:5.554, iou_loss:2.628, l1_loss:0.000, conf_loss:2.289, cls_loss:0.636, lr:1.55e-05, ETA:1:09:29
+2026-08-31 22:58:40.616 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:100/577, total_loss:3.328, iou_loss:1.986, l1_loss:0.000, conf_loss:0.815, cls_loss:0.527, lr:1.55e-05, ETA:1:09:20
+2026-08-31 22:58:49.304 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:120/577, total_loss:4.309, iou_loss:2.238, l1_loss:0.000, conf_loss:1.497, cls_loss:0.574, lr:1.54e-05, ETA:1:09:12
+2026-08-31 22:58:57.266 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:140/577, total_loss:3.174, iou_loss:1.667, l1_loss:0.000, conf_loss:0.995, cls_loss:0.512, lr:1.53e-05, ETA:1:09:03
+2026-08-31 22:59:04.836 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:160/577, total_loss:5.410, iou_loss:2.204, l1_loss:0.000, conf_loss:2.602, cls_loss:0.604, lr:1.52e-05, ETA:1:08:54
+2026-08-31 22:59:12.498 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:180/577, total_loss:5.051, iou_loss:2.416, l1_loss:0.000, conf_loss:2.034, cls_loss:0.601, lr:1.51e-05, ETA:1:08:45
+2026-08-31 22:59:19.521 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:200/577, total_loss:6.141, iou_loss:2.848, l1_loss:0.000, conf_loss:2.652, cls_loss:0.642, lr:1.50e-05, ETA:1:08:36
+2026-08-31 22:59:28.730 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:220/577, total_loss:5.832, iou_loss:2.819, l1_loss:0.000, conf_loss:2.372, cls_loss:0.641, lr:1.49e-05, ETA:1:08:27
+2026-08-31 22:59:36.916 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:240/577, total_loss:5.317, iou_loss:2.810, l1_loss:0.000, conf_loss:1.873, cls_loss:0.633, lr:1.48e-05, ETA:1:08:19
+2026-08-31 22:59:45.832 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:260/577, total_loss:5.951, iou_loss:3.050, l1_loss:0.000, conf_loss:2.202, cls_loss:0.700, lr:1.47e-05, ETA:1:08:10
+2026-08-31 22:59:53.668 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:280/577, total_loss:3.721, iou_loss:1.726, l1_loss:0.000, conf_loss:1.332, cls_loss:0.663, lr:1.47e-05, ETA:1:08:01
+2026-08-31 23:00:02.987 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:300/577, total_loss:4.833, iou_loss:2.488, l1_loss:0.000, conf_loss:1.738, cls_loss:0.607, lr:1.46e-05, ETA:1:07:53
+2026-08-31 23:00:12.426 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:320/577, total_loss:5.830, iou_loss:2.842, l1_loss:0.000, conf_loss:2.321, cls_loss:0.668, lr:1.45e-05, ETA:1:07:45
+2026-08-31 23:00:21.017 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:340/577, total_loss:6.061, iou_loss:2.641, l1_loss:0.000, conf_loss:2.653, cls_loss:0.767, lr:1.44e-05, ETA:1:07:36
+2026-08-31 23:00:29.134 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:360/577, total_loss:4.605, iou_loss:2.065, l1_loss:0.000, conf_loss:1.954, cls_loss:0.586, lr:1.43e-05, ETA:1:07:28
+2026-08-31 23:00:38.092 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:380/577, total_loss:5.080, iou_loss:2.109, l1_loss:0.000, conf_loss:2.384, cls_loss:0.587, lr:1.42e-05, ETA:1:07:19
+2026-08-31 23:00:46.734 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:400/577, total_loss:4.467, iou_loss:2.272, l1_loss:0.000, conf_loss:1.623, cls_loss:0.572, lr:1.41e-05, ETA:1:07:11
+2026-08-31 23:00:56.924 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:420/577, total_loss:5.510, iou_loss:2.873, l1_loss:0.000, conf_loss:1.991, cls_loss:0.646, lr:1.41e-05, ETA:1:07:03
+2026-08-31 23:01:05.408 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:440/577, total_loss:2.992, iou_loss:1.745, l1_loss:0.000, conf_loss:0.755, cls_loss:0.491, lr:1.40e-05, ETA:1:06:54
+2026-08-31 23:01:14.095 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:460/577, total_loss:3.766, iou_loss:1.908, l1_loss:0.000, conf_loss:1.335, cls_loss:0.523, lr:1.39e-05, ETA:1:06:46
+2026-08-31 23:01:25.010 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:480/577, total_loss:5.438, iou_loss:2.362, l1_loss:0.000, conf_loss:2.482, cls_loss:0.594, lr:1.38e-05, ETA:1:06:38
+2026-08-31 23:01:33.338 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:500/577, total_loss:3.616, iou_loss:2.024, l1_loss:0.000, conf_loss:1.032, cls_loss:0.560, lr:1.37e-05, ETA:1:06:30
+2026-08-31 23:01:40.539 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:520/577, total_loss:4.962, iou_loss:2.304, l1_loss:0.000, conf_loss:2.075, cls_loss:0.583, lr:1.36e-05, ETA:1:06:20
+2026-08-31 23:01:49.984 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:540/577, total_loss:5.324, iou_loss:3.048, l1_loss:0.000, conf_loss:1.600, cls_loss:0.676, lr:1.36e-05, ETA:1:06:12
+2026-08-31 23:01:57.375 | INFO     | yolox.core.trainer:after_iter:199 - ep:34/50, it:560/577, total_loss:4.904, iou_loss:2.245, l1_loss:0.000, conf_loss:2.087, cls_loss:0.572, lr:1.35e-05, ETA:1:06:03
+2026-08-31 23:02:05.965 | INFO     | yolox.core.trainer:save_ckpt:259 - Save weights to D:\Codes\HDR\Sana\hdr4rtt_rod\cfg_hdr4rtt_rod_dedup
+2026-08-31 23:02:06.020 | INFO     | yolox.core.trainer:before_epoch:152 - ---> start train epoch35
+2026-08-31 23:02:15.120 | INFO     | yolox.core.trainer:after_iter:199 - ep:35/50, it:20/577, total_loss:5.142, iou_loss:2.621, l1_loss:0.000, conf_loss:1.891, cls_loss:0.630, lr:1.33e-05, ETA:1:05:48
