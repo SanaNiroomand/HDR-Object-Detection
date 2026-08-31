@@ -13,9 +13,8 @@ detector.
 [Pipeline details](hdr4rtt_rod/README.md)
 
 > **Work in progress, not peer reviewed.** This is an internship project. The
-> numbers are preliminary and may change; one table is already marked as
-> superseded. Please ask before citing anything here. No warranty, see
-> [LICENSE](LICENSE).
+> numbers are preliminary and may change. Please ask before citing anything here.
+> No warranty, see [LICENSE](LICENSE).
 
 **Contents**
 
@@ -97,32 +96,35 @@ Whether a learned tone map helps seems to depend on what sits behind it.
 
 A different question: how do the detectors themselves compare? Both the input and
 the detector change here, so this table can't separate the two. Section 1 does
-that.
+that. Same deduplicated split as section 1, but 2 classes rather than 20, so the
+two still don't compare with each other.
 
-> **Superseded.** These values are inflated. The table predates the
-> [deduplication](#4-why-the-earlier-numbers-were-higher) and its test set still
-> holds the near-duplicate S1 frames. Row against row is still valid, since every
-> row saw identical images, but read the absolute numbers as 6 to 7 mAP high.
-> Re-running this is the first [open question](#10-layout-and-open-questions).
-
-779 test images, 4,082 boxes, person and car only.
+779 test images before, 576 after deduplication. All numbers measured here,
+4,082 boxes before and 3,785 after, person and car only.
 
 | detector | input | params | training | mAP | AP50 | Pedestrian | Car |
 |---|---|---|---|---|---|---|---|
-| RAOD (YOLOX-nano + its module) | HDR | 1M | zero-shot | 5.9 | 12.8 | 1.8 | 23.7 |
-| RAOD (YOLOX-nano + its module) | HDR | 1M | fine-tuned, 4.6 h | 34.9 | 61.3 | 60.2 | 62.4 |
-| RetinaNet R50-FPN v2 | tone-mapped | 38M | zero-shot | 29.6 | 57.4 | 50.2 | 64.6 |
-| Faster R-CNN R50-FPN v2 | tone-mapped | 44M | zero-shot | 31.0 | 60.6 | 56.1 | 65.0 |
-| Faster R-CNN R50-FPN v2 | tone-mapped | 44M | fine-tuned, 0.5 h | **51.7** | **79.4** | 77.4 | 81.4 |
+| RAOD (YOLOX-nano + its module) | HDR | 1M | zero-shot | 7.0 | 15.3 | 1.8 | 28.8 |
+| RAOD (YOLOX-nano + its module) | HDR | 1M | fine-tuned, 4.6 h | 27.0 | 55.0 | 49.7 | 60.2 |
+| RetinaNet R50-FPN v2 | tone-mapped | 38M | zero-shot | 24.2 | 50.7 | 38.5 | 62.9 |
+| Faster R-CNN R50-FPN v2 | tone-mapped | 44M | zero-shot | 26.4 | 54.7 | 44.6 | 64.8 |
+| Faster R-CNN R50-FPN v2 | tone-mapped | 44M | fine-tuned, 0.5 h | **43.0** | **74.0** | 68.8 | 79.1 |
 
 RAOD here is its released configuration: YOLOX at depth 0.33, width 0.25,
 depthwise convolutions, plus its Adaptive_Module tone mapper. 1.0M parameters in
 total.
 
-Fine-tuning lifts RAOD 5.9× overall and 33× on the class it was almost blind to.
-The comparison arm is more interesting. Ordinary tone-map-then-detect gets 48%
-higher mAP in a tenth of the training time, and an untrained off-the-shelf
-detector already matches fine-tuned RAOD's AP50.
+An earlier version of this table, measured before deduplication, reported 5.9 /
+34.9 / 29.6 / 31.0 / 51.7. The fine-tuned rows fell 8 to 9 points once the
+duplicate frames went, and the zero-shot rows moved much less. That gap is itself
+the tell: a model that never trained on this data can't benefit from duplicates
+in the test set, so only the fine-tuned rows had anything to lose. RAOD zero-shot
+even rose slightly, since removing 72% of S1 changed the mix of what remains.
+
+Fine-tuning still lifts RAOD 3.9× overall and 28× on the class it was almost
+blind to. Ordinary tone-map-then-detect still wins by a wide margin: 59% higher
+mAP in a tenth of the training time, and an untrained off-the-shelf detector
+still comes close to fine-tuned RAOD.
 
 The comparison isn't capacity matched, though. 44M parameters against 1M, and the
 large detector is COCO-pretrained on millions of ordinary photographs containing
@@ -412,12 +414,12 @@ end. Then both learned methods sit in one table under one detector.
 | | thesis | section 2 |
 |---|---|---|
 | classes | 20 | 2 (person, car) |
-| test images | 380 | 779 |
-| duplicate frames | removed entirely | still present |
+| test images | 380 | 576 |
+| duplicate frames | removed entirely | removed, but by a different method |
 | resolution | 1024×576 | 1280×1280 |
 | detectors | RetinaNet, Faster R-CNN | RAOD YOLOX, Faster R-CNN v2 |
 
-Putting 51.7 next to 31.6 would be meaningless.
+Putting 43.0 next to 31.6 would be meaningless.
 [Section 1](#1-which-tone-map-works-best) is the table to set beside his, since
 it uses 20 classes.
 
@@ -500,15 +502,19 @@ see [.gitignore](.gitignore).
 
 Open questions, roughly in order of how much they'd change:
 
-1. Re-run section 2 on the deduplicated split so both tables sit on the same
-   footing. About 6 hours of training.
-2. Match model capacity honestly, either shrinking the tone-mapped arm or growing
+1. Match model capacity honestly, either shrinking the tone-mapped arm or growing
    the HDR arm, so the HDR against tone-mapped question isn't confounded by a 44×
    difference in parameters.
-3. Re-implement TMO-GAN and run it as a seventh front end, so the two learned
+2. Re-implement TMO-GAN and run it as a seventh front end, so the two learned
    methods can be compared directly instead of through a shared reference.
-4. Run the local Reinhard variant, to find out whether the ranking inversion
+3. Run the local Reinhard variant, to find out whether the ranking inversion
    against the thesis is real or just two different operators being compared.
+4. Chase the failure analysis. Holding object size fixed, misses track local
+   contrast rather than brightness: objects with under a decade of range inside
+   their own box are missed 66% of the time against 12% for objects with over
+   three, and flat scenes are harder than high-contrast ones. Every operator here
+   compresses global range; none targets contrast at the scale objects actually
+   occupy.
 
 ---
 

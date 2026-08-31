@@ -1,0 +1,18 @@
+{
+ "arch": "fasterrcnn",
+ "weights": "coco",
+ "ann": "D:\\Data\\HDR\\hdr4rtt_rod\\annotations\\hdr4rtt_rod_dedup_test.json",
+ "n_images": 576,
+ "n_gt": 3785,
+ "mAP": 0.26433496809078766,
+ "AP50": 0.5467538472240101,
+ "AP_small": 0.03785662542755851,
+ "AP_med": 0.1315874189785198,
+ "AP_large": 0.4219450549483583,
+ "AR100": 0.38566846230283064,
+ "per_class_AP50": {
+  "Pedestrian": 0.44559978592306204,
+  "Car": 0.6479079085249582
+ },
+ "n_dets": 12097
+}

@@ -1,0 +1,18 @@
+{
+ "arch": "retinanet",
+ "weights": "coco",
+ "ann": "D:\\Data\\HDR\\hdr4rtt_rod\\annotations\\hdr4rtt_rod_dedup_test.json",
+ "n_images": 576,
+ "n_gt": 3785,
+ "mAP": 0.24223268896495523,
+ "AP50": 0.5074533133550325,
+ "AP_small": 0.027342508794513908,
+ "AP_med": 0.1078219625020569,
+ "AP_large": 0.3864713356815083,
+ "AR100": 0.38519198834440405,
+ "per_class_AP50": {
+  "Pedestrian": 0.38544890255490694,
+  "Car": 0.6294577241551582
+ },
+ "n_dets": 32590
+}

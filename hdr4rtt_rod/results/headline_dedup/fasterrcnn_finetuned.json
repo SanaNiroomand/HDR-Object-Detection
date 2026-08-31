@@ -1,0 +1,18 @@
+{
+ "arch": "fasterrcnn",
+ "weights": "D:\\Codes\\HDR\\Sana\\hdr4rtt_rod\\tv_runs_dedup\\fasterrcnn\\last.pth",
+ "ann": "D:\\Data\\HDR\\hdr4rtt_rod\\annotations\\hdr4rtt_rod_dedup_test.json",
+ "n_images": 576,
+ "n_gt": 3785,
+ "mAP": 0.429656240799238,
+ "AP50": 0.7397856757333675,
+ "AP_small": 0.1303284644654309,
+ "AP_med": 0.2904319533579676,
+ "AP_large": 0.5759024223344685,
+ "AR100": 0.5020201746101373,
+ "per_class_AP50": {
+  "Pedestrian": 0.6881961460841164,
+  "Car": 0.7913752053826189
+ },
+ "n_dets": 6848
+}

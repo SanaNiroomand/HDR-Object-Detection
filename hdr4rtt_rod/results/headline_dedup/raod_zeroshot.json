@@ -1,0 +1,26 @@
+{
+ "ann": "D:\\Data\\HDR\\hdr4rtt_rod\\annotations\\hdr4rtt_rod_dedup_test.json",
+ "img_dir": "D:\\Data\\HDR\\hdr4rtt_rod\\images",
+ "ckpt": "D:\\Codes\\HDR\\Sana\\RAOD\\RAOD\\pre-trained\\best-day_night.pth",
+ "conf": 0.001,
+ "n_images": 576,
+ "n_gt": 3785,
+ "summary": {
+  "1.0": {
+   "mAP": 0.0696084462109688,
+   "AP50": 0.15306866559425442,
+   "AP_small": 0.005104155177378643,
+   "AP_med": 0.026302432316092233,
+   "AP_large": 0.12360792223368891,
+   "AR100": 0.13595106798202422,
+   "n_dets": 101356,
+   "per_class_AP50": {
+    "Pedestrian": 0.018222174401130473,
+    "Car": 0.2879151567873784,
+    "Cyclist": NaN,
+    "Tram": NaN,
+    "Truck": NaN
+   }
+  }
+ }
+}
