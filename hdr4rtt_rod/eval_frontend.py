@@ -61,7 +61,11 @@ def main():
 
     sd = torch.load(ckpt, map_location="cpu", weights_only=False)
     n_classes = sd.get("n_classes")
-    det = build_detector(args.arch, n_classes)
+    _r = sd.get("anchor_ratios", "")
+    det = build_detector(args.arch, n_classes,
+                         sd.get("min_size", 800), sd.get("max_size", 1333),
+                         sd.get("anchor_scale", 1.0),
+                         [float(v) for v in _r.split(",")] if _r else None)
     if args.arm == "tmm":
         # input_gain is part of the trained configuration, not a free choice at
         # test time: evaluating at a different scale than training would measure
@@ -71,6 +75,7 @@ def main():
         model = det
     model.load_state_dict(sd["model"])
     model.eval().to(device)
+    print(f"  detector resize: short side {sd.get('min_size', 800)}, long side at most {sd.get('max_size', 1333)}")
     print(f"arm={args.arm} arch={args.arch} epoch={sd.get('epoch')} classes={n_classes-1}"
           + (f" input_gain={sd.get('input_gain', 1.0)} "
              f"lr_mult={sd.get('tmm_lr_mult')} "

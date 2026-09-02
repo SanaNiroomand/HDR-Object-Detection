@@ -141,7 +141,8 @@ class TmmWrapper(nn.Module):
         return self.detector([x[i] for i in range(x.shape[0])], targets)
 
 
-def build_detector(arch, num_classes):
+def build_detector(arch, num_classes, min_size=800, max_size=1333,
+                   anchor_scale=1.0, anchor_ratios=None):
     from torchvision.models.detection import (
         retinanet_resnet50_fpn_v2, RetinaNet_ResNet50_FPN_V2_Weights,
         fasterrcnn_resnet50_fpn_v2, FasterRCNN_ResNet50_FPN_V2_Weights)
@@ -157,6 +158,29 @@ def build_detector(arch, num_classes):
         m = fasterrcnn_resnet50_fpn_v2(weights=FasterRCNN_ResNet50_FPN_V2_Weights.COCO_V1)
         m.roi_heads.box_predictor = FastRCNNPredictor(
             m.roi_heads.box_predictor.cls_score.in_features, num_classes)
+    # torchvision rescales inputs to these limits before the backbone sees
+    # them. Left at the defaults, a 1280x1280 input arrives as 800x800.
+    m.transform.min_size = (min_size,)
+    m.transform.max_size = max_size
+
+    if (anchor_scale != 1.0 or anchor_ratios) and arch == "retinanet":
+        ag = m.anchor_generator
+        old_n = ag.num_anchors_per_location()[0]
+        if anchor_scale != 1.0:
+            ag.sizes = tuple(tuple(int(round(v * anchor_scale)) for v in lvl)
+                             for lvl in ag.sizes)
+        if anchor_ratios:
+            r = tuple(float(v) for v in anchor_ratios)
+            ag.aspect_ratios = tuple(r for _ in ag.sizes)
+        new_n = ag.num_anchors_per_location()[0]
+        # the pretrained regression head is shaped by this count, and only the
+        # classification head is rebuilt above, so the count must not change
+        assert new_n == old_n, (
+            f"anchors per location changed {old_n} -> {new_n}; the pretrained "
+            f"regression head would no longer match")
+        print(f"  anchors: sizes x{anchor_scale:g} -> "
+              f"{ag.sizes[0][0]}..{ag.sizes[-1][-1]}, "
+              f"ratios {ag.aspect_ratios[0]}")
     return m
 
 
@@ -185,6 +209,17 @@ def main():
     p.add_argument("--input_gain", type=float, default=1.0,
                    help="scale fed to the TMM before its own processing; 0.18 "
                         "puts this data near the mean RAOD's weights were fitted at")
+    p.add_argument("--min_size", type=int, default=800,
+                   help="detector short-side target; 800 is the torchvision "
+                        "default and downscales a 1280 input to 800")
+    p.add_argument("--max_size", type=int, default=1333)
+    p.add_argument("--anchor_scale", type=float, default=1.0,
+                   help="multiply every anchor size; use min_size/800 when "
+                        "raising the input resolution")
+    p.add_argument("--anchor_ratios", default="",
+                   help="comma-separated height/width ratios, e.g. 1,2.5,5. "
+                        "Must keep three values: the pretrained regression "
+                        "head depends on the anchor count.")
     p.add_argument("--tag", default="", help="suffix for the output directory, so "
                                              "variants do not overwrite each other")
     p.add_argument("--workers", type=int, default=4)
@@ -207,10 +242,14 @@ def main():
     print(f"arm={args.arm}  arch={args.arch}  images={len(tr)}  classes={n_classes-1}")
     print(f"  train annotations: {os.path.basename(train_ann)}")
     print(f"  reading {img_dir}")
+    print(f"  detector resize: short side {args.min_size}, long side at most {args.max_size}")
     loader = DataLoader(tr, batch_size=args.batch, shuffle=True, num_workers=args.workers,
                         collate_fn=collate, pin_memory=False, drop_last=True)
 
-    det = build_detector(args.arch, n_classes)
+    ratios = [float(v) for v in args.anchor_ratios.split(",")] \
+        if args.anchor_ratios else None
+    det = build_detector(args.arch, n_classes, args.min_size, args.max_size,
+                         args.anchor_scale, ratios)
     if args.arm == "tmm":
         model = TmmWrapper(det,
                            init_ckpt=None if args.tmm_random_init else RAOD_CKPT,
@@ -265,6 +304,9 @@ def main():
                 run = 0.0
         torch.save({"model": model.state_dict(), "arm": args.arm, "arch": args.arch,
                     "epoch": ep + 1, "n_classes": n_classes,
+                    "min_size": args.min_size, "max_size": args.max_size,
+                    "anchor_scale": args.anchor_scale,
+                    "anchor_ratios": args.anchor_ratios,
                     "input_gain": args.input_gain, "tmm_lr_mult": args.tmm_lr_mult,
                     "tmm_random_init": args.tmm_random_init},
                    os.path.join(out_dir, "last.pth"))

@@ -298,6 +298,76 @@ objects actually occupy.
 
 ---
 
+## Input geometry: three attempts, one small gain
+
+The failure analysis blames poor boxes and misses, which points at the input
+resolution and the anchor boxes. I tried all three geometric knobs. Only the
+first helped.
+
+Baseline throughout: Reinhard, RetinaNet R50-FPN v2, fine-tuned 10 epochs at
+batch 4 on the deduplicated split.
+
+| change | anchor fit | mAP | AP50 | AP75 | small | med | large | AR100 |
+|---|---|---|---|---|---|---|---|---|
+| none, images reach the net at 800px | 75.3% | 31.3 | 49.7 | 31.4 | 6.2 | 18.3 | **42.9** | 44.5 |
+| **short side raised to 1280** | 82.9% | **31.7** | **53.4** | **31.5** | 8.9 | 23.4 | 41.7 | 44.3 |
+| 1280, anchor ratios 1, 2.5, 5 | 94.6% | 30.1 | 49.3 | 30.7 | 9.0 | 23.1 | 40.0 | 44.5 |
+| 1280, anchor ratios 0.5, 1.6, 6.4 | 96.0% | 30.4 | 50.5 | 29.6 | **11.0** | 22.7 | 40.2 | **46.9** |
+| native aspect ratio, long side 2048 | — | 31.4 | 51.6 | 30.7 | 10.1 | **23.9** | 37.0 | 44.8 |
+
+**The first row was hiding a defect.** torchvision rescales its input so the short
+side equals `min_size`, 800 by default, and nothing in the pipeline mentioned it.
+Every 1280×1280 image had been arriving at the network as 800×800. Raising that
+limit is the only change here that gained anything: +0.4 mAP, +3.7 AP50, and
+small-object AP from 6.2 to 8.9. It is now `--min_size` on both scripts, stored in
+the checkpoint so evaluation cannot silently disagree with training.
+
+### The anchors fit badly, and fixing that made things worse
+
+RetinaNet matches an object to a template box, an anchor, when the two overlap by
+IoU 0.5. An object no anchor reaches cannot become a positive example, so it is
+close to unlearnable. [`anchor_fit.py`](hdr4rtt_rod/anchor_fit.py) measures that
+share before any training, which costs seconds rather than a GPU-hour.
+
+It turns up a genuine mismatch. **85% of the objects here are taller than wide,
+median height/width 2.39 and upper quartile 3.53, while torchvision's stock ratios
+stop at 2.0.** Those defaults were fitted for COCO, not for people and bottles.
+Retuning them lifts the matchable share from 82.9% to 96.0%.
+
+The detector got worse anyway: 31.7 to 30.4 mAP.
+
+What the retuned anchors do is find more and localise worse. Recall rises from
+44.3 to 46.9, small-object AP from 8.9 to 11.0, while AP75, which demands tight
+boxes, falls from 31.5 to 29.6. mAP averages overlap thresholds from 0.5 to 0.95,
+so the sloppier boxes outweigh the extra finds.
+
+The likely cause is structural. Only the classification head is rebuilt for 20
+classes; the box regression head is inherited from COCO pretraining, where it
+learned offsets tied to the default anchor shapes. New shapes invalidate those
+priors, and 10 epochs on 2,506 images will not retrain them. Adding a fourth,
+taller ratio would test this properly, but the anchor count fixes the regression
+head's output width, so that means rebuilding it too. Untested.
+
+One measurement worth keeping: scaling the anchor *sizes* to match the higher
+resolution, the textbook move for preserving relative coverage, drops small-object
+matching to **0.0%**. The smallest anchor moves from 32px to 51px and nothing
+under 32² in area can reach IoU 0.5 against it. That configuration was abandoned
+two epochs in rather than trained to completion.
+
+### What this says
+
+Resolution, aspect ratio and anchors all land within 1.3 mAP of each other, and
+the headline barely moved. **Input geometry is not what limits this model.** That
+agrees with the failure analysis, which pointed at local contrast rather than
+anything geometric.
+
+Two caveats against reading this as a dead end. The small-object and recall gains
+are real, so the retuned-ratio model is the better choice if small objects matter
+more than tight boxes. And the anchor-fit share is a ceiling, not a score: it says
+what is reachable, never what gets learned. I predicted mAP from it and was wrong.
+
+---
+
 ## Reproducing
 
 You need PyTorch and OpenCV. RAOD's own repository supplies the model code. Data
@@ -323,6 +393,16 @@ python hdr4rtt_rod/train_frontend.py --arm reinhard --arch retinanet --epochs 10
 python hdr4rtt_rod/eval_frontend.py --arm reinhard --arch retinanet --batch 4
 ```
 
+**Pass `--min_size 1280 --max_size 2133` to train at full resolution.** Left at the
+defaults, torchvision shrinks every 1280x1280 image to 800x800 before the backbone
+sees it, silently. Evaluation reads the value back from the checkpoint, so the two
+cannot drift apart. `--anchor_ratios` and `--anchor_scale` retune the anchors; both
+are recorded the same way, and both lost to the defaults.
+
+```bash
+python hdr4rtt_rod/anchor_fit.py --search
+```
+
 **Use batch size 4 on a 16 GB GPU, not 8.** Batch 8 needs 17.51 GB on a 17.1 GB
 card, and Windows won't raise an out-of-memory error for that. It pages GPU
 memory to system RAM, so the run just gets about 8× slower with nothing in the
@@ -343,6 +423,7 @@ own. `pick_tmo.py` reproduces that sweep.
 | `hdr4rtt_rod/` | conversion, annotations, splits, configs, evaluation |
 | `hdr4rtt_rod/results/` | every reported number, as saved JSON |
 | `hdr4rtt_rod/viz/` | ground truth and predictions drawn on converted images |
+| `hdr4rtt_rod/anchor_fit.py` | anchor coverage against the real box shapes, before training |
 | `hdr4rtt_rod/progress_note.html` | step-by-step record of the work |
 
 Checkpoints, converted imagery and the dataset itself are excluded on purpose,
@@ -357,7 +438,11 @@ see [.gitignore](.gitignore).
 3. Run the local Reinhard variant, to find out whether the ranking inversion
    against the thesis is real or just two different operators.
 4. Target local contrast at object scale rather than global range, which is what
-   the failure analysis points at.
+   the failure analysis points at, and is the one lead the geometry experiments
+   did not rule out.
+5. Rebuild the box regression head alongside the classification head, so anchor
+   ratios can be retuned without discarding COCO's regression priors. That is the
+   test the anchor result needs and did not get.
 
 ---
 

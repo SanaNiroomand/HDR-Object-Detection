@@ -1,0 +1,151 @@
+##### TRAIN ratio_round  ratios=1.0,2.5,5.0  sizes=default #####
+arm=reinhard  arch=retinanet  images=2500  classes=20
+  train annotations: hdr4rtt_voc20_dedup_train.json
+  reading D:\Data\HDR\hdr4rtt_voc20\frontends\reinhard
+  detector resize: short side 1280, long side at most 2133
+  anchors: sizes x1 -> 32..812, ratios (1.0, 2.5, 5.0)
+  36.7M params
+  ep1/10 it200/6250 loss=1.020 60s eta 1804s peak=7.7GB
+  ep1/10 it400/6250 loss=0.768 114s eta 1671s peak=9.4GB
+  ep1/10 it600/6250 loss=0.672 169s eta 1590s peak=9.4GB
+epoch 1 done (176s)
+  ep2/10 it800/6250 loss=0.529 228s eta 1557s peak=9.4GB
+  ep2/10 it1000/6250 loss=0.622 283s eta 1485s peak=9.4GB
+  ep2/10 it1200/6250 loss=0.561 337s eta 1420s peak=9.4GB
+epoch 2 done (352s)
+  ep3/10 it1400/6250 loss=0.381 397s eta 1376s peak=9.4GB
+  ep3/10 it1600/6250 loss=0.526 452s eta 1313s peak=9.4GB
+  ep3/10 it1800/6250 loss=0.490 506s eta 1252s peak=9.4GB
+epoch 3 done (527s)
+  ep4/10 it2000/6250 loss=0.342 566s eta 1203s peak=9.4GB
+  ep4/10 it2200/6250 loss=0.433 621s eta 1143s peak=9.4GB
+  ep4/10 it2400/6250 loss=0.444 675s eta 1083s peak=9.4GB
+epoch 4 done (703s)
+  ep5/10 it2600/6250 loss=0.190 735s eta 1032s peak=9.4GB
+  ep5/10 it2800/6250 loss=0.421 790s eta 973s peak=9.4GB
+  ep5/10 it3000/6250 loss=0.430 844s eta 914s peak=9.4GB
+epoch 5 done (879s)
+  ep6/10 it3200/6250 loss=0.144 904s eta 862s peak=9.4GB
+  ep6/10 it3400/6250 loss=0.378 958s eta 803s peak=9.4GB
+  ep6/10 it3600/6250 loss=0.399 1013s eta 746s peak=9.4GB
+epoch 6 done (1055s)
+  ep7/10 it3800/6250 loss=0.088 1073s eta 692s peak=9.4GB
+  ep7/10 it4000/6250 loss=0.358 1128s eta 634s peak=9.4GB
+  ep7/10 it4200/6250 loss=0.331 1182s eta 577s peak=9.4GB
+epoch 7 done (1231s)
+  ep8/10 it4400/6250 loss=0.040 1242s eta 522s peak=9.4GB
+  ep8/10 it4600/6250 loss=0.334 1297s eta 465s peak=9.4GB
+  ep8/10 it4800/6250 loss=0.332 1351s eta 408s peak=9.4GB
+  ep8/10 it5000/6250 loss=0.358 1406s eta 351s peak=9.4GB
+epoch 8 done (1406s)
+  ep9/10 it5200/6250 loss=0.326 1466s eta 296s peak=9.4GB
+  ep9/10 it5400/6250 loss=0.320 1520s eta 239s peak=9.4GB
+  ep9/10 it5600/6250 loss=0.310 1575s eta 183s peak=9.4GB
+epoch 9 done (1582s)
+  ep10/10 it5800/6250 loss=0.252 1635s eta 127s peak=9.4GB
+  ep10/10 it6000/6250 loss=0.322 1689s eta 70s peak=9.4GB
+  ep10/10 it6200/6250 loss=0.330 1744s eta 14s peak=9.4GB
+epoch 10 done (1758s)
+
+[retinanet_reinhard] trained in 1758s, 0 non-finite steps skipped -> D:\Codes\HDR\Sana\hdr4rtt_rod\frontend_runs\retinanet_reinhard_ratio_round\last.pth
+##### EVAL ratio_round #####
+  anchors: sizes x1 -> 32..812, ratios (1.0, 2.5, 5.0)
+  detector resize: short side 1280, long side at most 2133
+arm=reinhard arch=retinanet epoch=10 classes=20
+633 test images present in D:\Data\HDR\hdr4rtt_voc20\frontends\reinhard
+5684 ground-truth boxes
+   4/633
+   164/633
+   324/633
+   484/633
+64716 detections
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.301
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.493
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.307
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.090
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.231
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.400
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.244
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.398
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.445
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.170
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.353
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.535
+   per-class AP50: dog=0.932  diningtable=0.815  chair=0.782  car=0.733  pottedplant=0.667  person=0.657  aeroplane=0.644  bottle=0.595  horse=0.519  sheep=0.505  tv/monitor=0.486  bicycle=0.453  sofa=0.421  bird=0.395  boat=0.271  motorbike=0.002  train=0.001  bus=0.000
+wrote D:\Codes\HDR\Sana\hdr4rtt_rod\frontend_runs\retinanet_reinhard_ratio_round\eval.json
+##### TRAIN ratio_fit  ratios=0.5,1.6,6.4  sizes=default #####
+arm=reinhard  arch=retinanet  images=2500  classes=20
+  train annotations: hdr4rtt_voc20_dedup_train.json
+  reading D:\Data\HDR\hdr4rtt_voc20\frontends\reinhard
+  detector resize: short side 1280, long side at most 2133
+  anchors: sizes x1 -> 32..812, ratios (0.5, 1.6, 6.4)
+  36.7M params
+  ep1/10 it200/6250 loss=1.021 60s eta 1815s peak=9.2GB
+  ep1/10 it400/6250 loss=0.762 115s eta 1677s peak=9.2GB
+  ep1/10 it600/6250 loss=0.693 169s eta 1594s peak=9.4GB
+epoch 1 done (176s)
+  ep2/10 it800/6250 loss=0.512 229s eta 1560s peak=9.4GB
+  ep2/10 it1000/6250 loss=0.549 284s eta 1489s peak=9.4GB
+  ep2/10 it1200/6250 loss=0.580 338s eta 1423s peak=9.4GB
+epoch 2 done (352s)
+  ep3/10 it1400/6250 loss=0.373 398s eta 1378s peak=9.4GB
+  ep3/10 it1600/6250 loss=0.509 452s eta 1315s peak=9.4GB
+  ep3/10 it1800/6250 loss=0.491 507s eta 1253s peak=9.4GB
+epoch 3 done (528s)
+  ep4/10 it2000/6250 loss=0.278 567s eta 1204s peak=9.4GB
+  ep4/10 it2200/6250 loss=0.455 621s eta 1144s peak=9.4GB
+  ep4/10 it2400/6250 loss=0.440 676s eta 1085s peak=9.4GB
+epoch 4 done (704s)
+  ep5/10 it2600/6250 loss=0.207 736s eta 1033s peak=9.4GB
+  ep5/10 it2800/6250 loss=0.403 790s eta 974s peak=9.4GB
+  ep5/10 it3000/6250 loss=0.404 845s eta 916s peak=9.4GB
+epoch 5 done (880s)
+  ep6/10 it3200/6250 loss=0.149 905s eta 863s peak=9.4GB
+  ep6/10 it3400/6250 loss=0.395 960s eta 804s peak=9.4GB
+  ep6/10 it3600/6250 loss=0.376 1014s eta 747s peak=9.4GB
+epoch 6 done (1056s)
+  ep7/10 it3800/6250 loss=0.087 1074s eta 693s peak=9.4GB
+  ep7/10 it4000/6250 loss=0.336 1129s eta 635s peak=9.4GB
+  ep7/10 it4200/6250 loss=0.367 1184s eta 578s peak=9.4GB
+epoch 7 done (1232s)
+  ep8/10 it4400/6250 loss=0.040 1244s eta 523s peak=9.4GB
+  ep8/10 it4600/6250 loss=0.343 1298s eta 466s peak=9.4GB
+  ep8/10 it4800/6250 loss=0.324 1353s eta 409s peak=9.4GB
+  ep8/10 it5000/6250 loss=0.361 1408s eta 352s peak=9.4GB
+epoch 8 done (1408s)
+  ep9/10 it5200/6250 loss=0.325 1468s eta 296s peak=9.4GB
+  ep9/10 it5400/6250 loss=0.326 1522s eta 240s peak=9.4GB
+  ep9/10 it5600/6250 loss=0.319 1577s eta 183s peak=9.4GB
+epoch 9 done (1584s)
+  ep10/10 it5800/6250 loss=0.262 1637s eta 127s peak=9.4GB
+  ep10/10 it6000/6250 loss=0.324 1691s eta 70s peak=9.4GB
+  ep10/10 it6200/6250 loss=0.315 1746s eta 14s peak=9.4GB
+epoch 10 done (1760s)
+
+[retinanet_reinhard] trained in 1760s, 0 non-finite steps skipped -> D:\Codes\HDR\Sana\hdr4rtt_rod\frontend_runs\retinanet_reinhard_ratio_fit\last.pth
+##### EVAL ratio_fit #####
+  anchors: sizes x1 -> 32..812, ratios (0.5, 1.6, 6.4)
+  detector resize: short side 1280, long side at most 2133
+arm=reinhard arch=retinanet epoch=10 classes=20
+633 test images present in D:\Data\HDR\hdr4rtt_voc20\frontends\reinhard
+5684 ground-truth boxes
+   4/633
+   164/633
+   324/633
+   484/633
+62909 detections
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.304
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.505
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.296
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.110
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.227
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.402
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.247
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.419
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.469
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.224
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.382
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.537
+   per-class AP50: dog=0.949  chair=0.795  aeroplane=0.789  diningtable=0.775  car=0.725  sheep=0.654  person=0.651  pottedplant=0.630  bottle=0.602  bicycle=0.506  horse=0.469  bird=0.445  tv/monitor=0.425  sofa=0.398  boat=0.253  motorbike=0.017  train=0.004  bus=0.000
+wrote D:\Codes\HDR\Sana\hdr4rtt_rod\frontend_runs\retinanet_reinhard_ratio_fit\eval.json
+##### ANCHOR RUNS COMPLETE #####

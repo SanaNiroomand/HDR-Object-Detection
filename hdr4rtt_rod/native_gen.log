@@ -1,0 +1,17 @@
+3139 images, arm=reinhard, long side capped at 2048
+  500/3139  20s
+  1000/3139  48s
+  1500/3139  77s
+  2000/3139  135s
+  2500/3139  206s
+  3000/3139  278s
+  3139/3139  299s
+
+done in 299s | 3139 images | failed 0
+  resolution: median 2.07 MP, min 0.92, max 3.15
+  against 1.64 MP for the squashed 1280x1280 version (1.3x more pixels at the median)
+  distinct shapes: 12
+
+annotations:
+  hdr4rtt_voc20_dedup_native_train.json: 2506 images, 19748 boxes (dropped <8px: 0)
+  hdr4rtt_voc20_dedup_native_test.json: 633 images, 5684 boxes (dropped <8px: 0)

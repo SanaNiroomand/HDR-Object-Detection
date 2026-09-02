@@ -1,0 +1,106 @@
+arm=reinhard  arch=retinanet  images=2500  classes=20
+  train annotations: hdr4rtt_voc20_dedup_native_train.json
+  reading D:/Data/HDR/hdr4rtt_voc20/frontends_native\reinhard
+  detector resize: short side 1080, long side at most 2048
+  36.7M params
+  ep1/10 it200/12500 loss=1.080 41s eta 2517s peak=7.3GB
+  ep1/10 it400/12500 loss=0.760 76s eta 2301s peak=7.6GB
+  ep1/10 it600/12500 loss=0.753 111s eta 2207s peak=7.6GB
+  ep1/10 it800/12500 loss=0.635 148s eta 2160s peak=7.8GB
+  ep1/10 it1000/12500 loss=0.721 184s eta 2118s peak=7.8GB
+  ep1/10 it1200/12500 loss=0.648 221s eta 2078s peak=7.8GB
+epoch 1 done (230s)
+  ep2/10 it1400/12500 loss=0.405 262s eta 2079s peak=7.8GB
+  ep2/10 it1600/12500 loss=0.538 299s eta 2035s peak=7.8GB
+  ep2/10 it1800/12500 loss=0.541 335s eta 1993s peak=7.8GB
+  ep2/10 it2000/12500 loss=0.612 372s eta 1952s peak=7.8GB
+  ep2/10 it2200/12500 loss=0.519 408s eta 1911s peak=7.8GB
+  ep2/10 it2400/12500 loss=0.503 445s eta 1871s peak=7.8GB
+epoch 2 done (463s)
+  ep3/10 it2600/12500 loss=0.224 486s eta 1851s peak=7.8GB
+  ep3/10 it2800/12500 loss=0.546 523s eta 1811s peak=7.8GB
+  ep3/10 it3000/12500 loss=0.493 559s eta 1772s peak=7.8GB
+  ep3/10 it3200/12500 loss=0.452 596s eta 1731s peak=7.8GB
+  ep3/10 it3400/12500 loss=0.463 632s eta 1692s peak=7.8GB
+  ep3/10 it3600/12500 loss=0.458 668s eta 1652s peak=7.8GB
+epoch 3 done (696s)
+  ep4/10 it3800/12500 loss=0.101 709s eta 1624s peak=7.8GB
+  ep4/10 it4000/12500 loss=0.408 746s eta 1584s peak=7.8GB
+  ep4/10 it4200/12500 loss=0.409 782s eta 1545s peak=7.8GB
+  ep4/10 it4400/12500 loss=0.479 818s eta 1506s peak=7.8GB
+  ep4/10 it4600/12500 loss=0.397 855s eta 1468s peak=7.8GB
+  ep4/10 it4800/12500 loss=0.439 891s eta 1429s peak=7.8GB
+  ep4/10 it5000/12500 loss=0.426 927s eta 1391s peak=7.8GB
+epoch 4 done (928s)
+  ep5/10 it5200/12500 loss=0.385 969s eta 1360s peak=7.8GB
+  ep5/10 it5400/12500 loss=0.390 1005s eta 1321s peak=7.8GB
+  ep5/10 it5600/12500 loss=0.386 1041s eta 1283s peak=7.8GB
+  ep5/10 it5800/12500 loss=0.399 1077s eta 1245s peak=7.8GB
+  ep5/10 it6000/12500 loss=0.361 1114s eta 1207s peak=7.8GB
+  ep5/10 it6200/12500 loss=0.457 1151s eta 1169s peak=7.8GB
+epoch 5 done (1160s)
+  ep6/10 it6400/12500 loss=0.312 1192s eta 1136s peak=7.8GB
+  ep6/10 it6600/12500 loss=0.334 1229s eta 1098s peak=7.8GB
+  ep6/10 it6800/12500 loss=0.356 1265s eta 1060s peak=7.8GB
+  ep6/10 it7000/12500 loss=0.381 1302s eta 1023s peak=7.8GB
+  ep6/10 it7200/12500 loss=0.369 1338s eta 985s peak=7.8GB
+  ep6/10 it7400/12500 loss=0.338 1374s eta 947s peak=7.8GB
+epoch 6 done (1393s)
+  ep7/10 it7600/12500 loss=0.156 1415s eta 913s peak=7.8GB
+  ep7/10 it7800/12500 loss=0.381 1452s eta 875s peak=7.8GB
+  ep7/10 it8000/12500 loss=0.338 1488s eta 837s peak=7.8GB
+  ep7/10 it8200/12500 loss=0.346 1525s eta 800s peak=7.8GB
+  ep7/10 it8400/12500 loss=0.331 1561s eta 762s peak=7.8GB
+  ep7/10 it8600/12500 loss=0.298 1598s eta 725s peak=7.8GB
+epoch 7 done (1626s)
+  ep8/10 it8800/12500 loss=0.073 1639s eta 689s peak=7.8GB
+  ep8/10 it9000/12500 loss=0.296 1676s eta 652s peak=7.8GB
+  ep8/10 it9200/12500 loss=0.382 1712s eta 614s peak=7.8GB
+  ep8/10 it9400/12500 loss=0.314 1749s eta 577s peak=7.8GB
+  ep8/10 it9600/12500 loss=0.284 1785s eta 539s peak=7.8GB
+  ep8/10 it9800/12500 loss=0.290 1821s eta 502s peak=7.8GB
+  ep8/10 it10000/12500 loss=0.312 1858s eta 465s peak=7.8GB
+epoch 8 done (1859s)
+  ep9/10 it10200/12500 loss=0.286 1900s eta 428s peak=7.8GB
+  ep9/10 it10400/12500 loss=0.334 1937s eta 391s peak=7.8GB
+  ep9/10 it10600/12500 loss=0.277 1973s eta 354s peak=7.8GB
+  ep9/10 it10800/12500 loss=0.299 2009s eta 316s peak=7.8GB
+  ep9/10 it11000/12500 loss=0.265 2046s eta 279s peak=7.8GB
+  ep9/10 it11200/12500 loss=0.286 2082s eta 242s peak=7.8GB
+epoch 9 done (2092s)
+  ep10/10 it11400/12500 loss=0.239 2124s eta 205s peak=7.8GB
+  ep10/10 it11600/12500 loss=0.292 2161s eta 168s peak=7.8GB
+  ep10/10 it11800/12500 loss=0.269 2198s eta 130s peak=7.8GB
+  ep10/10 it12000/12500 loss=0.272 2234s eta 93s peak=7.8GB
+  ep10/10 it12200/12500 loss=0.269 2270s eta 56s peak=7.8GB
+  ep10/10 it12400/12500 loss=0.268 2307s eta 19s peak=7.8GB
+epoch 10 done (2325s)
+
+[retinanet_reinhard] trained in 2325s, 0 non-finite steps skipped -> D:\Codes\HDR\Sana\hdr4rtt_rod\frontend_runs\retinanet_reinhard_native\last.pth
+  detector resize: short side 1080, long side at most 2048
+arm=reinhard arch=retinanet epoch=10 classes=20
+633 test images present in D:/Data/HDR/hdr4rtt_voc20/frontends_native\reinhard
+5684 ground-truth boxes
+   2/633
+   82/633
+   162/633
+   242/633
+   322/633
+   402/633
+   482/633
+   562/633
+58025 detections
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.314
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.516
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.307
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.101
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.239
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.370
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.239
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.407
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.448
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.232
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.369
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.489
+   per-class AP50: dog=1.000  chair=0.814  diningtable=0.791  aeroplane=0.766  car=0.730  horse=0.711  person=0.676  pottedplant=0.657  bottle=0.640  sheep=0.602  sofa=0.507  bicycle=0.428  bird=0.386  tv/monitor=0.339  boat=0.234  motorbike=0.005  bus=0.000  train=0.000
+wrote D:\Codes\HDR\Sana\hdr4rtt_rod\frontend_runs\retinanet_reinhard_native\eval.json
