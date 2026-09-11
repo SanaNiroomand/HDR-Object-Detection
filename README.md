@@ -54,17 +54,18 @@ found the same under both his detectors, where raw HDR scored 26.3 and 23.5.
 operators sit within 1.6 points of each other, against a 6.9 point gap to using
 nothing.
 
-**RAOD's learned module lost to a one-line formula from 2002**, finishing fifth
-of six. I suspected my own settings, so I retrained it three more times changing
-one thing each: full learning rate, random init instead of RAOD's weights, and
-input rescaled to the level those weights expect. All three still landed below
-every fixed operator.
+**RAOD's learned module finished fifth of six here**, 2.6 behind a one-line
+formula from 2002. I suspected my own settings, so I retrained it three more times
+changing one thing each: full learning rate, random init instead of RAOD's
+weights, and input rescaled to the level those weights expect. All three still
+landed below every fixed operator.
 
-That isn't evidence the method is wrong. RAOD pairs it with a 1M-parameter
-detector, where the front end has far more work to do; a 38M-parameter detector
-may already handle internally whatever the module supplied. Kocdemir's tables
-point the same way from the other side, and whether a learned tone map helps
-seems to depend on what sits behind it.
+That gap belongs to the detector in front of it rather than to the method. Put the
+same module behind a two-stage detector and it draws level with Reinhard, 42.6
+against 43.0 — see [what the module does behind a larger
+detector](#what-the-module-does-behind-a-larger-detector). Whether a learned tone
+map helps depends on what sits behind it, which is also where Kocdemir's tables
+point from the other side.
 
 ---
 
@@ -88,10 +89,55 @@ Ordinary tone-map-then-detect wins by a wide margin: 59% higher mAP in a tenth o
 the training time, and an untrained off-the-shelf detector comes close to a
 fine-tuned RAOD.
 
-The comparison isn't capacity matched, though. 44M parameters against 1M, and the
-large detector is COCO-pretrained on ordinary photographs containing person and
-car specifically, while RAOD was pretrained on five traffic classes from a
-car-mounted sensor. Neither advantage has anything to do with HDR.
+The comparison isn't capacity matched, though, and that accounts for nearly all of
+it: holding the front end and the input fixed and changing only the detector
+recovers 15.6 of those 16 points, measured in the next section. What remains
+confounded is pretraining, since the large detector is COCO-pretrained on ordinary
+photographs containing person and car specifically, while RAOD was pretrained on
+five traffic classes from a car-mounted sensor. Neither advantage has anything to
+do with HDR.
+
+---
+
+## What the module does behind a larger detector
+
+The table above changes two things at once, so it cannot say which mattered.
+This changes one. RAOD's own `Adaptive_Module`, initialised from their
+`best-day_night` checkpoint, stays in front; the input stays linear HDR; only the
+detector behind it changes. Same 2-class deduplicated split, 2,307 train and 576
+test, everything fine-tuned 10 epochs.
+
+| detector | params | front end | mAP | AP50 | small | med | large |
+|---|---|---|---|---|---|---|---|
+| YOLOX-Nano *(RAOD's own)* | 1M | RAOD module | 27.0 | 55.0 | 3.8 | 12.8 | 41.6 |
+| RetinaNet R50-FPN v2 | 38M | RAOD module | 36.9 | 64.1 | 5.5 | 18.9 | 54.7 |
+| Faster R-CNN R50-FPN v2 | 44M | RAOD module | **42.6** | 72.6 | 10.1 | 28.1 | 57.7 |
+| RetinaNet R50-FPN v2 | 38M | Reinhard | 39.8 | 68.3 | 7.7 | 22.3 | 57.0 |
+| Faster R-CNN R50-FPN v2 | 44M | Reinhard | **43.0** | 74.0 | 13.0 | 29.0 | 57.6 |
+
+**Changing the detector is worth +15.6 mAP with the module untouched**, and at
+that point it draws level with Reinhard: 42.6 against 43.0. The 16-point gap in
+the detector table was almost all capacity, not method.
+
+Two separate effects, both real. 1M to 38M is +9.9, which is size. 38M to 44M is
++5.7 on only 6M more parameters, so that step is one-stage to two-stage rather
+than size — Faster R-CNN's proposal stage is doing the work.
+
+The front-end gap tracks the detector, not the class count. It is 2.6 on the
+20-class split with RetinaNet, 2.9 here on 2 classes with RetinaNet, and 0.4 with
+Faster R-CNN. Scoring fewer classes did not close it; a stronger detector did.
+
+Three things this does not establish. **0.4 is inside run-to-run noise I have not
+measured**, so the honest reading is that the two front ends tie behind Faster
+R-CNN, not that Reinhard still edges it. **Pretraining is still confounded**, since
+COCO contains person and car specifically while RAOD pretrained on five traffic
+classes from a car-mounted sensor. And the module is **not free**: 11 GB and 57
+minutes against 3.3 GB and 17 for tone mapping once, offline, because it processes
+the full 1280×1280 float image before the detector downsizes it to 800. Matching
+accuracy at three times the cost is a real result, just not a favourable one.
+
+Reproduce with [`run_capacity.sh`](hdr4rtt_rod/run_capacity.sh); numbers in
+`results/capacity/`.
 
 ---
 
@@ -258,6 +304,13 @@ its own experiment, which cancels the differences in split and detector version.
 His method edged 0.3 past its best classical operator; RAOD's module fell 2.6
 behind mine. About 2.9 apart in his favour, measured against a shared reference
 rather than on a shared scale.
+
+That reference is less stable than it looks. RAOD's 2.6 deficit is a RetinaNet
+figure, and the capacity runs put the same deficit at 0.4 behind Faster R-CNN. So
+the 2.9 is specific to the detector it was measured with, and the same arithmetic
+behind a two-stage detector gives roughly 0.7. Treat the direction as informative
+and the size as not, at least until TMO-GAN can be run behind a fixed detector
+too.
 
 Deduplication helped here. My best operator now scores 31.3 against his best
 classical 31.3, where before I sat about 7 points above him with no explanation I
@@ -431,8 +484,8 @@ see [.gitignore](.gitignore).
 
 **Open questions**
 
-1. Match model capacity honestly, either shrinking the tone-mapped arm or growing
-   the HDR arm, so the comparison isn't confounded by a 44× parameter difference.
+1. Isolate pretraining, the one confound the capacity runs left standing: COCO
+   contains person and car specifically, RAOD's five traffic classes do not.
 2. Re-implement TMO-GAN as a seventh front end, so the two learned methods can be
    compared directly.
 3. Run the local Reinhard variant, to find out whether the ranking inversion
