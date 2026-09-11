@@ -8,6 +8,7 @@ Three parts: an audit of the dataset, a rebuilt pipeline for running
 (CVPR 2023) on it, and a comparison of six tone mapping methods behind one fixed
 detector.
 
+[Repository structure](STRUCTURE.md) ·
 [Progress note](hdr4rtt_rod/progress_note.html) ·
 [Dataset audit](hdr4rtt_analysis/REPORT.md) ·
 [Pipeline details](hdr4rtt_rod/README.md)
