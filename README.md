@@ -48,6 +48,13 @@ Row 5 trains the learned module jointly with the detector, the way RAOD intends.
 "S2 only" scores the bracketed photographs alone, the one source where duplicates
 are impossible.
 
+> **Every figure on this page is mAP × 100**, the convention the papers use.
+> `pycocotools` writes the same value between 0 and 1, so **31.3** here is
+> `0.31286...` in the saved JSON. Two more conventions matter before comparing
+> anything to a paper: mAP averages only over classes that have ground truth,
+> and tables with different class counts do not compare with each other. See
+> [reading the numbers](#reading-the-numbers).
+
 **Skipping the tone curve costs 6.9 mAP** and is worst on every source. Kocdemir
 found the same under both his detectors, where raw HDR scored 26.3 and 23.5.
 
