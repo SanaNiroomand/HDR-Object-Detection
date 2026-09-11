@@ -59,7 +59,7 @@ def cross(df, row_col, row_edges, row_labels, title, min_n=25):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--csv", default=r"D:\Codes\HDR\Sana\hdr4rtt_rod\failures\retinanet_reinhard_dedup_gt_boxes.csv")
+    p.add_argument("--csv", default=r"D:\Codes\HDR\Sana\hdr4rtt_rod\results\failures\retinanet_reinhard_dedup_gt_boxes.csv")
     args = p.parse_args()
 
     df = pd.read_csv(args.csv)

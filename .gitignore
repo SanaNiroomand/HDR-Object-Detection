@@ -20,6 +20,7 @@
 # training output directories (checkpoints, ~170 MB each, plus tensorboard logs)
 hdr4rtt_rod/cfg_hdr4rtt_rod/
 hdr4rtt_rod/cfg_hdr4rtt_rod_original/
+hdr4rtt_rod/cfg_hdr4rtt_rod_dedup/
 hdr4rtt_rod/tv_runs/
 hdr4rtt_rod/frontend_runs/
 

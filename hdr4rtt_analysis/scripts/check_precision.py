@@ -2,7 +2,8 @@
 import os, struct, collections
 import numpy as np, pandas as pd
 
-OUT = os.path.dirname(os.path.abspath(__file__))
+# outputs live one level up, beside REPORT.md, not next to the scripts
+OUT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ROOT = r"D:\Data\HDR\HDR4RTT Database\HDR4RTT Database"
 IMG = os.path.join(ROOT, "images")
 df = pd.read_csv(os.path.join(OUT, "hdr_stats_annotated.csv"))

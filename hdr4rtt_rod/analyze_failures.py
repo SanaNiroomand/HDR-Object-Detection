@@ -122,7 +122,7 @@ def main():
                    help="a detection below this is not something a user would act on")
     p.add_argument("--batch", type=int, default=2)
     p.add_argument("--viz_n", type=int, default=8)
-    p.add_argument("--out_dir", default=r"D:\Codes\HDR\Sana\hdr4rtt_rod\failures")
+    p.add_argument("--out_dir", default=r"D:\Codes\HDR\Sana\hdr4rtt_rod\results\failures")
     args = p.parse_args()
 
     import sys

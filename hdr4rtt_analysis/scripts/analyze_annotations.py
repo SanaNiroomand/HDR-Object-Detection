@@ -4,7 +4,8 @@ import numpy as np
 
 ROOT = r"D:\Data\HDR\HDR4RTT Database\HDR4RTT Database"
 ANN = os.path.join(ROOT, "annotations")
-OUT = os.path.dirname(os.path.abspath(__file__))
+# outputs live one level up, beside REPORT.md, not next to the scripts
+OUT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def sec(t):
