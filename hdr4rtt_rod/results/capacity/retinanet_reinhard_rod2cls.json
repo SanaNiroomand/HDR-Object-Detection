@@ -1,0 +1,19 @@
+{
+ "arm": "reinhard",
+ "arch": "retinanet",
+ "ckpt": "D:\\Codes\\HDR\\Sana\\hdr4rtt_rod\\frontend_runs\\retinanet_reinhard_rod2cls\\last.pth",
+ "n_images": 576,
+ "n_gt": 3785,
+ "mAP": 0.39825166408970575,
+ "AP50": 0.6833413450163088,
+ "AP75": 0.3898115935767913,
+ "AP_small": 0.07727911382486967,
+ "AP_med": 0.22273617133585955,
+ "AP_large": 0.5698313435053062,
+ "AR100": 0.5054742471308613,
+ "per_class_AP50": {
+  "Pedestrian": 0.6318,
+  "Car": 0.7349
+ },
+ "n_dets": 35570
+}

@@ -1,0 +1,19 @@
+{
+ "arm": "tmm",
+ "arch": "retinanet",
+ "ckpt": "D:\\Codes\\HDR\\Sana\\hdr4rtt_rod\\frontend_runs\\retinanet_tmm_rod2cls\\last.pth",
+ "n_images": 576,
+ "n_gt": 3785,
+ "mAP": 0.3687853929516478,
+ "AP50": 0.6405063253412023,
+ "AP75": 0.35657365721267353,
+ "AP_small": 0.05513370839956424,
+ "AP_med": 0.18944408738409727,
+ "AP_large": 0.5467147260378773,
+ "AR100": 0.48441601167350007,
+ "per_class_AP50": {
+  "Pedestrian": 0.586,
+  "Car": 0.695
+ },
+ "n_dets": 41267
+}

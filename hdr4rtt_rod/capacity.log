@@ -1,0 +1,151 @@
+##### TRAIN tmm + retinanet (2-class ROD split) #####
+arm=tmm  arch=retinanet  images=2294  classes=5
+  train annotations: hdr4rtt_rod_dedup_train.json
+  reading D:\Data\HDR\hdr4rtt_voc20\frontends\hdr
+  detector resize: short side 800, long side at most 1333
+gamma range: [7.0, 10.5]
+  TMM initialised from RAOD checkpoint: 22 tensors, missing=0 unexpected=0
+  tmm_lr_mult=0.1  input_gain=1.0  init=RAOD checkpoint
+  36.5M params
+  ep1/10 it200/5730 loss=0.883 122s eta 3361s peak=11.2GB
+  ep1/10 it400/5730 loss=0.657 237s eta 3161s peak=11.3GB
+epoch 1 done (338s)
+  ep2/10 it600/5730 loss=0.079 358s eta 3064s peak=11.3GB
+  ep2/10 it800/5730 loss=0.517 474s eta 2921s peak=11.3GB
+  ep2/10 it1000/5730 loss=0.465 590s eta 2789s peak=11.3GB
+epoch 2 done (675s)
+  ep3/10 it1200/5730 loss=0.103 711s eta 2683s peak=11.3GB
+  ep3/10 it1400/5730 loss=0.426 824s eta 2548s peak=11.3GB
+  ep3/10 it1600/5730 loss=0.413 936s eta 2417s peak=11.3GB
+epoch 3 done (1004s)
+  ep4/10 it1800/5730 loss=0.153 1054s eta 2302s peak=11.3GB
+  ep4/10 it2000/5730 loss=0.373 1167s eta 2177s peak=11.3GB
+  ep4/10 it2200/5730 loss=0.399 1280s eta 2054s peak=11.3GB
+epoch 4 done (1333s)
+  ep5/10 it2400/5730 loss=0.191 1398s eta 1940s peak=11.3GB
+  ep5/10 it2600/5730 loss=0.341 1512s eta 1820s peak=11.3GB
+  ep5/10 it2800/5730 loss=0.363 1625s eta 1700s peak=11.3GB
+epoch 5 done (1662s)
+  ep6/10 it3000/5730 loss=0.224 1743s eta 1586s peak=11.3GB
+  ep6/10 it3200/5730 loss=0.318 1856s eta 1467s peak=11.3GB
+  ep6/10 it3400/5730 loss=0.322 1969s eta 1349s peak=11.3GB
+epoch 6 done (1991s)
+  ep7/10 it3600/5730 loss=0.238 2087s eta 1235s peak=11.3GB
+  ep7/10 it3800/5730 loss=0.311 2201s eta 1118s peak=11.3GB
+  ep7/10 it4000/5730 loss=0.313 2314s eta 1001s peak=11.3GB
+epoch 7 done (2321s)
+  ep8/10 it4200/5730 loss=0.274 2433s eta 886s peak=11.3GB
+  ep8/10 it4400/5730 loss=0.288 2546s eta 770s peak=11.3GB
+epoch 8 done (2651s)
+  ep9/10 it4600/5730 loss=0.022 2665s eta 655s peak=11.3GB
+  ep9/10 it4800/5730 loss=0.270 2778s eta 538s peak=11.3GB
+  ep9/10 it5000/5730 loss=0.255 2891s eta 422s peak=11.3GB
+epoch 9 done (2981s)
+  ep10/10 it5200/5730 loss=0.061 3010s eta 307s peak=11.3GB
+  ep10/10 it5400/5730 loss=0.269 3124s eta 191s peak=11.3GB
+  ep10/10 it5600/5730 loss=0.268 3237s eta 75s peak=11.3GB
+epoch 10 done (3311s)
+
+[retinanet_tmm] trained in 3311s, 0 non-finite steps skipped -> D:\Codes\HDR\Sana\hdr4rtt_rod\frontend_runs\retinanet_tmm_rod2cls\last.pth
+##### EVAL tmm + retinanet #####
+gamma range: [7.0, 10.5]
+  TMM randomly initialised (no checkpoint found)
+  detector resize: short side 800, long side at most 1333
+arm=tmm arch=retinanet epoch=10 classes=5 input_gain=1.0 lr_mult=0.1 init=RAOD
+576 test images present in D:\Data\HDR\hdr4rtt_voc20\frontends\hdr
+3785 ground-truth boxes
+   4/576
+   164/576
+   324/576
+   484/576
+41267 detections
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.369
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.641
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.357
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.055
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.189
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.547
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.139
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.385
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.484
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.140
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.380
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.632
+   per-class AP50: Car=0.695  Pedestrian=0.586
+wrote D:\Codes\HDR\Sana\hdr4rtt_rod\frontend_runs\retinanet_tmm_rod2cls\eval.json
+##### TRAIN tmm + fasterrcnn (2-class ROD split) #####
+arm=tmm  arch=fasterrcnn  images=2294  classes=5
+  train annotations: hdr4rtt_rod_dedup_train.json
+  reading D:\Data\HDR\hdr4rtt_voc20\frontends\hdr
+  detector resize: short side 800, long side at most 1333
+gamma range: [7.0, 10.5]
+  TMM initialised from RAOD checkpoint: 22 tensors, missing=0 unexpected=0
+  tmm_lr_mult=0.1  input_gain=1.0  init=RAOD checkpoint
+  43.3M params
+  ep1/10 it200/5730 loss=0.799 126s eta 3479s peak=11.0GB
+  ep1/10 it400/5730 loss=0.421 245s eta 3269s peak=11.0GB
+epoch 1 done (350s)
+  ep2/10 it600/5730 loss=0.054 371s eta 3168s peak=11.0GB
+  ep2/10 it800/5730 loss=0.323 491s eta 3024s peak=11.0GB
+  ep2/10 it1000/5730 loss=0.338 610s eta 2887s peak=11.0GB
+epoch 2 done (699s)
+  ep3/10 it1200/5730 loss=0.074 736s eta 2778s peak=11.0GB
+  ep3/10 it1400/5730 loss=0.304 856s eta 2647s peak=11.0GB
+  ep3/10 it1600/5730 loss=0.290 975s eta 2517s peak=11.0GB
+epoch 3 done (1047s)
+  ep4/10 it1800/5730 loss=0.111 1100s eta 2401s peak=11.0GB
+  ep4/10 it2000/5730 loss=0.273 1219s eta 2274s peak=11.0GB
+  ep4/10 it2200/5730 loss=0.272 1339s eta 2148s peak=11.0GB
+epoch 4 done (1394s)
+  ep5/10 it2400/5730 loss=0.138 1463s eta 2030s peak=11.0GB
+  ep5/10 it2600/5730 loss=0.242 1583s eta 1905s peak=11.0GB
+  ep5/10 it2800/5730 loss=0.263 1702s eta 1781s peak=11.0GB
+epoch 5 done (1742s)
+  ep6/10 it3000/5730 loss=0.158 1827s eta 1663s peak=11.0GB
+  ep6/10 it3200/5730 loss=0.254 1947s eta 1540s peak=11.0GB
+  ep6/10 it3400/5730 loss=0.224 2067s eta 1417s peak=11.0GB
+epoch 6 done (2090s)
+  ep7/10 it3600/5730 loss=0.188 2192s eta 1297s peak=11.0GB
+  ep7/10 it3800/5730 loss=0.224 2312s eta 1174s peak=11.0GB
+  ep7/10 it4000/5730 loss=0.219 2432s eta 1052s peak=11.0GB
+epoch 7 done (2439s)
+  ep8/10 it4200/5730 loss=0.210 2557s eta 932s peak=11.0GB
+  ep8/10 it4400/5730 loss=0.214 2677s eta 809s peak=11.0GB
+epoch 8 done (2789s)
+  ep9/10 it4600/5730 loss=0.012 2804s eta 689s peak=11.0GB
+  ep9/10 it4800/5730 loss=0.195 2928s eta 567s peak=11.0GB
+  ep9/10 it5000/5730 loss=0.207 3049s eta 445s peak=11.0GB
+epoch 9 done (3143s)
+  ep10/10 it5200/5730 loss=0.051 3174s eta 324s peak=11.0GB
+  ep10/10 it5400/5730 loss=0.189 3294s eta 201s peak=11.0GB
+  ep10/10 it5600/5730 loss=0.205 3414s eta 79s peak=11.0GB
+epoch 10 done (3492s)
+
+[fasterrcnn_tmm] trained in 3492s, 0 non-finite steps skipped -> D:\Codes\HDR\Sana\hdr4rtt_rod\frontend_runs\fasterrcnn_tmm_rod2cls\last.pth
+##### EVAL tmm + fasterrcnn #####
+gamma range: [7.0, 10.5]
+  TMM randomly initialised (no checkpoint found)
+  detector resize: short side 800, long side at most 1333
+arm=tmm arch=fasterrcnn epoch=10 classes=5 input_gain=1.0 lr_mult=0.1 init=RAOD
+576 test images present in D:\Data\HDR\hdr4rtt_voc20\frontends\hdr
+3785 ground-truth boxes
+   4/576
+   164/576
+   324/576
+   484/576
+10077 detections
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.426
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.726
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.427
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.101
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.281
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.577
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.142
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.419
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.502
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.219
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.398
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.642
+   per-class AP50: Car=0.764  Pedestrian=0.689
+wrote D:\Codes\HDR\Sana\hdr4rtt_rod\frontend_runs\fasterrcnn_tmm_rod2cls\eval.json
+##### CAPACITY RUNS COMPLETE #####
