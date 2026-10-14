@@ -1,8 +1,11 @@
 #!/bin/bash
-# Completes the 2x2. The capacity runs give TMM x {RetinaNet, FasterRCNN}; the
-# detector table already has Reinhard + FasterRCNN fine-tuned at 43.0. The one
-# missing cell is Reinhard + RetinaNet on the same 2-class split, without which
-# "detector" and "front end" stay tangled for the RetinaNet row.
+# Adds the like-for-like tone-map cell for RetinaNet. The capacity runs give
+# TMM x {RetinaNet, FasterRCNN}. The detector table's fine-tuned FasterRCNN
+# (43.0) is NOT a matching cell: it used gamma at p99, not Reinhard, and was
+# trained by train_torchvision.py for 12 epochs at batch 2. This run is
+# Reinhard + RetinaNet through train_frontend.py with the capacity runs'
+# settings, without which "detector" and "front end" stay tangled for the
+# RetinaNet row. A matching Reinhard + FasterRCNN cell has not been run.
 PY="/c/Users/OGAM/miniconda3/envs/hs-ml/python.exe"
 ANN="D:/Data/HDR/hdr4rtt_rod/annotations"
 cd "D:/Codes/HDR/Sana/hdr4rtt_rod"

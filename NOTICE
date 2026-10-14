@@ -58,10 +58,11 @@ those projects.
     and the corresponding MS thesis.
 
     No source code from this work is used, adapted, or redistributed here. The
-    original software was reported lost and could not be re-run. Numerical
-    results are quoted from the published tables for academic comparison, with
-    attribution, and are labelled as quoted rather than reproduced wherever they
-    appear. Rights remain with the authors and publisher.
+    author's training code is public (https://github.com/ismailkocdemir/tmo_detector)
+    but ships no trained models, and the method has not been re-run here.
+    Numerical results are quoted from the published tables for academic
+    comparison, with attribution, and are labelled as quoted rather than
+    reproduced wherever they appear. Rights remain with the authors and publisher.
 
 ================================================================================
 3. Tone-mapping operators -- ALGORITHMS from papers, INDEPENDENT implementations

@@ -15,7 +15,8 @@
 #   RetinaNet   38M    ?
 #   FasterRCNN  44M    ?
 #
-# Reinhard + FasterRCNN on the same split scores 43.0, so:
+# Tone-mapped FasterRCNN on the same split scores 43.0 (gamma at p99, 12 epochs,
+# batch 2, train_torchvision.py -- not Reinhard, and not this schedule), so:
 #   result near 43 -> capacity was the whole story, the module is fine
 #   result near 27 -> the module is the ceiling, not the detector
 PY="/c/Users/OGAM/miniconda3/envs/hs-ml/python.exe"

@@ -193,11 +193,11 @@
 <header>
   <p class="eyebrow">Internship progress note</p>
   <h1>Getting HDR4RTT to work with the RAOD detector</h1>
-  <p class="standfirst">A full dataset audit, two bugs found in the previous pipeline, a rebuilt conversion and evaluation chain, a fine-tuned model, and a measured answer to the train/test leakage question.</p>
+  <p class="standfirst">A full dataset audit, two bugs found in the previous pipeline, a rebuilt conversion and evaluation chain, a fine-tuned model, and a measured answer to the train/test leakage question. Then a controlled comparison of six tone maps, near-duplicate removal, a failure analysis, and a test of detector capacity.</p>
   <div class="meta">
-    <span>11–13 August 2026</span>
+    <span>11 August – 11 September 2026</span>
     <span>4,080 EXR files audited</span>
-    <span>3 training runs</span>
+    <span>12 phases</span>
     <span>RTX 5070 Ti</span>
   </div>
 </header>
@@ -207,10 +207,12 @@
   <div class="stat"><p class="k">mAP after</p><p class="v">0.349</p><p class="d">5.9× higher</p></div>
   <div class="stat"><p class="k">People AP50</p><p class="v">0.602</p><p class="d">was 0.018 — 33×</p></div>
   <div class="stat"><p class="k">Cars AP50</p><p class="v">0.624</p><p class="d">was 0.237</p></div>
-  <div class="stat"><p class="k">Best overall</p><p class="v">51.7</p><p class="d">ordinary detector, tone-mapped</p></div>
+  <div class="stat"><p class="k">Best overall</p><p class="v">51.7</p><p class="d">tone-mapped detector &mdash; 43.0 after deduplication</p></div>
 </div>
 
-<p class="phase-note" style="margin-top:1rem">Scores above are written 0&ndash;1 (0.349); from Phase&nbsp;8 onward they are written &times;100 (34.9), the convention the papers use &mdash; identical numbers. Phases&nbsp;1&ndash;7 also score <b>2 classes</b> while Phase&nbsp;8 scores <b>20</b>, so the two are not comparable with each other.</p>
+<p class="phase-note" style="margin-top:1rem">Scores above are written 0&ndash;1 (0.349); from Phase&nbsp;8 onward they are written &times;100 (34.9), the convention the papers use &mdash; identical numbers. Phases&nbsp;1&ndash;7, 10 and 12 score <b>2 classes</b> while Phases&nbsp;8, 9 and 11 score <b>20</b>, so the two groups are not comparable with each other.</p>
+
+<div class="problem"><strong>Read this first &mdash; updated 14 October 2026</strong><p>Phases&nbsp;1&ndash;8 were written between 11 and 20 August, <b>before near-duplicate images were removed</b>. Their absolute scores, including the band above, are inflated; the rankings held. Phase&nbsp;9 measures how much, and Phases&nbsp;9&ndash;12 bring the note up to date. The current numbers are in the top-level <code>README.md</code>. Two figures in Phase&nbsp;8 were also corrected on this date (Steps&nbsp;35&ndash;37).</p></div>
 
 <h2>Phase 1 — Auditing the dataset</h2>
 <p class="phase-note">Every one of the 4,080 EXR files was decoded and measured. No sampling.</p>
@@ -572,7 +574,9 @@ Scores in this phase are &times;100 and cover all 20 classes.</p>
     <p>A weak operator would have made the comparison arm lose by construction.
     Eight candidates were scored with a COCO-pretrained detector, needing no
     training. The spread was <em class="q">10%</em> relative, so the choice genuinely
-    mattered; gamma at the 99th percentile won and was used throughout.</p>
+    mattered; gamma at the 99th percentile won. Every tone-mapped row of the
+    detector comparison uses it, including the fine-tuned Faster R-CNN in Steps 31
+    and 41. It is <b>not</b> the Reinhard image set built in Step 33.</p>
   </div>
 </div>
 
@@ -649,8 +653,8 @@ Scores in this phase are &times;100 and cover all 20 classes.</p>
           <tr class="hi"><td>Reinhard <b>(global)</b></td><td>classical, 2002</td><td class="num">38.3</td><td class="num">7.0</td></tr>
           <tr><td>HDR with gamma</td><td>standard curve</td><td class="num">36.5</td><td class="num">5.7</td></tr>
           <tr><td>Durand <b>(local)</b></td><td>classical, 2002</td><td class="num">36.4</td><td class="num">5.4</td></tr>
-          <tr><td>RAOD module</td><td>learned, CVPR 2023</td><td class="num">36.1</td><td class="num">5.2</td></tr>
           <tr><td>Log compression</td><td>simple formula</td><td class="num">35.9</td><td class="num">8.2</td></tr>
+          <tr><td>RAOD module</td><td>learned, CVPR 2023</td><td class="num">35.5</td><td class="num">6.8</td></tr>
           <tr class="hi"><td>no tone curve</td><td>control</td><td class="num">30.4</td><td class="num">1.1</td></tr>
         </tbody>
       </table>
@@ -659,7 +663,12 @@ Scores in this phase are &times;100 and cover all 20 classes.</p>
     the worst</b>, and near-blind on small objects (1.1 against 5&ndash;8), independently
     replicating the thesis result under a third detector. <b>Which curve barely
     matters</b>: the sensible ones span 2.4 points while the gap to no-curve is 6.
-    <b>The learned module lost to a one-line formula from 2002</b>, by 2.2 points.</p></div>
+    <b>The learned module lost to a one-line formula from 2002</b>, by 2.8 points.</p></div>
+    <div class="problem"><strong>Corrected 14 October 2026</strong><p>This table first
+    gave the RAOD module 36.1 mAP and 5.2 small-object AP, and a 2.2-point loss. Those
+    were the full-learning-rate retest from Step&nbsp;36, not the standard run. The
+    standard run, <code>results/frontends/retinanet_tmm.json</code>, scored 35.5 and
+    6.8, which also puts it below log compression.</p></div>
   </div>
 </div>
 
@@ -671,10 +680,11 @@ Scores in this phase are &times;100 and cover all 20 classes.</p>
     so each was isolated: full learning rate (<em class="q">36.1</em>), random
     initialisation instead of RAOD's weights (<em class="q">35.7</em>), and input
     rescaled to the level those weights were fitted at (<em class="q">34.4</em>).</p>
-    <div class="found"><strong>Result</strong><p>All four variants land below every
-    sensible fixed operator, so the finding is not an artefact of the settings. The
-    rescaling variant was <b>worse</b>, not better &mdash; the assumed input-scale
-    mismatch was not the limiting factor.</p></div>
+    <div class="found"><strong>Result</strong><p>No variant reaches Reinhard, gamma or
+    Durand, so the finding is not an artefact of the settings. The full-learning-rate
+    run does edge log compression, 36.1 against 35.9, too small a margin to read
+    anything into. The rescaling variant was <b>worse</b>, not better &mdash; the
+    assumed input-scale mismatch was not the limiting factor.</p></div>
   </div>
 </div>
 
@@ -683,27 +693,235 @@ Scores in this phase are &times;100 and cover all 20 classes.</p>
   <h3>Recorded a failed bridge between the two experiments</h3>
   <div class="body">
     <p>The plan was to use the operators common to both experiments to map the
-    thesis's scale onto this one, so its lost method could be placed. It does not
+    thesis's scale onto this one, so its method, which had not been re-run here,
+    could be placed. It does not
     work: the rankings <b>invert</b> &mdash; Reinhard is the worst tone map in the
     thesis table and the best here. No scale factor reconciles them.</p>
     <p>What does hold is comparing each learned method against the best classical
     operator <em>in its own experiment</em>: the thesis method <em class="q">+0.3</em>
-    ahead of its best classical, RAOD's module <em class="q">-2.2</em> behind its own.
+    ahead of its best classical, RAOD's module <em class="q">-2.8</em> behind its own.
     An indirect comparison, not a head-to-head.</p>
+  </div>
+</div>
+
+<h2>Phase 9 — Removing near-duplicate images</h2>
+<p class="phase-note">Late August. Every score before this phase is inflated by near-identical images in both train and test.</p>
+
+<div class="step">
+  <div class="n">38</div>
+  <h3>Split the best arm's score by source, and found most of it was duplicates</h3>
+  <div class="body">
+    <div class="scroll">
+      <table>
+        <caption>Measured here &mdash; Reinhard + RetinaNet, 20 classes, FINE-TUNED, before deduplication</caption>
+        <thead><tr><th>source</th><th>what it is</th><th class="num">mAP</th><th class="num">AP50</th></tr></thead>
+        <tbody>
+          <tr class="hi"><td>S1</td><td>video / rendered</td><td class="num">90.1</td><td class="num">99.2</td></tr>
+          <tr><td>S3</td><td>HDR video</td><td class="num">63.3</td><td class="num">86.5</td></tr>
+          <tr><td>S2</td><td>bracketed photographs</td><td class="num">24.7</td><td class="num">43.5</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="problem"><strong>Problem found</strong><p>99.2 AP50 on S1 is not a
+    real result. Its 1,289 images turned out to hold only <b>367 distinct scenes</b>,
+    so the test set was mostly copies of training images. This confirms the first
+    open item from August.</p></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">39</div>
+  <h3>Removed near-duplicates by image similarity</h3>
+  <div class="body">
+    <p>Used Ula&#351;'s <code>dedupe_hdr_frames.py</code>, which compares each frame by
+    SSIM (a standard image-similarity score) against the last frame it kept. The
+    threshold was chosen by what it removes, not by aiming for a target count.</p>
+    <div class="scroll">
+      <table>
+        <caption>Images kept at each similarity threshold</caption>
+        <thead><tr><th class="num">threshold</th><th class="num">kept</th><th class="num">S1</th><th class="num">S2</th><th class="num">S3</th></tr></thead>
+        <tbody>
+          <tr class="hi"><td class="num">0.92 (used)</td><td class="num">3,145</td><td class="num">28%</td><td class="num">100%</td><td class="num">99%</td></tr>
+          <tr><td class="num">0.60</td><td class="num">2,822</td><td class="num">7%</td><td class="num">98%</td><td class="num">98%</td></tr>
+          <tr><td class="num">0.30</td><td class="num">2,582</td><td class="num">2%</td><td class="num">89%</td><td class="num">94%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Harsher settings come closer to Kocdemir's 1,871 images, but only by deleting
+    S2 photographs taken on separate days, which have no duplicates to remove. Result:
+    <em class="q">2,506</em> training and <em class="q">633</em> test images.
+    <b>This is not Kocdemir's split</b>; his list was not available.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">40</div>
+  <h3>Re-ran all six tone maps on the clean split</h3>
+  <div class="body">
+    <div class="scroll">
+      <table>
+        <caption>Measured here &mdash; RetinaNet R50-FPN v2, 20 classes, 633 test images, all FINE-TUNED 10 epochs, deduplicated</caption>
+        <thead><tr><th>front end</th><th class="num">mAP</th><th class="num">before</th><th class="num">S2 only</th></tr></thead>
+        <tbody>
+          <tr class="hi"><td>Reinhard <b>(global)</b></td><td class="num">31.3</td><td class="num">38.3</td><td class="num">24.2</td></tr>
+          <tr><td>HDR with gamma</td><td class="num">30.4</td><td class="num">36.5</td><td class="num">22.9</td></tr>
+          <tr><td>Log compression</td><td class="num">29.9</td><td class="num">35.9</td><td class="num">22.5</td></tr>
+          <tr><td>Durand <b>(local)</b></td><td class="num">29.7</td><td class="num">36.4</td><td class="num">22.7</td></tr>
+          <tr><td>RAOD module</td><td class="num">28.7</td><td class="num">35.5</td><td class="num">22.0</td></tr>
+          <tr class="hi"><td>no tone curve</td><td class="num">24.4</td><td class="num">30.4</td><td class="num">18.8</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="found"><strong>Result</strong><p>Every arm dropped 5.9 to 7.0 points
+    and <b>the ranking held</b>. S2, which lost almost nothing to deduplication,
+    barely moved (24.7 to 24.2), so the drop came from duplicates rather than from
+    anything else. No tone curve still costs <b>6.9</b>; the four classical curves sit
+    within 1.6; the learned module is 2.6 behind Reinhard.</p></div>
+  </div>
+</div>
+
+<h2>Phase 10 — Re-running the detector comparison</h2>
+<p class="phase-note">1 September. The 2-class table from Steps&nbsp;22 and 31, rebuilt on the deduplicated images.</p>
+
+<div class="step">
+  <div class="n">41</div>
+  <h3>The ordinary detector still wins, by less</h3>
+  <div class="body">
+    <div class="scroll">
+      <table>
+        <caption>Measured here &mdash; 2 classes (person, car), 576 test images, deduplicated</caption>
+        <thead><tr><th>detector</th><th>input</th><th>training</th><th class="num">mAP</th></tr></thead>
+        <tbody>
+          <tr><td>RAOD (1M)</td><td>linear HDR</td><td>zero-shot</td><td class="num">7.0</td></tr>
+          <tr><td>RAOD (1M)</td><td>linear HDR</td><td>fine-tuned, 50 ep, batch 4</td><td class="num">27.0</td></tr>
+          <tr><td>RetinaNet (38M)</td><td>gamma p99</td><td>zero-shot</td><td class="num">24.2</td></tr>
+          <tr><td>Faster R-CNN (44M)</td><td>gamma p99</td><td>zero-shot</td><td class="num">26.4</td></tr>
+          <tr class="hi"><td>Faster R-CNN (44M)</td><td>gamma p99</td><td>fine-tuned, 12 ep, batch 2</td><td class="num">43.0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Against the August table, the fine-tuned rows fell 8 to 9 points (RAOD 34.9
+    to 27.0, Faster R-CNN 51.7 to 43.0). The zero-shot rows fell less: 4.6 and 5.4
+    for the torchvision detectors, while RAOD's rose 1.1. A model that never trained
+    on this data cannot benefit from duplicates, so its drop most likely comes from
+    the test set losing easy S1 images. Comparing Faster R-CNN with itself, the
+    fine-tuned model lost about 4 points more than the zero-shot one (8.7 against
+    4.6), roughly what the duplicates had been adding.</p>
+  </div>
+</div>
+
+<h2>Phase 11 — Where the detector fails, and input geometry</h2>
+<p class="phase-note">1&ndash;2 September. Reinhard + RetinaNet, deduplicated split.</p>
+
+<div class="step">
+  <div class="n">42</div>
+  <h3>Classified every prediction and every missed object</h3>
+  <div class="body">
+    <p>Of predictions above 0.3 confidence: 58.8% correct, <b>18.8% find the object
+    but draw a poor box</b>, 15.2% land on background, 4.6% have the wrong class, 2.6%
+    are duplicates. <em class="q">38%</em> of real objects are missed entirely. Each
+    object was joined to statistics measured from the original EXR file.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">43</div>
+  <h3>Found that misses follow local contrast, not darkness</h3>
+  <div class="body">
+    <p>Holding object size fixed (objects 5&ndash;10% of the image side), objects with
+    under 1 decade of brightness range inside their own box are missed
+    <em class="q">66%</em> of the time; those with over 3 decades,
+    <em class="q">12%</em>. Flat, low-contrast objects are the hard ones.</p>
+    <div class="found"><strong>Interpretation</strong><p>Every tone map tested here
+    compresses the range of the whole scene. None targets contrast at the scale
+    objects actually occupy, which is where the failures are.</p></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">44</div>
+  <h3>Found a silent downscale, and fixed it</h3>
+  <div class="body">
+    <p>torchvision shrinks its input so the short side is 800 pixels unless told
+    otherwise, so every 1280&times;1280 image had reached the network at
+    800&times;800. Raising that to 1280 gave <b>+0.4 mAP</b> (31.3 to 31.7), +3.7
+    AP50, and small-object AP from 6.2 to 8.9. It is now <code>--min_size</code>,
+    stored in the checkpoint so evaluation cannot disagree with training.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">45</div>
+  <h3>Retuned the anchor boxes &mdash; a better fit that scored worse</h3>
+  <div class="body">
+    <p>85% of objects here are taller than wide (median height/width 2.39), while the
+    detector's stock box shapes stop at 2. Retuning them raised the share of objects
+    the anchors can reach from 82.9% to <em class="q">96.0%</em>, but mAP fell from
+    31.7 to 30.4: more objects found, looser boxes. Keeping the native aspect ratio
+    instead of squashing to a square gave 31.4.</p>
+    <div class="found"><strong>Result</strong><p>Resolution, aspect ratio and anchors
+    all land within 1.3 points of each other. <b>Input geometry is not what limits
+    this model</b>, which agrees with Step&nbsp;43.</p></div>
+  </div>
+</div>
+
+<h2>Phase 12 — Detector capacity</h2>
+<p class="phase-note">11 September. Answers the August open item on matching model capacity.</p>
+
+<div class="step">
+  <div class="n">46</div>
+  <h3>Put RAOD's module behind larger detectors</h3>
+  <div class="body">
+    <p>The module stays in front, initialised from RAOD's weights; the input stays
+    linear HDR; only the detector behind it changes.</p>
+    <div class="scroll">
+      <table>
+        <caption>Measured here &mdash; 2 classes, 576 test images, deduplicated, all FINE-TUNED</caption>
+        <thead><tr><th>detector</th><th>front end</th><th>training</th><th class="num">mAP</th></tr></thead>
+        <tbody>
+          <tr><td>YOLOX-Nano (1M)</td><td>RAOD module</td><td>50 ep, batch 4</td><td class="num">27.0</td></tr>
+          <tr><td>RetinaNet (38M)</td><td>RAOD module</td><td>10 ep, batch 4</td><td class="num">36.9</td></tr>
+          <tr class="hi"><td>Faster R-CNN (44M)</td><td>RAOD module</td><td>10 ep, batch 4</td><td class="num">42.6</td></tr>
+          <tr><td>RetinaNet (38M)</td><td>Reinhard</td><td>10 ep, batch 4</td><td class="num">39.8</td></tr>
+          <tr><td>Faster R-CNN (44M)</td><td>gamma p99</td><td>12 ep, batch 2 &dagger;</td><td class="num">43.0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>&dagger; Reused from Step&nbsp;41, not rerun: a different tone map, trained by a
+    different script on a different schedule.</p>
+    <div class="found"><strong>Result</strong><p><b>Changing only the detector is
+    worth +15.6 mAP</b>, so the 16-point gap in Step&nbsp;41 was almost all capacity,
+    not method. Behind RetinaNet the module is still 2.9 behind Reinhard, like for
+    like. Behind Faster R-CNN it comes within 0.4 of the gamma run, a rough tie
+    rather than a controlled one.</p></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">47</div>
+  <h3>Measured what the module costs</h3>
+  <div class="body">
+    <p>Behind the same RetinaNet, training took <em class="q">11.3 GB</em> and 55
+    minutes with the module, against 3.3 GB and 15 minutes with Reinhard. The module
+    works on the full 1280&times;1280 float image before the detector shrinks it; a
+    fixed tone map is computed once, offline.</p>
   </div>
 </div>
 
 <h2>What remains open</h2>
 
 <div class="step">
-  <div class="n">28</div>
-  <h3>Three items, in priority order</h3>
+  <div class="n">48</div>
+  <h3>Updated 14 October 2026</h3>
   <div class="body">
+    <p>Done since August: S1 duplicates checked and removed (Phase&nbsp;9); model
+    capacity matched (Phase&nbsp;12).</p>
     <ul>
-      <li><b>Check S1 for duplicate frames.</b> No longer a theoretical concern — the 0.982 score is direct evidence. Needs image-similarity comparison rather than metadata, since S1 has none.</li>
+      <li><b>Run Reinhard + Faster R-CNN like for like.</b> Through <code>train_frontend.py</code> at 10 epochs and batch 4, so the Faster R-CNN cell in Step&nbsp;46 compares the same way the RetinaNet cells do.</li>
+      <li><b>Run TMO-GAN as a seventh front end.</b> Its training code is public in the thesis author's repository, <code>github.com/ismailkocdemir/tmo_detector</code>, though it ships no trained weights and has not been confirmed as the exact code behind the thesis tables. Re-implement it only if that code cannot be trained.</li>
+      <li><b>Isolate pretraining.</b> COCO, which the large detectors start from, contains person and car specifically; RAOD's five traffic classes do not.</li>
+      <li><b>Target local contrast at object scale</b>, which is what Step&nbsp;43 points at.</li>
       <li><b>Test without the augmentation fill quirk.</b> RAOD's training code fills empty borders with a value inherited from 8-bit image code, which sits far above the real pixel range here. It affects RAOD's own training equally and does not touch evaluation, but removing it may be free accuracy.</li>
-      <li><b>Re-implement the thesis's TMO-GAN from the paper</b> and run it as a seventh front end. Its software was lost, so the two learned methods have still never been measured side by side; this is the only way to close that.</li>
-      <li><b>Match model capacity honestly</b> &mdash; either shrink the large detector or grow the small one &mdash; so the HDR-versus-tone-mapped question is not confounded by a 44&times; difference in parameters.</li>
     </ul>
   </div>
 </div>
