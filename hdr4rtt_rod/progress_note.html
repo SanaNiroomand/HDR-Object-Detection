@@ -212,7 +212,7 @@
 
 <p class="phase-note" style="margin-top:1rem">Scores above are written 0&ndash;1 (0.349); from Phase&nbsp;8 onward they are written &times;100 (34.9), the convention the papers use &mdash; identical numbers. Phases&nbsp;1&ndash;7, 10 and 12 score <b>2 classes</b> while Phases&nbsp;8, 9 and 11 score <b>20</b>, so the two groups are not comparable with each other.</p>
 
-<div class="problem"><strong>Read this first &mdash; updated 14 October 2026</strong><p>Phases&nbsp;1&ndash;8 were written between 11 and 20 August, <b>before near-duplicate images were removed</b>. Their absolute scores, including the band above, are inflated; the rankings held. Phase&nbsp;9 measures how much, and Phases&nbsp;9&ndash;12 bring the note up to date. The current numbers are in the top-level <code>README.md</code>. Two figures in Phase&nbsp;8 were also corrected on this date (Steps&nbsp;35&ndash;37).</p></div>
+<div class="problem"><strong>Read this first &mdash; updated 14 and 17 October 2026</strong><p>Phases&nbsp;1&ndash;8 were written between 11 and 20 August, <b>before near-duplicate images were removed</b>. Their absolute scores, including the band above, are inflated; the rankings held. Phase&nbsp;9 measures how much, and Phases&nbsp;9&ndash;12 bring the note up to date. The current numbers are in the top-level <code>README.md</code>. Two figures in Phase&nbsp;8 were also corrected on this date (Steps&nbsp;35&ndash;37).</p></div>
 
 <h2>Phase 1 — Auditing the dataset</h2>
 <p class="phase-note">Every one of the 4,080 EXR files was decoded and measured. No sampling.</p>
@@ -883,17 +883,18 @@ Scores in this phase are &times;100 and cover all 20 classes.</p>
           <tr><td>RetinaNet (38M)</td><td>RAOD module</td><td>10 ep, batch 4</td><td class="num">36.9</td></tr>
           <tr class="hi"><td>Faster R-CNN (44M)</td><td>RAOD module</td><td>10 ep, batch 4</td><td class="num">42.6</td></tr>
           <tr><td>RetinaNet (38M)</td><td>Reinhard</td><td>10 ep, batch 4</td><td class="num">39.8</td></tr>
-          <tr><td>Faster R-CNN (44M)</td><td>gamma p99</td><td>12 ep, batch 2 &dagger;</td><td class="num">43.0</td></tr>
+          <tr class="hi"><td>Faster R-CNN (44M)</td><td>Reinhard</td><td>10 ep, batch 4 &dagger;</td><td class="num">44.9</td></tr>
         </tbody>
       </table>
     </div>
-    <p>&dagger; Reused from Step&nbsp;41, not rerun: a different tone map, trained by a
-    different script on a different schedule.</p>
+    <p>&dagger; Added 17 October (<code>run_capacity3.sh</code>). Until then this row was
+    the gamma run from Step&nbsp;41, which scored 43.0 on a different schedule and made
+    the two front ends look tied.</p>
     <div class="found"><strong>Result</strong><p><b>Changing only the detector is
-    worth +15.6 mAP</b>, so the 16-point gap in Step&nbsp;41 was almost all capacity,
-    not method. Behind RetinaNet the module is still 2.9 behind Reinhard, like for
-    like. Behind Faster R-CNN it comes within 0.4 of the gamma run, a rough tie
-    rather than a controlled one.</p></div>
+    worth +15.6 mAP</b>, so most of RAOD's gap to ordinary detectors is capacity. But
+    <b>the module still loses to Reinhard at every size</b>, like for like: by 2.9
+    behind RetinaNet and 2.3 behind Faster R-CNN. A bigger detector narrows the
+    tone-map gap a little; it does not close it.</p></div>
   </div>
 </div>
 
@@ -902,9 +903,11 @@ Scores in this phase are &times;100 and cover all 20 classes.</p>
   <h3>Measured what the module costs</h3>
   <div class="body">
     <p>Behind the same RetinaNet, training took <em class="q">11.3 GB</em> and 55
-    minutes with the module, against 3.3 GB and 15 minutes with Reinhard. The module
+    minutes with the module, against 3.3 GB and 15 minutes with Reinhard. Behind
+    Faster R-CNN, 11.0 GB and 58 minutes against 3.0 GB and 19 minutes. The module
     works on the full 1280&times;1280 float image before the detector shrinks it; a
-    fixed tone map is computed once, offline.</p>
+    fixed tone map is computed once, offline. Three to four times the cost, for a
+    lower score.</p>
   </div>
 </div>
 
@@ -912,12 +915,13 @@ Scores in this phase are &times;100 and cover all 20 classes.</p>
 
 <div class="step">
   <div class="n">48</div>
-  <h3>Updated 14 October 2026</h3>
+  <h3>Updated 17 October 2026</h3>
   <div class="body">
     <p>Done since August: S1 duplicates checked and removed (Phase&nbsp;9); model
-    capacity matched (Phase&nbsp;12).</p>
+    capacity matched (Phase&nbsp;12), including the like-for-like Reinhard + Faster
+    R-CNN cell.</p>
     <ul>
-      <li><b>Run Reinhard + Faster R-CNN like for like.</b> Through <code>train_frontend.py</code> at 10 epochs and batch 4, so the Faster R-CNN cell in Step&nbsp;46 compares the same way the RetinaNet cells do.</li>
+      <li><b>Measure run-to-run noise.</b> Every capacity figure is one training run. Repeating the four <code>train_frontend.py</code> cells would show whether the 2.3&ndash;2.9 gap is larger than the noise.</li>
       <li><b>Run TMO-GAN as a seventh front end.</b> Its training code is public in the thesis author's repository, <code>github.com/ismailkocdemir/tmo_detector</code>, though it ships no trained weights and has not been confirmed as the exact code behind the thesis tables. Re-implement it only if that code cannot be trained.</li>
       <li><b>Isolate pretraining.</b> COCO, which the large detectors start from, contains person and car specifically; RAOD's five traffic classes do not.</li>
       <li><b>Target local contrast at object scale</b>, which is what Step&nbsp;43 points at.</li>

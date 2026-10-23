@@ -71,14 +71,15 @@ Durand there. The full-learning-rate run edged log compression by 0.2 (36.1
 against 35.9), too small to read anything into, and the other two stayed below
 every fixed operator.
 
-That gap belongs to the detector behind it rather than to the method. Put the
-same module behind a two-stage detector and it comes within 0.4 of an ordinary
-tone map, 42.6 against 43.0. That comparison is looser than this table, since the
-43.0 run used gamma rather than Reinhard and a different training schedule — see
-[what the module does behind a larger
-detector](#what-the-module-does-behind-a-larger-detector). Whether a learned tone
-map helps depends on what sits behind it, which is also where Kocdemir's tables
-point from the other side.
+A bigger detector narrows that gap only slightly. Behind Faster R-CNN, with
+identical settings, the module still trails Reinhard by 2.3, 42.6 against 44.9 —
+see [what the module does behind a larger
+detector](#what-the-module-does-behind-a-larger-detector). An earlier version of
+this page said the two drew level there; that rested on a mislabelled comparison
+run. What a bigger detector does fix is RAOD's overall score: most of its deficit
+against ordinary detectors is detector size, not tone mapping. In Kocdemir's
+tables the verdict on his learned method flips between detectors; here RAOD's
+module loses behind both.
 
 ---
 
@@ -132,49 +133,52 @@ test.
 | RetinaNet R50-FPN v2 | 38M | RAOD module | 10 ep, batch 4 | 36.9 | 64.1 | 5.5 | 18.9 | 54.7 |
 | Faster R-CNN R50-FPN v2 | 44M | RAOD module | 10 ep, batch 4 | **42.6** | 72.6 | 10.1 | 28.1 | 57.7 |
 | RetinaNet R50-FPN v2 | 38M | Reinhard | 10 ep, batch 4 | 39.8 | 68.3 | 7.7 | 22.3 | 57.0 |
-| Faster R-CNN R50-FPN v2 | 44M | gamma *(p99)* | 12 ep, batch 2 † | **43.0** | 74.0 | 13.0 | 29.0 | 57.6 |
+| Faster R-CNN R50-FPN v2 | 44M | Reinhard | 10 ep, batch 4 | **44.9** | 76.2 | 11.7 | 31.1 | 59.5 |
 
-The middle three rows come from the same script, `train_frontend.py`, with
-identical settings, so they compare directly. † The last row is the fine-tuned
-Faster R-CNN from the detector table, reused rather than rerun: a different tone
-map, trained by `train_torchvision.py` on a different schedule.
+Every row except RAOD's own comes from the same script, `train_frontend.py`, with
+identical settings, so they compare directly. RAOD's row uses its own trainer and
+schedule.
 
-> **Correction, 14 October 2026.** An earlier version of this table labelled the
-> last row Reinhard and said every row trained 10 epochs. Neither was true: that
-> run used gamma at the 99th percentile (`conversion_manifest.json` of the LDR
-> images) and 12 epochs at batch 2 (`headline_dedup.log`), and RAOD's own row
-> trained 50 epochs. The scores are unchanged; the labels were wrong, and the
-> Faster R-CNN comparison is less controlled than it claimed.
+> **Correction, 14 and 17 October 2026.** An earlier version of this table had a
+> Faster R-CNN row labelled Reinhard at 43.0 and said every row trained 10
+> epochs. That row was really the gamma-p99 run from the detector table, trained
+> 12 epochs at batch 2 by `train_torchvision.py`, and RAOD's own row trained 50
+> epochs. On that basis the page said the module "draws level" with a tone map
+> behind Faster R-CNN. The proper Reinhard + Faster R-CNN run, added 17 October
+> with the same settings as the other rows, scores 44.9. The module trails it by
+> 2.3, and the tie is withdrawn.
 
-**Changing the detector is worth +15.6 mAP with the module untouched**, and at
-that point it comes within 0.4 of the tone-mapped Faster R-CNN: 42.6 against
-43.0. The 16-point gap in the detector table was almost all capacity, not method.
+**Changing the detector is worth +15.6 mAP with the module untouched.** That is
+most of the 18-point gap between RAOD and a tone-mapped Faster R-CNN (27.0 against
+44.9). The remaining 2.3 is the front end: behind the same Faster R-CNN, on
+identical settings, Reinhard still beats the module, 44.9 against 42.6. The gap in
+the detector table was mostly capacity, then, but not all of it.
 
 Two separate effects, both real. 1M to 38M is +9.9, which is size. 38M to 44M is
 +5.7 on only 6M more parameters, so that step is one-stage to two-stage rather
 than size — Faster R-CNN's proposal stage is doing the work.
 
-The front-end gap tracks the detector, not the class count. It is 2.6 on the
-20-class split with RetinaNet and 2.9 here on 2 classes with RetinaNet, both like
-for like. Behind Faster R-CNN it shrinks to 0.4, though only against the gamma run
-above. Scoring fewer classes did not close the gap; a stronger detector appears to.
+**The front-end gap does not close with a bigger detector.** Like for like, the
+module trails Reinhard by 2.6 on the 20-class split with RetinaNet, 2.9 here with
+RetinaNet, and 2.3 with Faster R-CNN. A stronger detector narrows it a little; it
+does not remove it.
 
-Three things this does not establish. **The 0.4 is not a controlled
-measurement**: it sets the module against a different tone map on a different
-schedule, and sits inside run-to-run noise I have not measured. The honest reading
-is that the two roughly tie behind Faster R-CNN. A Reinhard + Faster R-CNN run
-through `train_frontend.py` at 10 epochs and batch 4 would make it like for like.
-**Pretraining is still confounded**, since COCO contains person and car
-specifically while RAOD pretrained on five traffic classes from a car-mounted
-sensor. And the module is **not free**. Behind the same RetinaNet it took 11.3 GB
-and 55 minutes to train, against 3.3 GB and 15 minutes with Reinhard (training
-time only, from `capacity.log` and `capacity2.log`); behind Faster R-CNN, 11.0 GB
-and 58 minutes. The module processes the full 1280×1280 float image before the
-detector downsizes it to 800, while a fixed tone map is computed once, offline.
-Coming close to a tone map's accuracy at three to four times the training time is
-a real result, just not a favourable one.
+Three caveats. **Run-to-run noise is unmeasured.** Each figure is a single
+training run. Three separate like-for-like measurements landing between 2.3 and
+2.9 is more convincing than any one of them, but repeating each would show how
+much is noise. **Pretraining is still confounded**, since COCO contains person and
+car specifically while RAOD pretrained on five traffic classes from a car-mounted
+sensor. And the module is **not free**. Behind RetinaNet it took 11.3 GB and 55
+minutes to train, against 3.3 GB and 15 minutes with Reinhard; behind Faster
+R-CNN, 11.0 GB and 58 minutes against 3.0 GB and 19 minutes (training time only,
+from `capacity.log`, `capacity2.log` and `capacity3.log`). The module processes
+the full 1280×1280 float image before the detector downsizes it to 800, while a
+fixed tone map is computed once, offline. So it costs three to four times the
+training time and memory, and still scores lower.
 
-Reproduce with [`run_capacity.sh`](hdr4rtt_rod/run_capacity.sh); numbers in
+Reproduce with [`run_capacity.sh`](hdr4rtt_rod/run_capacity.sh),
+[`run_capacity2.sh`](hdr4rtt_rod/run_capacity2.sh) and
+[`run_capacity3.sh`](hdr4rtt_rod/run_capacity3.sh); numbers in
 `results/capacity/`.
 
 ---
@@ -351,15 +355,14 @@ His method edged 0.3 past its best classical operator; RAOD's module fell 2.6
 behind mine. About 2.9 apart in his favour, measured against a shared reference
 rather than on a shared scale.
 
-That reference is less stable than it looks. RAOD's 2.6 deficit is a RetinaNet
-figure. Behind Faster R-CNN the capacity runs put it near 0.4, and only loosely,
-since that comparison is against a gamma run on a different schedule. Doing the
+That reference depends on the detector. RAOD's 2.6 deficit is a RetinaNet figure;
+behind Faster R-CNN, like for like, the capacity runs put it at 2.3. Doing the
 same arithmetic with his Faster R-CNN table, where TMO-GAN sat 1.8 behind Fattal
-(27.7 against 29.5), reverses the order: RAOD's module comes out about 1.4 ahead.
-An earlier version of this paragraph gave 0.7 here, which set his RetinaNet margin
-against my Faster R-CNN one. So even the direction depends on the detector, the
-same pattern his two tables show. Treat neither size nor direction as settled
-until TMO-GAN runs behind a fixed detector too.
+(27.7 against 29.5), leaves his method about 0.5 ahead. So the direction holds
+under both detectors, in his favour, while the size ranges from 0.5 to 2.9.
+Earlier versions of this paragraph gave 0.7, then 1.4 in RAOD's favour; both
+rested on the mislabelled Faster R-CNN run. Treat the direction as informative and
+the size as not, until TMO-GAN runs behind a fixed detector too.
 
 Deduplication helped here. My best operator now scores 31.3 against his best
 classical 31.3, where before I sat about 7 points above him with no explanation I

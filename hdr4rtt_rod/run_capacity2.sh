@@ -5,7 +5,7 @@
 # trained by train_torchvision.py for 12 epochs at batch 2. This run is
 # Reinhard + RetinaNet through train_frontend.py with the capacity runs'
 # settings, without which "detector" and "front end" stay tangled for the
-# RetinaNet row. A matching Reinhard + FasterRCNN cell has not been run.
+# RetinaNet row. The matching Reinhard + FasterRCNN cell is run_capacity3.sh.
 PY="/c/Users/OGAM/miniconda3/envs/hs-ml/python.exe"
 ANN="D:/Data/HDR/hdr4rtt_rod/annotations"
 cd "D:/Codes/HDR/Sana/hdr4rtt_rod"

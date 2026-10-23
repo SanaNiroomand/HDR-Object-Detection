@@ -1,0 +1,73 @@
+##### TRAIN reinhard + fasterrcnn (2-class ROD split) #####
+C:\Users\OGAM\miniconda3\envs\hs-ml\Lib\site-packages\torch\optim\lr_scheduler.py:192: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  warnings.warn(
+arm=reinhard  arch=fasterrcnn  images=2294  classes=5
+  train annotations: hdr4rtt_rod_dedup_train.json
+  reading D:\Data\HDR\hdr4rtt_voc20\frontends\reinhard
+  detector resize: short side 800, long side at most 1333
+  43.3M params
+  ep1/10 it200/5730 loss=0.752 44s eta 1210s peak=3.0GB
+  ep1/10 it400/5730 loss=0.368 81s eta 1083s peak=3.0GB
+epoch 1 done (114s)
+  ep2/10 it600/5730 loss=0.044 124s eta 1061s peak=3.0GB
+  ep2/10 it800/5730 loss=0.284 162s eta 997s peak=3.0GB
+  ep2/10 it1000/5730 loss=0.302 199s eta 940s peak=3.0GB
+epoch 2 done (226s)
+  ep3/10 it1200/5730 loss=0.072 241s eta 910s peak=3.0GB
+  ep3/10 it1400/5730 loss=0.275 278s eta 860s peak=3.0GB
+  ep3/10 it1600/5730 loss=0.272 315s eta 813s peak=3.0GB
+epoch 3 done (338s)
+  ep4/10 it1800/5730 loss=0.107 357s eta 780s peak=3.0GB
+  ep4/10 it2000/5730 loss=0.248 395s eta 736s peak=3.0GB
+  ep4/10 it2200/5730 loss=0.245 432s eta 693s peak=3.0GB
+epoch 4 done (449s)
+  ep5/10 it2400/5730 loss=0.120 474s eta 658s peak=3.0GB
+  ep5/10 it2600/5730 loss=0.249 511s eta 616s peak=3.0GB
+  ep5/10 it2800/5730 loss=0.231 548s eta 574s peak=3.0GB
+epoch 5 done (561s)
+  ep6/10 it3000/5730 loss=0.163 590s eta 537s peak=3.0GB
+  ep6/10 it3200/5730 loss=0.220 627s eta 496s peak=3.0GB
+  ep6/10 it3400/5730 loss=0.216 664s eta 455s peak=3.0GB
+epoch 6 done (672s)
+  ep7/10 it3600/5730 loss=0.163 707s eta 418s peak=3.0GB
+  ep7/10 it3800/5730 loss=0.222 744s eta 378s peak=3.0GB
+  ep7/10 it4000/5730 loss=0.203 781s eta 338s peak=3.0GB
+epoch 7 done (783s)
+  ep8/10 it4200/5730 loss=0.185 823s eta 300s peak=3.0GB
+  ep8/10 it4400/5730 loss=0.206 860s eta 260s peak=3.0GB
+epoch 8 done (895s)
+  ep9/10 it4600/5730 loss=0.014 902s eta 222s peak=3.0GB
+  ep9/10 it4800/5730 loss=0.191 939s eta 182s peak=3.0GB
+  ep9/10 it5000/5730 loss=0.199 976s eta 143s peak=3.0GB
+epoch 9 done (1005s)
+  ep10/10 it5200/5730 loss=0.041 1018s eta 104s peak=3.0GB
+  ep10/10 it5400/5730 loss=0.184 1055s eta 64s peak=3.0GB
+  ep10/10 it5600/5730 loss=0.184 1092s eta 25s peak=3.0GB
+epoch 10 done (1117s)
+
+[fasterrcnn_reinhard] trained in 1117s, 0 non-finite steps skipped -> D:\Codes\HDR\Sana\hdr4rtt_rod\frontend_runs\fasterrcnn_reinhard_rod2cls\last.pth
+##### EVAL reinhard + fasterrcnn #####
+  detector resize: short side 800, long side at most 1333
+arm=reinhard arch=fasterrcnn epoch=10 classes=5
+576 test images present in D:\Data\HDR\hdr4rtt_voc20\frontends\reinhard
+3785 ground-truth boxes
+   4/576
+   164/576
+   324/576
+   484/576
+8935 detections
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.449
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.762
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.455
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.117
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.311
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.595
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.143
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.438
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.529
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.247
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.428
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.665
+   per-class AP50: Car=0.805  Pedestrian=0.719
+wrote results/capacity/fasterrcnn_reinhard_rod2cls.json
+##### CELL COMPLETE #####

@@ -16,7 +16,8 @@
 #   FasterRCNN  44M    ?
 #
 # Tone-mapped FasterRCNN on the same split scores 43.0 (gamma at p99, 12 epochs,
-# batch 2, train_torchvision.py -- not Reinhard, and not this schedule), so:
+# batch 2, train_torchvision.py -- not Reinhard, and not this schedule; the
+# like-for-like Reinhard cell is run_capacity3.sh and scores 44.9), so:
 #   result near 43 -> capacity was the whole story, the module is fine
 #   result near 27 -> the module is the ceiling, not the detector
 PY="/c/Users/OGAM/miniconda3/envs/hs-ml/python.exe"

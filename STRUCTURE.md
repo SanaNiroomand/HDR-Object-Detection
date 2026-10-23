@@ -3,7 +3,7 @@
 What lives where, and why. For results see the [top-level README](README.md); for
 the pipeline's design decisions see [`hdr4rtt_rod/README.md`](hdr4rtt_rod/README.md).
 
-136 tracked files: 33 Python scripts, 63 result files, two project folders.
+139 tracked files: 33 Python scripts, 64 result files, two project folders.
 
 ---
 
@@ -18,10 +18,10 @@ HDR-Object-Detection/
 │   ├── hdr_stats_sources.csv    one row per EXR file, every measured statistic
 │   └── scripts/             9 scripts, run as a chain
 ├── hdr4rtt_rod/             the experiments
-│   ├── results/             63 JSON files: every number in the READMEs
+│   ├── results/             64 JSON files: every number in the READMEs
 │   ├── viz/                 predictions drawn on converted images
 │   ├── progress_note.html   step-by-step record of the work
-│   └── ...                  24 scripts, 7 sweep runners, run logs
+│   └── ...                  24 scripts, 8 sweep runners, run logs
 ├── README.md                results and conclusions
 ├── LICENSE                  MIT, covers original work
 ├── LICENSE-Apache-2.0.txt   covers the three RAOD-derived config files
@@ -196,7 +196,7 @@ whole sweep.
 | `run_headline_dedup.ps1` | the 2-class detector-comparison table, deduplicated |
 | `run_tmm_variants.ps1` | three isolated retests of the learned tone-mapping arm |
 | `run_anchors.sh` | the retuned-anchor-ratio runs |
-| `run_capacity.sh`, `run_capacity2.sh` | RAOD's tone map behind RetinaNet and Faster R-CNN |
+| `run_capacity.sh`, `run_capacity2.sh`, `run_capacity3.sh` | RAOD's tone map behind RetinaNet and Faster R-CNN, and Reinhard behind both for comparison |
 
 ---
 
@@ -211,7 +211,7 @@ Every figure in the READMEs traces to a file in `hdr4rtt_rod/results/`.
 | `results/geometry/` | 6 | resolution and anchor experiments, plus `anchor_fit.txt` |
 | `results/headline_dedup/` | 5 | the 2-class detector comparison |
 | `results/failures/` | 4 | per-box failure CSV, the worst-image list, and the two worst images as JPEG |
-| `results/capacity/` | 3 | RAOD's tone map behind RetinaNet and Faster R-CNN |
+| `results/capacity/` | 4 | RAOD's tone map and Reinhard, each behind RetinaNet and Faster R-CNN |
 | `results/*.json` | 18 | baselines, leakage tests, the deduplication report, sweeps |
 
 Result JSON is uniform: `arm`, `arch`, checkpoint path, image and box counts,
