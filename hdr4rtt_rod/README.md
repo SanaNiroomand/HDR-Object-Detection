@@ -1,7 +1,8 @@
 # HDR4RTT → RAOD/ROD pipeline
 
 Rebuilt on Windows, August 2026. Replaces the earlier attempt in
-`HDR4RTT_dataset_operations_to_match_RAOD/` and `RAOD/RAOD/convert_exr_to_raod.py`.
+`previous_intern_ulas/HDR4RTT_dataset_operations_to_match_RAOD/` and
+`RAOD/RAOD/convert_exr_to_raod.py` (both local only, not in this repository).
 
 Environment: `C:\Users\OGAM\miniconda3\envs\hs-ml\python.exe` (torch 2.8 + CUDA,
 RTX 5070 Ti). Added `pycocotools loguru tabulate thop tqdm psutil`.
