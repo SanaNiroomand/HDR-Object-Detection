@@ -3,7 +3,7 @@
 What lives where, and why. For results see the [top-level README](README.md); for
 the pipeline's design decisions see [`hdr4rtt_rod/README.md`](hdr4rtt_rod/README.md).
 
-139 tracked files: 33 Python scripts, 64 result files, two project folders.
+140 tracked files: 33 Python scripts, 64 result files, two project folders.
 
 ---
 
@@ -21,6 +21,7 @@ HDR-Object-Detection/
 │   ├── results/             64 JSON files: every number in the READMEs
 │   ├── viz/                 predictions drawn on converted images
 │   ├── progress_note.html   step-by-step record of the work
+│   ├── tmogan_feasibility.md   can Kocdemir's TMO-GAN run here? (not yet run)
 │   └── ...                  24 scripts, 8 sweep runners, run logs
 ├── README.md                results and conclusions
 ├── LICENSE                  MIT, covers original work
