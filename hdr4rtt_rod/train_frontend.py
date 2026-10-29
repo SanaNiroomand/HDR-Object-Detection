@@ -187,7 +187,7 @@ def build_detector(arch, num_classes, min_size=800, max_size=1333,
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--arm", required=True,
-                   choices=["gamma", "reinhard", "durand", "log", "hdr", "tmm"])
+                   choices=["gamma", "reinhard", "reinhard_local", "reinhard_localexp", "durand", "log", "hdr", "tmm"])
     p.add_argument("--arch", default="retinanet", choices=["retinanet", "fasterrcnn"])
     p.add_argument("--frontend_root", default=FRONTEND_ROOT)
     p.add_argument("--ann_dir", default=ANN_DIR)

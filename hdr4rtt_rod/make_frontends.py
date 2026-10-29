@@ -25,6 +25,25 @@ Front ends produced here:
   durand     bilateral base/detail separation in log luminance, base compressed,
              detail preserved. A local operator, unlike the three above.
   log        log1p compression.
+  reinhard_local
+             LOCAL Reinhard, the automatic dodging-and-burning operator from the
+             same 2002 paper (Sec. 3.2): each pixel is divided by a blurred
+             neighbourhood luminance, L / (1 + V1(x, s_m)), instead of by itself,
+             L / (1 + L). The blur scale s_m is chosen per pixel as the largest of
+             8 scales (s = 1.6^i) over which the centre-surround difference stays
+             below a threshold. Paper defaults throughout: key 0.18, phi 8,
+             epsilon 0.05. Identical to `reinhard` in every other respect, so the
+             two arms differ only in global versus local normalisation.
+  reinhard_localexp
+             GLOBAL Reinhard after a LOCAL exposure step. `reinhard_local` only
+             changes pixels where L is near or above 1, so dark regions come out
+             exactly as under `reinhard`. Here each region is instead exposed
+             from its own log-average luminance: the gain is pulled half-way (in
+             log) from the frame's key toward the region's, capped at 2 stops
+             either way. Regions come from the same quarter-resolution bilateral
+             base layer `durand` uses, so the gain stops at strong edges rather
+             than bleeding across them. Strength 0.5 and the 2-stop cap were set
+             before any training, not tuned on the test split.
 
 The four tone-mapped arms are written as 8-bit PNG, which is what a tone-mapping
 operator actually produces -- compressing to a displayable image is the point of
@@ -88,6 +107,51 @@ def tonemap(rgb, kind, pct=99.9, gamma=2.2, key=0.18, base_contrast=4.0):
         lum = _luminance(rgb)
         key_now = np.exp(np.mean(np.log(lum + EPS)))
         scaled = rgb * (key / max(key_now, EPS))
+        out = scaled / (1.0 + scaled)
+
+    elif kind == "reinhard_local":
+        # Same exposure step as `reinhard`, then Reinhard et al. 2002 Sec. 3.2:
+        # V1/V2 are Gaussian-blurred luminance with widths alpha1*s and
+        # alpha2*s; the normalised difference V picks, per pixel, the largest
+        # scale whose surround still matches its centre.
+        lum = _luminance(rgb)
+        key_now = np.exp(np.mean(np.log(lum + EPS)))
+        scaled = rgb * (key / max(key_now, EPS))
+        L = _luminance(scaled).astype(np.float32)
+        phi, eps_v, a1 = 8.0, 0.05, 1.0 / (2.0 * np.sqrt(2.0))
+        a2 = 1.6 * a1
+        chosen = None
+        active = np.ones(L.shape, bool)
+        for i in range(8):
+            s = 1.6 ** i
+            # R_i = exp(-r^2 / (alpha_i s)^2) is a Gaussian with std alpha_i*s/sqrt(2)
+            v1 = cv2.GaussianBlur(L, (0, 0), max(a1 * s / np.sqrt(2.0), 0.3))
+            v2 = cv2.GaussianBlur(L, (0, 0), max(a2 * s / np.sqrt(2.0), 0.3))
+            if chosen is None:
+                chosen = v1.copy()
+            v = (v1 - v2) / (2.0 ** phi * key / s ** 2 + v1)
+            ok = np.abs(v) < eps_v
+            upd = active & ok
+            chosen[upd] = v1[upd]
+            active &= ok
+        out = scaled / (1.0 + np.maximum(chosen, 0.0))[:, :, None]
+
+    elif kind == "reinhard_localexp":
+        # Same exposure step as `reinhard`, then a per-region correction in
+        # stops: half the gap between the frame's log-average and the region's,
+        # capped at +-2 stops. The region average is durand's edge-aware base
+        # layer (log10 sigmaColor 0.4, converted here to natural log).
+        lum = _luminance(rgb)
+        log_lum = np.log(lum + EPS)
+        key_now = np.exp(np.mean(log_lum))
+        h, w = log_lum.shape
+        small = cv2.resize(log_lum, (w // 4, h // 4), interpolation=cv2.INTER_AREA)
+        sigma_space = max(2.0, 0.02 * np.hypot(h // 4, w // 4))
+        base_s = cv2.bilateralFilter(small.astype(np.float32), d=-1,
+                                     sigmaColor=0.4 * np.log(10.0), sigmaSpace=sigma_space)
+        base = cv2.resize(base_s, (w, h), interpolation=cv2.INTER_LINEAR)
+        rel = np.clip(0.5 * (np.log(max(key_now, EPS)) - base), -np.log(4.0), np.log(4.0))
+        scaled = rgb * (key / max(key_now, EPS)) * np.exp(rel)[:, :, None]
         out = scaled / (1.0 + scaled)
 
     elif kind == "durand":

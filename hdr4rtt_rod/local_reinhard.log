@@ -1,0 +1,82 @@
+##### BUILD reinhard_local images #####
+4074 images x 1 front ends: ['reinhard_local']
+  [reinhard_local] 1000/4074  85s
+  [reinhard_local] 2000/4074  171s
+  [reinhard_local] 3000/4074  287s
+  [reinhard_local] 4000/4074  448s
+  [reinhard_local] 4074/4074  459s
+  [reinhard_local] done in 459s | mean pixel 0.4617 | 11.4 GB | failed 0
+
+##### TRAIN reinhard_local + fasterrcnn (2-class ROD split) #####
+C:\Users\OGAM\miniconda3\envs\hs-ml\Lib\site-packages\torch\optim\lr_scheduler.py:192: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  warnings.warn(
+arm=reinhard_local  arch=fasterrcnn  images=2294  classes=5
+  train annotations: hdr4rtt_rod_dedup_train.json
+  reading D:\Data\HDR\hdr4rtt_voc20\frontends\reinhard_local
+  detector resize: short side 800, long side at most 1333
+  43.3M params
+  ep1/10 it200/5730 loss=0.747 44s eta 1207s peak=3.0GB
+  ep1/10 it400/5730 loss=0.351 81s eta 1084s peak=3.0GB
+epoch 1 done (114s)
+  ep2/10 it600/5730 loss=0.043 125s eta 1066s peak=3.0GB
+  ep2/10 it800/5730 loss=0.291 163s eta 1001s peak=3.0GB
+  ep2/10 it1000/5730 loss=0.301 200s eta 948s peak=3.0GB
+epoch 2 done (229s)
+  ep3/10 it1200/5730 loss=0.068 244s eta 921s peak=3.0GB
+  ep3/10 it1400/5730 loss=0.277 281s eta 870s peak=3.0GB
+  ep3/10 it1600/5730 loss=0.266 319s eta 823s peak=3.0GB
+epoch 3 done (342s)
+  ep4/10 it1800/5730 loss=0.109 362s eta 791s peak=3.0GB
+  ep4/10 it2000/5730 loss=0.236 400s eta 746s peak=3.0GB
+  ep4/10 it2200/5730 loss=0.245 437s eta 702s peak=3.0GB
+epoch 4 done (455s)
+  ep5/10 it2400/5730 loss=0.121 481s eta 667s peak=3.0GB
+  ep5/10 it2600/5730 loss=0.228 518s eta 624s peak=3.0GB
+  ep5/10 it2800/5730 loss=0.242 556s eta 581s peak=3.0GB
+epoch 5 done (568s)
+  ep6/10 it3000/5730 loss=0.152 598s eta 545s peak=3.0GB
+  ep6/10 it3200/5730 loss=0.222 635s eta 502s peak=3.0GB
+  ep6/10 it3400/5730 loss=0.226 673s eta 461s peak=3.0GB
+epoch 6 done (681s)
+  ep7/10 it3600/5730 loss=0.175 716s eta 424s peak=3.0GB
+  ep7/10 it3800/5730 loss=0.204 754s eta 383s peak=3.0GB
+  ep7/10 it4000/5730 loss=0.212 791s eta 342s peak=3.0GB
+epoch 7 done (794s)
+  ep8/10 it4200/5730 loss=0.198 834s eta 304s peak=3.0GB
+  ep8/10 it4400/5730 loss=0.204 871s eta 263s peak=3.0GB
+epoch 8 done (906s)
+  ep9/10 it4600/5730 loss=0.012 915s eta 225s peak=3.0GB
+  ep9/10 it4800/5730 loss=0.199 952s eta 184s peak=3.0GB
+  ep9/10 it5000/5730 loss=0.190 989s eta 144s peak=3.0GB
+epoch 9 done (1019s)
+  ep10/10 it5200/5730 loss=0.037 1032s eta 105s peak=3.0GB
+  ep10/10 it5400/5730 loss=0.176 1069s eta 65s peak=3.0GB
+  ep10/10 it5600/5730 loss=0.196 1106s eta 26s peak=3.0GB
+epoch 10 done (1131s)
+
+[fasterrcnn_reinhard_local] trained in 1131s, 0 non-finite steps skipped -> D:\Codes\HDR\Sana\hdr4rtt_rod\frontend_runs\fasterrcnn_reinhard_local_rod2cls\last.pth
+##### EVAL reinhard_local + fasterrcnn #####
+  detector resize: short side 800, long side at most 1333
+arm=reinhard_local arch=fasterrcnn epoch=10 classes=5
+576 test images present in D:\Data\HDR\hdr4rtt_voc20\frontends\reinhard_local
+3785 ground-truth boxes
+   4/576
+   164/576
+   324/576
+   484/576
+8595 detections
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.443
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.763
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.450
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.112
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.306
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.590
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.145
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.433
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.522
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.241
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.421
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.659
+   per-class AP50: Car=0.806  Pedestrian=0.721
+wrote results/capacity/fasterrcnn_reinhard_local_rod2cls.json
+##### LOCAL REINHARD COMPLETE #####

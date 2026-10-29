@@ -212,7 +212,7 @@
 
 <p class="phase-note" style="margin-top:1rem">Scores above are written 0&ndash;1 (0.349); from Phase&nbsp;8 onward they are written &times;100 (34.9), the convention the papers use &mdash; identical numbers. Phases&nbsp;1&ndash;7, 10 and 12 score <b>2 classes</b> while Phases&nbsp;8, 9 and 11 score <b>20</b>, so the two groups are not comparable with each other.</p>
 
-<div class="problem"><strong>Read this first &mdash; updated 14 and 17 October 2026</strong><p>Phases&nbsp;1&ndash;8 were written between 11 and 20 August, <b>before near-duplicate images were removed</b>. Their absolute scores, including the band above, are inflated; the rankings held. Phase&nbsp;9 measures how much, and Phases&nbsp;9&ndash;12 bring the note up to date. The current numbers are in the top-level <code>README.md</code>. Two figures in Phase&nbsp;8 were also corrected on this date (Steps&nbsp;35&ndash;37).</p></div>
+<div class="problem"><strong>Read this first &mdash; updated 14, 17 and 29 October 2026</strong><p>Phases&nbsp;1&ndash;8 were written between 11 and 20 August, <b>before near-duplicate images were removed</b>. Their absolute scores, including the band above, are inflated; the rankings held. Phase&nbsp;9 measures how much, and Phases&nbsp;9&ndash;13 bring the note up to date. The current numbers are in the top-level <code>README.md</code>. Two figures in Phase&nbsp;8 were also corrected on this date (Steps&nbsp;35&ndash;37).</p></div>
 
 <h2>Phase 1 — Auditing the dataset</h2>
 <p class="phase-note">Every one of the 4,080 EXR files was decoded and measured. No sampling.</p>
@@ -911,20 +911,84 @@ Scores in this phase are &times;100 and cover all 20 classes.</p>
   </div>
 </div>
 
-<h2>What remains open</h2>
+<h2>Phase 13 — Noise, and two local tone maps</h2>
+<p class="phase-note">28 October. Answers the open item on run-to-run noise, and tests the lead from Step&nbsp;43. Same settings as Phase&nbsp;12: Faster R-CNN, 2 classes, 10 epochs, batch 4.</p>
 
 <div class="step">
   <div class="n">48</div>
-  <h3>Updated 17 October 2026</h3>
+  <h3>Measured run-to-run noise</h3>
+  <div class="body">
+    <p>Retrained Reinhard + Faster R-CNN twice more with nothing changed. The
+    trainer sets no random seed, so each run starts fresh.</p>
+    <div class="scroll">
+      <table>
+        <caption>Measured here &mdash; 2 classes, 576 test images, deduplicated</caption>
+        <thead><tr><th>run</th><th class="num">mAP</th><th class="num">AP50</th><th class="num">small</th><th class="num">med</th></tr></thead>
+        <tbody>
+          <tr><td>1 (17 October, Step&nbsp;46)</td><td class="num">44.93</td><td class="num">76.2</td><td class="num">11.7</td><td class="num">31.1</td></tr>
+          <tr><td>2</td><td class="num">44.85</td><td class="num">75.8</td><td class="num">12.1</td><td class="num">30.0</td></tr>
+          <tr><td>3</td><td class="num">44.75</td><td class="num">76.4</td><td class="num">12.8</td><td class="num">30.8</td></tr>
+          <tr class="hi"><td>average</td><td class="num">44.84</td><td class="num">76.1</td><td class="num">12.2</td><td class="num">30.6</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="found"><strong>Result</strong><p><b>The noise is small: 0.18 mAP
+    from lowest to highest.</b> The module's 2.2 gap behind this detector is more
+    than ten times that, so it is real. The size columns swing more, by about
+    1&nbsp;point. Only this one cell has been repeated.</p></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="n">49</div>
+  <h3>Tried two local tone maps &mdash; both slightly worse</h3>
+  <div class="body">
+    <p><b>Local Reinhard</b> divides each pixel by a blurred neighbourhood instead
+    of by itself (the 2002 paper's dodging-and-burning). In dark areas the
+    &ldquo;1&rdquo; in L/(1&nbsp;+&nbsp;V) dominates, so only bright areas change,
+    by 1&ndash;5 levels out of 255 on average.</p>
+    <p><b>Local exposure</b> goes after dark areas directly: each region is exposed
+    from its own average brightness, half-way from the frame's, capped at two
+    stops, with edges from Durand's base layer. It lifted the darkest third of
+    pixels by 19 levels and lowered the brightest third by 28 on eight samples.
+    Its settings were fixed before training.</p>
+    <div class="scroll">
+      <table>
+        <caption>Measured here &mdash; same setup as Step&nbsp;48</caption>
+        <thead><tr><th>front end</th><th class="num">mAP</th></tr></thead>
+        <tbody>
+          <tr class="hi"><td>Reinhard, global (3 runs)</td><td class="num">44.8</td></tr>
+          <tr><td>Reinhard, local</td><td class="num">44.3</td></tr>
+          <tr><td>Local exposure, then Reinhard</td><td class="num">44.0</td></tr>
+          <tr><td>RAOD module</td><td class="num">42.6</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="found"><strong>Result</strong><p><b>Both lose, by 0.5 and 0.9</b>,
+    each below the lowest of the three global runs. Shadows look clearly better
+    under local exposure, yet the detector does worse. Likely reason, untested:
+    lifting a dark object and darkening its bright surroundings also brings them
+    closer together. A learned local tone map is not ruled out, but it should start
+    exactly at global Reinhard.</p></div>
+  </div>
+</div>
+
+<h2>What remains open</h2>
+
+<div class="step">
+  <div class="n">50</div>
+  <h3>Updated 29 October 2026</h3>
   <div class="body">
     <p>Done since August: S1 duplicates checked and removed (Phase&nbsp;9); model
     capacity matched (Phase&nbsp;12), including the like-for-like Reinhard + Faster
-    R-CNN cell.</p>
+    R-CNN cell; run-to-run noise measured for that cell, and two local tone maps
+    tried (Phase&nbsp;13).</p>
     <ul>
-      <li><b>Measure run-to-run noise.</b> Every capacity figure is one training run. Repeating the four <code>train_frontend.py</code> cells would show whether the 2.3&ndash;2.9 gap is larger than the noise.</li>
+      <li><b>Repeat the other capacity cells.</b> Only Reinhard + Faster R-CNN has been run three times; the RetinaNet cells and the module are still single runs.</li>
       <li><b>Run TMO-GAN as a seventh front end.</b> Its training code is public in the thesis author's repository, <code>github.com/ismailkocdemir/tmo_detector</code>, though it ships no trained weights and has not been confirmed as the exact code behind the thesis tables. Re-implement it only if that code cannot be trained.</li>
       <li><b>Isolate pretraining.</b> COCO, which the large detectors start from, contains person and car specifically; RAOD's five traffic classes do not.</li>
-      <li><b>Target local contrast at object scale</b>, which is what Step&nbsp;43 points at.</li>
+      <li><b>Target local contrast at object scale</b>, which is what Step&nbsp;43 points at. Two fixed local tone maps lost slightly (Step&nbsp;49); a learned one that starts at global Reinhard is untested.</li>
+      <li><b>Run local Reinhard on the 20-class RetinaNet table</b>, where the ranking inversion against the thesis appears. Step&nbsp;49 ran it in a different setting.</li>
       <li><b>Test without the augmentation fill quirk.</b> RAOD's training code fills empty borders with a value inherited from 8-bit image code, which sits far above the real pixel range here. It affects RAOD's own training equally and does not touch evaluation, but removing it may be free accuracy.</li>
     </ul>
   </div>

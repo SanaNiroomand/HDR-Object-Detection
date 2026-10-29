@@ -1,0 +1,222 @@
+##### BUILD reinhard_localexp images #####
+4074 images x 1 front ends: ['reinhard_localexp']
+  [reinhard_localexp] 1000/4074  65s
+  [reinhard_localexp] 2000/4074  130s
+  [reinhard_localexp] 3000/4074  215s
+  [reinhard_localexp] 4000/4074  326s
+  [reinhard_localexp] 4074/4074  334s
+  [reinhard_localexp] done in 334s | mean pixel 0.4443 | 11.0 GB | failed 0
+
+##### TRAIN reinhard_localexp (rod2cls) #####
+C:\Users\OGAM\miniconda3\envs\hs-ml\Lib\site-packages\torch\optim\lr_scheduler.py:192: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  warnings.warn(
+arm=reinhard_localexp  arch=fasterrcnn  images=2294  classes=5
+  train annotations: hdr4rtt_rod_dedup_train.json
+  reading D:\Data\HDR\hdr4rtt_voc20\frontends\reinhard_localexp
+  detector resize: short side 800, long side at most 1333
+  43.3M params
+  ep1/10 it200/5730 loss=0.738 44s eta 1228s peak=3.0GB
+  ep1/10 it400/5730 loss=0.372 83s eta 1103s peak=3.0GB
+epoch 1 done (116s)
+  ep2/10 it600/5730 loss=0.043 127s eta 1083s peak=3.0GB
+  ep2/10 it800/5730 loss=0.282 164s eta 1012s peak=3.0GB
+  ep2/10 it1000/5730 loss=0.307 202s eta 955s peak=3.0GB
+epoch 2 done (230s)
+  ep3/10 it1200/5730 loss=0.068 245s eta 925s peak=3.0GB
+  ep3/10 it1400/5730 loss=0.292 283s eta 875s peak=3.0GB
+  ep3/10 it1600/5730 loss=0.279 321s eta 829s peak=3.0GB
+epoch 3 done (344s)
+  ep4/10 it1800/5730 loss=0.111 365s eta 797s peak=3.0GB
+  ep4/10 it2000/5730 loss=0.250 404s eta 753s peak=3.0GB
+  ep4/10 it2200/5730 loss=0.240 442s eta 710s peak=3.0GB
+epoch 4 done (460s)
+  ep5/10 it2400/5730 loss=0.130 486s eta 674s peak=3.0GB
+  ep5/10 it2600/5730 loss=0.239 524s eta 631s peak=3.0GB
+  ep5/10 it2800/5730 loss=0.232 562s eta 588s peak=3.0GB
+epoch 5 done (575s)
+  ep6/10 it3000/5730 loss=0.153 605s eta 551s peak=3.0GB
+  ep6/10 it3200/5730 loss=0.224 642s eta 508s peak=3.0GB
+  ep6/10 it3400/5730 loss=0.219 680s eta 466s peak=3.0GB
+epoch 6 done (688s)
+  ep7/10 it3600/5730 loss=0.164 723s eta 428s peak=3.0GB
+  ep7/10 it3800/5730 loss=0.203 761s eta 387s peak=3.0GB
+  ep7/10 it4000/5730 loss=0.224 799s eta 346s peak=3.0GB
+epoch 7 done (802s)
+  ep8/10 it4200/5730 loss=0.200 843s eta 307s peak=3.0GB
+  ep8/10 it4400/5730 loss=0.193 882s eta 266s peak=3.0GB
+epoch 8 done (917s)
+  ep9/10 it4600/5730 loss=0.014 926s eta 227s peak=3.0GB
+  ep9/10 it4800/5730 loss=0.189 963s eta 187s peak=3.0GB
+  ep9/10 it5000/5730 loss=0.194 1002s eta 146s peak=3.0GB
+epoch 9 done (1032s)
+  ep10/10 it5200/5730 loss=0.043 1045s eta 107s peak=3.0GB
+  ep10/10 it5400/5730 loss=0.172 1083s eta 66s peak=3.0GB
+  ep10/10 it5600/5730 loss=0.188 1121s eta 26s peak=3.0GB
+epoch 10 done (1146s)
+
+[fasterrcnn_reinhard_localexp] trained in 1146s, 0 non-finite steps skipped -> D:\Codes\HDR\Sana\hdr4rtt_rod\frontend_runs\fasterrcnn_reinhard_localexp_rod2cls\last.pth
+##### EVAL reinhard_localexp (rod2cls) #####
+  detector resize: short side 800, long side at most 1333
+arm=reinhard_localexp arch=fasterrcnn epoch=10 classes=5
+576 test images present in D:\Data\HDR\hdr4rtt_voc20\frontends\reinhard_localexp
+3785 ground-truth boxes
+   4/576
+   164/576
+   324/576
+   484/576
+8963 detections
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.440
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.750
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.441
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.108
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.292
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.592
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.143
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.428
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.515
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.225
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.411
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.657
+   per-class AP50: Car=0.787  Pedestrian=0.712
+wrote results/capacity/fasterrcnn_reinhard_localexp_rod2cls.json
+##### TRAIN reinhard (rod2cls_rep2) #####
+arm=reinhard  arch=fasterrcnn  images=2294  classes=5
+  train annotations: hdr4rtt_rod_dedup_train.json
+  reading D:\Data\HDR\hdr4rtt_voc20\frontends\reinhard
+  detector resize: short side 800, long side at most 1333
+  43.3M params
+  ep1/10 it200/5730 loss=0.769 44s eta 1223s peak=3.0GB
+  ep1/10 it400/5730 loss=0.356 83s eta 1107s peak=3.0GB
+epoch 1 done (117s)
+  ep2/10 it600/5730 loss=0.039 128s eta 1090s peak=3.0GB
+  ep2/10 it800/5730 loss=0.306 167s eta 1026s peak=3.0GB
+  ep2/10 it1000/5730 loss=0.300 205s eta 969s peak=3.0GB
+epoch 2 done (234s)
+  ep3/10 it1200/5730 loss=0.068 249s eta 940s peak=3.0GB
+  ep3/10 it1400/5730 loss=0.289 287s eta 886s peak=3.0GB
+  ep3/10 it1600/5730 loss=0.263 324s eta 837s peak=3.0GB
+epoch 3 done (348s)
+  ep4/10 it1800/5730 loss=0.103 368s eta 803s peak=3.0GB
+  ep4/10 it2000/5730 loss=0.244 406s eta 757s peak=3.0GB
+  ep4/10 it2200/5730 loss=0.264 444s eta 712s peak=3.0GB
+epoch 4 done (462s)
+  ep5/10 it2400/5730 loss=0.129 487s eta 676s peak=3.0GB
+  ep5/10 it2600/5730 loss=0.230 525s eta 632s peak=3.0GB
+  ep5/10 it2800/5730 loss=0.240 562s eta 588s peak=3.0GB
+epoch 5 done (575s)
+  ep6/10 it3000/5730 loss=0.158 605s eta 551s peak=3.0GB
+  ep6/10 it3200/5730 loss=0.213 643s eta 508s peak=3.0GB
+  ep6/10 it3400/5730 loss=0.227 680s eta 466s peak=3.0GB
+epoch 6 done (688s)
+  ep7/10 it3600/5730 loss=0.164 723s eta 428s peak=3.0GB
+  ep7/10 it3800/5730 loss=0.219 760s eta 386s peak=3.0GB
+  ep7/10 it4000/5730 loss=0.215 797s eta 345s peak=3.0GB
+epoch 7 done (800s)
+  ep8/10 it4200/5730 loss=0.182 840s eta 306s peak=3.0GB
+  ep8/10 it4400/5730 loss=0.192 877s eta 265s peak=3.0GB
+epoch 8 done (912s)
+  ep9/10 it4600/5730 loss=0.018 920s eta 226s peak=3.0GB
+  ep9/10 it4800/5730 loss=0.200 957s eta 185s peak=3.0GB
+  ep9/10 it5000/5730 loss=0.186 994s eta 145s peak=3.0GB
+epoch 9 done (1024s)
+  ep10/10 it5200/5730 loss=0.038 1037s eta 106s peak=3.0GB
+  ep10/10 it5400/5730 loss=0.187 1074s eta 66s peak=3.0GB
+  ep10/10 it5600/5730 loss=0.185 1111s eta 26s peak=3.0GB
+epoch 10 done (1135s)
+
+[fasterrcnn_reinhard] trained in 1135s, 0 non-finite steps skipped -> D:\Codes\HDR\Sana\hdr4rtt_rod\frontend_runs\fasterrcnn_reinhard_rod2cls_rep2\last.pth
+##### EVAL reinhard (rod2cls_rep2) #####
+  detector resize: short side 800, long side at most 1333
+arm=reinhard arch=fasterrcnn epoch=10 classes=5
+576 test images present in D:\Data\HDR\hdr4rtt_voc20\frontends\reinhard
+3785 ground-truth boxes
+   4/576
+   164/576
+   324/576
+   484/576
+8727 detections
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.448
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.757
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.454
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.121
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.300
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.599
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.146
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.435
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.524
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.251
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.419
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.663
+   per-class AP50: Car=0.795  Pedestrian=0.720
+wrote results/capacity/fasterrcnn_reinhard_rod2cls_rep2.json
+##### TRAIN reinhard (rod2cls_rep3) #####
+arm=reinhard  arch=fasterrcnn  images=2294  classes=5
+  train annotations: hdr4rtt_rod_dedup_train.json
+  reading D:\Data\HDR\hdr4rtt_voc20\frontends\reinhard
+  detector resize: short side 800, long side at most 1333
+  43.3M params
+  ep1/10 it200/5730 loss=0.686 43s eta 1182s peak=3.0GB
+  ep1/10 it400/5730 loss=0.370 80s eta 1063s peak=3.0GB
+epoch 1 done (112s)
+  ep2/10 it600/5730 loss=0.042 122s eta 1047s peak=3.0GB
+  ep2/10 it800/5730 loss=0.299 160s eta 984s peak=3.0GB
+  ep2/10 it1000/5730 loss=0.277 197s eta 931s peak=3.0GB
+epoch 2 done (224s)
+  ep3/10 it1200/5730 loss=0.087 239s eta 904s peak=3.0GB
+  ep3/10 it1400/5730 loss=0.249 276s eta 854s peak=3.0GB
+  ep3/10 it1600/5730 loss=0.267 313s eta 808s peak=3.0GB
+epoch 3 done (336s)
+  ep4/10 it1800/5730 loss=0.118 356s eta 776s peak=3.0GB
+  ep4/10 it2000/5730 loss=0.242 392s eta 732s peak=3.0GB
+  ep4/10 it2200/5730 loss=0.243 429s eta 689s peak=3.0GB
+epoch 4 done (447s)
+  ep5/10 it2400/5730 loss=0.128 472s eta 655s peak=3.0GB
+  ep5/10 it2600/5730 loss=0.221 509s eta 612s peak=3.0GB
+  ep5/10 it2800/5730 loss=0.246 545s eta 571s peak=3.0GB
+epoch 5 done (558s)
+  ep6/10 it3000/5730 loss=0.137 588s eta 535s peak=3.0GB
+  ep6/10 it3200/5730 loss=0.215 625s eta 494s peak=3.0GB
+  ep6/10 it3400/5730 loss=0.234 662s eta 454s peak=3.0GB
+epoch 6 done (670s)
+  ep7/10 it3600/5730 loss=0.172 705s eta 417s peak=3.0GB
+  ep7/10 it3800/5730 loss=0.222 742s eta 377s peak=3.0GB
+  ep7/10 it4000/5730 loss=0.197 779s eta 337s peak=3.0GB
+epoch 7 done (781s)
+  ep8/10 it4200/5730 loss=0.176 821s eta 299s peak=3.0GB
+  ep8/10 it4400/5730 loss=0.203 858s eta 259s peak=3.0GB
+epoch 8 done (893s)
+  ep9/10 it4600/5730 loss=0.014 901s eta 221s peak=3.0GB
+  ep9/10 it4800/5730 loss=0.199 938s eta 182s peak=3.0GB
+  ep9/10 it5000/5730 loss=0.182 975s eta 142s peak=3.0GB
+epoch 9 done (1004s)
+  ep10/10 it5200/5730 loss=0.036 1017s eta 104s peak=3.0GB
+  ep10/10 it5400/5730 loss=0.175 1054s eta 64s peak=3.0GB
+  ep10/10 it5600/5730 loss=0.180 1091s eta 25s peak=3.0GB
+epoch 10 done (1115s)
+
+[fasterrcnn_reinhard] trained in 1115s, 0 non-finite steps skipped -> D:\Codes\HDR\Sana\hdr4rtt_rod\frontend_runs\fasterrcnn_reinhard_rod2cls_rep3\last.pth
+##### EVAL reinhard (rod2cls_rep3) #####
+  detector resize: short side 800, long side at most 1333
+arm=reinhard arch=fasterrcnn epoch=10 classes=5
+576 test images present in D:\Data\HDR\hdr4rtt_voc20\frontends\reinhard
+3785 ground-truth boxes
+   4/576
+   164/576
+   324/576
+   484/576
+8355 detections
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.447
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.764
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.457
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.128
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.308
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.592
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.145
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.437
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.526
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.245
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.424
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.662
+   per-class AP50: Car=0.811  Pedestrian=0.717
+wrote results/capacity/fasterrcnn_reinhard_rod2cls_rep3.json
+##### ALL COMPLETE #####

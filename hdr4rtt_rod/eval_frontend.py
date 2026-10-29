@@ -30,7 +30,7 @@ ARM_DIR = {"tmm": "hdr"}
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--arm", required=True,
-                   choices=["gamma", "reinhard", "durand", "log", "hdr", "tmm"])
+                   choices=["gamma", "reinhard", "reinhard_local", "reinhard_localexp", "durand", "log", "hdr", "tmm"])
     p.add_argument("--arch", default="retinanet", choices=["retinanet", "fasterrcnn"])
     p.add_argument("--ckpt", default=None)
     p.add_argument("--tag", default="", help="variant suffix used at training time")

@@ -137,7 +137,8 @@ test.
 
 Every row except RAOD's own comes from the same script, `train_frontend.py`, with
 identical settings, so they compare directly. RAOD's row uses its own trainer and
-schedule.
+schedule. The Faster R-CNN Reinhard row is the first of three identical runs,
+which average 44.8; see [local tone maps](#local-tone-maps-two-tries-both-slightly-worse).
 
 > **Correction, 14 and 17 October 2026.** An earlier version of this table had a
 > Faster R-CNN row labelled Reinhard at 43.0 and said every row trained 10
@@ -163,10 +164,12 @@ module trails Reinhard by 2.6 on the 20-class split with RetinaNet, 2.9 here wit
 RetinaNet, and 2.3 with Faster R-CNN. A stronger detector narrows it a little; it
 does not remove it.
 
-Three caveats. **Run-to-run noise is unmeasured.** Each figure is a single
-training run. Three separate like-for-like measurements landing between 2.3 and
-2.9 is more convincing than any one of them, but repeating each would show how
-much is noise. **Pretraining is still confounded**, since COCO contains person and
+Three caveats. **Noise is measured for one cell only.** Reinhard behind Faster
+R-CNN, retrained three times with nothing changed, scored 44.93, 44.85 and 44.75,
+a spread of 0.18. The module's gap in that row, 2.2 against the three-run average,
+is more than ten times that. The other cells are still single runs, though three
+separate like-for-like gaps landing between 2.3 and 2.9 is some evidence on its
+own. **Pretraining is still confounded**, since COCO contains person and
 car specifically while RAOD pretrained on five traffic classes from a car-mounted
 sensor. And the module is **not free**. Behind RetinaNet it took 11.3 GB and 55
 minutes to train, against 3.3 GB and 15 minutes with Reinhard; behind Faster
@@ -178,7 +181,8 @@ training time and memory, and still scores lower.
 
 Reproduce with [`run_capacity.sh`](hdr4rtt_rod/run_capacity.sh),
 [`run_capacity2.sh`](hdr4rtt_rod/run_capacity2.sh) and
-[`run_capacity3.sh`](hdr4rtt_rod/run_capacity3.sh); numbers in
+[`run_capacity3.sh`](hdr4rtt_rod/run_capacity3.sh), and the two repeat runs with
+[`run_localexp_and_noise.sh`](hdr4rtt_rod/run_localexp_and_noise.sh); numbers in
 `results/capacity/`.
 
 ---
@@ -201,10 +205,17 @@ Rare classes are a real problem. The test set has 2 `bus`, 2 `motorbike`, 5
 `train`, 6 `horse`. A class with two examples scores close to random but carries
 the same weight as `person` with 3,719. That's what the head-8 column is for.
 
+**Run-to-run noise has been measured once.** Reinhard + Faster R-CNN on the
+2-class split, trained three times with nothing changed: 44.93, 44.85, 44.75.
+Treat a gap under about 0.3 between two single runs as noise. The size columns
+swing more, by about 1 point each, and other detectors or the learned module may
+too; they haven't been repeated.
+
 **Reinhard here is the global variant**, one curve applied uniformly. Kocdemir
 lists global and local separately elsewhere (CityScapes: 32.7 and 33.2) but his
 HDR4RTT table says only "Reinhard 29.6", so his row and mine may not be the same
-operator. Durand is local in both.
+operator. Durand is local in both. Local Reinhard has since been tested here, in
+a different setting; see [local tone maps](#local-tone-maps-two-tries-both-slightly-worse).
 
 ---
 
@@ -347,7 +358,10 @@ other. It fails: the rankings invert. Reinhard is his weakest tone map and my
 strongest, Durand his strongest of the three and my weakest. An inversion isn't
 an offset, so no scale factor reconciles them. Recording it as a negative result.
 Part of the Reinhard gap may be global against local rather than real
-disagreement.
+disagreement. Local Reinhard has since run here and scored 0.5 below global (see
+[local tone maps](#local-tone-maps-two-tries-both-slightly-worse)), which leans
+that way. It doesn't settle it: that test was behind Faster R-CNN on 2 classes,
+and the inversion is in the 20-class RetinaNet table.
 
 What does work is comparing each method against the best classical operator in
 its own experiment, which cancels the differences in split and detector version.
@@ -401,6 +415,57 @@ image side, so size doesn't explain that one.
 
 Every operator here compresses global range. None targets contrast at the scale
 objects actually occupy.
+
+---
+
+## Local tone maps: two tries, both slightly worse
+
+The failure analysis says misses follow contrast inside the object's own box, so
+the obvious next step is a tone map that works locally. I tried two, each a small
+change to global Reinhard, behind the same Faster R-CNN with the capacity table's
+settings: 2-class deduplicated split, 10 epochs, batch 4. Global Reinhard was
+retrained twice more alongside, so this table has a measured noise level.
+
+| front end | runs | mAP | AP50 | small | med | large |
+|---|---|---|---|---|---|---|
+| Reinhard *(global)* | 3 | **44.8** (44.75–44.93) | 76.1 | 12.2 | 30.6 | 59.5 |
+| Reinhard *(local)* | 1 | 44.3 | 76.3 | 11.2 | 30.6 | 59.0 |
+| Local exposure, then Reinhard | 1 | 44.0 | 75.0 | 10.8 | 29.2 | 59.2 |
+| RAOD module | 1 | 42.6 | 72.6 | 10.1 | 28.1 | 57.7 |
+
+The global row averages its three runs.
+
+**The noise is small.** The three global runs span 0.18 mAP, and both local
+variants land below the lowest of them, so both losses are real, if small. The
+size columns swing more between identical runs (small 11.7 to 12.8, medium 30.0
+to 31.1), so read those loosely.
+
+**Local Reinhard** is the dodging-and-burning operator from the same 2002 paper:
+each pixel is divided by a blurred neighbourhood instead of by itself. In dark
+areas the "1" in L/(1 + V) outweighs any neighbourhood value, so dark objects come
+out exactly as under the global curve. Only bright areas change, and on six sample
+images the average pixel moved by just 1 to 5 levels out of 255. It cost 0.5.
+
+**Local exposure** goes after the dark areas directly. Each region is exposed from
+its own average brightness, pulled half-way from the whole frame's and capped at
+two stops either way, with region edges taken from Durand's edge-aware base layer.
+On eight sample images it lifted the darkest third of pixels by 19 levels and
+lowered the brightest third by 28, and the shadows look clearly better. It cost
+0.9, spread across small and medium objects and cars. Both of its settings were
+fixed before training, not tuned on the test split.
+
+**Making the picture look better locally did not help the detector.** A likely
+reason, not yet tested: lifting a dark car and darkening the bright road around
+it also brings the two closer together, and a COCO-pretrained detector leans on
+that contrast. Two hand-set operators don't rule out a learned one, but a learned
+local tone map should start exactly at global Reinhard, so it only moves away
+from it where that helps.
+
+Reproduce with [`run_local_reinhard.sh`](hdr4rtt_rod/run_local_reinhard.sh) and
+[`run_localexp_and_noise.sh`](hdr4rtt_rod/run_localexp_and_noise.sh); the arms
+are `reinhard_local` and `reinhard_localexp` in
+[`make_frontends.py`](hdr4rtt_rod/make_frontends.py), and the numbers are in
+`results/capacity/`.
 
 ---
 
@@ -541,12 +606,15 @@ see [.gitignore](.gitignore).
    contains person and car specifically, RAOD's five traffic classes do not.
 2. Run TMO-GAN as a seventh front end, from the author's public code if it still
    trains, so the two learned methods can be compared directly.
-3. Run the local Reinhard variant, to find out whether the ranking inversion
-   against the thesis is real or just two different operators.
+3. Run local Reinhard on the 20-class RetinaNet table, to find out whether the
+   ranking inversion against the thesis is real or just two different operators.
+   It has only run behind Faster R-CNN on 2 classes so far, 0.5 below global.
 4. Target local contrast at object scale rather than global range, which is what
-   the failure analysis points at, and is the one lead the geometry experiments
-   did not rule out.
-5. Rebuild the box regression head alongside the classification head, so anchor
+   the failure analysis points at. Two fixed local tone maps both lost slightly;
+   a learned one that starts at global Reinhard is still untested.
+5. Repeat the other capacity cells, as was done for Reinhard + Faster R-CNN, so
+   every gap in that table has a measured noise level.
+6. Rebuild the box regression head alongside the classification head, so anchor
    ratios can be retuned without discarding COCO's regression priors. That is the
    test the anchor result needs and did not get.
 

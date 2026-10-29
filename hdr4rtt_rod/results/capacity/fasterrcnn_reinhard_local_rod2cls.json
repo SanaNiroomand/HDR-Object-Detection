@@ -1,0 +1,19 @@
+{
+ "arm": "reinhard_local",
+ "arch": "fasterrcnn",
+ "ckpt": "D:\\Codes\\HDR\\Sana\\hdr4rtt_rod\\frontend_runs\\fasterrcnn_reinhard_local_rod2cls\\last.pth",
+ "n_images": 576,
+ "n_gt": 3785,
+ "mAP": 0.4431057238359434,
+ "AP50": 0.7633593120254616,
+ "AP75": 0.4503074285205622,
+ "AP_small": 0.11232361041066447,
+ "AP_med": 0.3055595690543828,
+ "AP_large": 0.5901345091913215,
+ "AR100": 0.5217782057364868,
+ "per_class_AP50": {
+  "Pedestrian": 0.721,
+  "Car": 0.8057
+ },
+ "n_dets": 8595
+}

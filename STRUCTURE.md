@@ -3,7 +3,7 @@
 What lives where, and why. For results see the [top-level README](README.md); for
 the pipeline's design decisions see [`hdr4rtt_rod/README.md`](hdr4rtt_rod/README.md).
 
-140 tracked files: 33 Python scripts, 64 result files, two project folders.
+148 tracked files: 33 Python scripts, 68 result files, two project folders.
 
 ---
 
@@ -18,11 +18,11 @@ HDR-Object-Detection/
 │   ├── hdr_stats_sources.csv    one row per EXR file, every measured statistic
 │   └── scripts/             9 scripts, run as a chain
 ├── hdr4rtt_rod/             the experiments
-│   ├── results/             64 JSON files: every number in the READMEs
+│   ├── results/             68 JSON files: every number in the READMEs
 │   ├── viz/                 predictions drawn on converted images
 │   ├── progress_note.html   step-by-step record of the work
 │   ├── tmogan_feasibility.md   can Kocdemir's TMO-GAN run here? (not yet run)
-│   └── ...                  24 scripts, 8 sweep runners, run logs
+│   └── ...                  24 scripts, 10 sweep runners, run logs
 ├── README.md                results and conclusions
 ├── LICENSE                  MIT, covers original work
 ├── LICENSE-Apache-2.0.txt   covers the three RAOD-derived config files
@@ -198,6 +198,7 @@ whole sweep.
 | `run_tmm_variants.ps1` | three isolated retests of the learned tone-mapping arm |
 | `run_anchors.sh` | the retuned-anchor-ratio runs |
 | `run_capacity.sh`, `run_capacity2.sh`, `run_capacity3.sh` | RAOD's tone map behind RetinaNet and Faster R-CNN, and Reinhard behind both for comparison |
+| `run_local_reinhard.sh`, `run_localexp_and_noise.sh` | two local tone maps behind Faster R-CNN, and two repeat runs of Reinhard to measure noise |
 
 ---
 
@@ -212,7 +213,7 @@ Every figure in the READMEs traces to a file in `hdr4rtt_rod/results/`.
 | `results/geometry/` | 6 | resolution and anchor experiments, plus `anchor_fit.txt` |
 | `results/headline_dedup/` | 5 | the 2-class detector comparison |
 | `results/failures/` | 4 | per-box failure CSV, the worst-image list, and the two worst images as JPEG |
-| `results/capacity/` | 4 | RAOD's tone map and Reinhard, each behind RetinaNet and Faster R-CNN |
+| `results/capacity/` | 8 | RAOD's tone map and Reinhard, each behind RetinaNet and Faster R-CNN; two repeat Reinhard runs (`_rep2`, `_rep3`); the two local tone maps |
 | `results/*.json` | 18 | baselines, leakage tests, the deduplication report, sweeps |
 
 Result JSON is uniform: `arm`, `arch`, checkpoint path, image and box counts,
